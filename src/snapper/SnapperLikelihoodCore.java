@@ -35,23 +35,22 @@ import snap.NodeData;
 public class SnapperLikelihoodCore  {
     boolean m_bReuseCache = false;
     
-    // #nodes x #patterns * 2 (bottom of branch & top of branch)
-    ChebyshevPolynomial[][][] chebPoly;
+    // #nodes x #patterns at bottom of branch
+    ChebyshevPolynomial[][] chebPoly;
 
     public SnapperLikelihoodCore(Node root, Alignment data, int N) {
     	int nodeCount = root.getNodeCount();
     	int patternCount = data.getPatternCount(); 
-    	chebPoly = new ChebyshevPolynomial[nodeCount][patternCount][2];
+    	chebPoly = new ChebyshevPolynomial[nodeCount][patternCount];
     	for (int i = 0; i < nodeCount; i++) {
     		for (int j = 0; j < patternCount; j++) {
-    			chebPoly[i][j][0] = new ChebyshevPolynomial(N);
-    			chebPoly[i][j][1] = new ChebyshevPolynomial(N);
+    			chebPoly[i][j] = new ChebyshevPolynomial(N);
     		}
     	}    	
     }
     
     public void setLeafPolyFactors(int nodeIndex, int patternIndex, double [] f) {
-    	chebPoly[nodeIndex][patternIndex][0].setPolyValues(f);
+    	chebPoly[nodeIndex][patternIndex].setPolyValues(f);
     }
 
 
