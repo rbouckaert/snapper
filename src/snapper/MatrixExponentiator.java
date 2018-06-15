@@ -762,7 +762,7 @@ public class MatrixExponentiator {
 			for (int j = 0; j < N; j++) {
 				double delta = 0;
 				for (int k = 0; k < N; k++) {
-					delta += dH[j*N+k] * k2y[k];
+					delta += dH[j*N+k] * k3y[k];
 				}
 				k4x[j] = delta;
 			}
