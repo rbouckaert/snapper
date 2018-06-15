@@ -49,8 +49,8 @@ public class SnapperLikelihoodCore  {
     	}    	
     }
     
-    public void setLeafPolyFactors(int nodeIndex, int patternIndex, double [] f) {
-    	chebPoly[nodeIndex][patternIndex].setPolyValues(f);
+    public void setLeafPolyFactors(int nodeIndex, int patternIndex, int r, int n) {
+    	chebPoly[nodeIndex][patternIndex].init(r, n);
     }
 
 

@@ -234,39 +234,7 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
             for (int j = 0; j < thisSite.length; j++) {
             	int r = thisSite[j];
             	int n = lineageCounts[j];
-            	double c = logBinom(r, n);
-            	
-            	if (n == 0) { 
-            		// deal with missing data
-            		double [] a = new double[N];
-            		Arrays.fill(a, 0);
-            		a[0] = 1;
-            		ChebyshevPolynomial cheb = new ChebyshevPolynomial(N);
-            		cheb.setPolyFactors(a);
-            		cheb.aToF();
-            	} else {
-            		// there is some data
-                	// first, set f[0] and f[N-1];
-	            	if (r == 0) {
-	            		f[0] = 1;
-	            		f[N-1] = 0;            		
-	            	} else if (r == n) {
-	            		f[0] = 0;
-	            		f[N-1] = 1;
-	            	} else {
-	            		f[0] = 0;
-	            		f[N-1] = 0;
-	            	}
-	            		
-	            	// set the other values
-	            	for (int m = 1; m < N - 1; m++) {
-	            		double x = 1 - Math.cos(-m/(N-1.0)*Math.PI) / 2.0;
-	            		double logp = c + r * Math.log(x) + (n-r) * Math.log(1-x);
-	            		double p = Math.exp(logp);
-	            		f[m] = p;
-	            	}
-	                m_core.setLeafPolyFactors(j, i, f);
-            	}
+            	m_core.setLeafPolyFactors(j, i, r, n);
             }
     	}
 		

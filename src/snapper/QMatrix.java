@@ -2,7 +2,10 @@ package snapper;
 
 import java.util.Arrays;
 
-public class QMatrix {
+import snap.likelihood.COMPLEX;
+import snap.matrix.AbstractMatrix;
+
+public class QMatrix  extends AbstractMatrix {
 	int N;
 	double [] D;
 	double [] SD;
@@ -11,6 +14,7 @@ public class QMatrix {
 	double [] D2;
 	double [] SD2;
 	double [] S2D2;
+	double [] Q;
 
 	private double [] x_times_Tx() { //Transpose of Operator B defined as x*f(x) (Gordon's thesis Propositon.5 page. 78)
 		    //B = sp.sparse.diags([0.25, 0.5, 0.25], [-1, 0, 1], shape=(N, N)).toarray()
@@ -93,9 +97,11 @@ public class QMatrix {
 		dot(S,D2,SD2);
 		S2D2 = new double [N*N];
 		dot(S2,D2,S2D2);
+		
+		Q = new double[N*N];
 	}
 
-    public void getQ(double [] a, double [] b, double [] Q) {
+    public void setQ(double [] a, double [] b) {
     	if (Q.length != N * N) {
     		throw new IllegalArgumentException("Exepected matrix of site " + N + "x" + N);
     	}
@@ -136,4 +142,64 @@ public class QMatrix {
         	System.out.println(']');
     	}
     }
+    
+	@Override
+	public void multiply(double[] v, double[] Av) {
+		if (v.length == N + 1) {
+			// in case v an Av are indexed [1,..,N] instead of [0,..,N-1]
+			for (int i = 0; i < N; i++) {
+				double sum = 0;
+				for (int k = 0; k < N; k++) {
+					sum += Q[i*N+k] * v[k + 1];
+				}
+				Av[i + 1] = sum;
+			}
+			return;
+		}
+		for (int i = 0; i < N; i++) {
+			double sum = 0;
+			for (int k = 0; k < N; k++) {
+				sum += Q[i*N+k] * v[k];
+			}
+			Av[i] = sum;
+		}
+	}
+	
+	@Override
+	public void solve(COMPLEX[] vc, COMPLEX offset, COMPLEX[] xc) throws Exception {
+		throw new RuntimeException("not implemented yet");
+	}
+
+	@Override
+	public void solve(double[] vc_r, double[] vc_i, double offset_r, double offset_i, double[] xc_r, double[] xc_i)
+			throws Exception {
+		throw new RuntimeException("not implemented yet");		
+	}
+	
+	public void transpose() {
+		double [] T = new double[Q.length];
+		for (int i = 0; i < N; i++) {
+			for (int j = 0; j < N; j++) {
+				T[i*N+j] = Q[i+j*N];
+			}
+		}
+		Q = T;		
+	}
+	
+	public int getNrOfRows() {return N;}
+	public int getNrOfCols() {return N;}
+	public double infNorm() {
+		double norm = 0;
+		for (double d : Q) {
+			norm += Math.abs(d);
+		}
+		return norm;
+	}
+	public double trace() {
+		double trace = 0;
+		for (int i = 0; i < N; i++) {
+			trace += Q[i*N+i];
+		}
+		return trace;
+	};
 }
