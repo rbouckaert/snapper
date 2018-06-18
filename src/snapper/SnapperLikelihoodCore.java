@@ -38,13 +38,13 @@ public class SnapperLikelihoodCore extends BeerLikelihoodCore {
     // 2 x #nodes x #patterns at bottom of branch 
     ChebyshevPolynomial[][][] chebPoly;
     double[][]time;
-    MatrixExponentiator exponentiator;
     int N;
 
 	double [] v1;
 	double [] v2;
 	double [] Q1;
 	double [] Q2;
+	double [] delta;
 
     public SnapperLikelihoodCore(Node root, Alignment data, int N) {
     	super(N);
@@ -58,15 +58,16 @@ public class SnapperLikelihoodCore extends BeerLikelihoodCore {
     			chebPoly[1][i][j] = new ChebyshevPolynomial(N);
     		}
     	}
-    	exponentiator = new MatrixExponentiator();
     	v1 = new double[N];
     	v2 = new double[N];
     	Q1 = new double[N*N];
     	Q2 = new double[N*N];
+    	
+    	delta = ChebyshevPolynomial.getInterValContributions(N);
     }
     
     void exponentiate(double time, double [] matrix, double [] a) {
-    	exponentiator.expmvRK4(time, matrix, a, MIN_STEP);
+    	MatrixExponentiator.expmvRK4(time, matrix, a, MIN_STEP);
     }
     
     @Override
@@ -200,6 +201,11 @@ public class SnapperLikelihoodCore extends BeerLikelihoodCore {
         }
     }
 
+    @Override
+    public void integratePartials(int nodeIndex, double[] proportions, double[] outPartials) {
+        calculateIntegratePartials(chebPoly[currentPartialsIndex[nodeIndex]][nodeIndex], proportions, outPartials);
+    }
+    
     /**
      * Integrates partials across categories.
      *
@@ -207,16 +213,16 @@ public class SnapperLikelihoodCore extends BeerLikelihoodCore {
      * @param proportions the proportions of sites in each category
      * @param outPartials an array into which the partials will go
      */
-    @Override
-	protected void calculateIntegratePartials(double[] inPartials, double[] proportions, double[] outPartials) {
+	protected void calculateIntegratePartials(ChebyshevPolynomial[] inPartials, double[] proportions, double[] outPartials) {
 
         int u = 0;
         int v = 0;
+        double [] f;
         for (int k = 0; k < nrOfPatterns; k++) {
-
+        	f = inPartials[v].f;
             for (int i = 0; i < nrOfStates; i++) {
 
-                outPartials[u] = inPartials[v] * proportions[0];
+                outPartials[u] = f[i] * proportions[0];
                 u++;
                 v++;
             }
@@ -227,10 +233,11 @@ public class SnapperLikelihoodCore extends BeerLikelihoodCore {
             u = 0;
 
             for (int k = 0; k < nrOfPatterns; k++) {
+            	f = inPartials[v].f;
 
                 for (int i = 0; i < nrOfStates; i++) {
 
-                    outPartials[u] += inPartials[v] * proportions[l];
+                    outPartials[u] += f[i] * proportions[l];
                     u++;
                     v++;
                 }
@@ -253,7 +260,7 @@ public class SnapperLikelihoodCore extends BeerLikelihoodCore {
             double sum = 0.0;
             for (int i = 0; i < nrOfStates; i++) {
 
-                sum += frequencies[i] * partials[v];
+                sum += frequencies[i] * partials[v] * delta[i];
                 v++;
             }
             outLogLikelihoods[k] = Math.log(sum) + getLogScalingFactor(k);
@@ -261,4 +268,4 @@ public class SnapperLikelihoodCore extends BeerLikelihoodCore {
     }
 
 
-} // class SnAPLikelihoodCore
+} // class SnapperLikelihoodCore

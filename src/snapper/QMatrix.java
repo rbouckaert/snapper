@@ -119,7 +119,8 @@ public class QMatrix  extends AbstractMatrix {
     	if (Q.length != N * N) {
     		throw new IllegalArgumentException("Exepected matrix of site " + N + "x" + N);
     	}
-		throw new RuntimeException("Not implemented yet");
+		setQ(/* a= */ new double[]{u*coalescentRate, -(u+v) * coalescentRate, 0, 0},
+			 /* b= */	new double[]{0, 0.5, -0.5, 0});
     }
     
     
