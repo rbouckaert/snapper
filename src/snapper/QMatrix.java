@@ -114,6 +114,14 @@ public class QMatrix  extends AbstractMatrix {
     	add(Q, 0.5*b[1], SD2);
     	add(Q, 0.5*b[2], S2D2);
     }
+
+    public void setQ(double u, double v, double coalescentRate) {
+    	if (Q.length != N * N) {
+    		throw new IllegalArgumentException("Exepected matrix of site " + N + "x" + N);
+    	}
+		throw new RuntimeException("Not implemented yet");
+    }
+    
     
     private void add(double [] Q, double x, double [] M) {
     	if (x == 0) {

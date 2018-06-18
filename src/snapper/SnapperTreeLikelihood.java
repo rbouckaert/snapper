@@ -44,6 +44,8 @@ import beast.core.parameter.RealParameter;
 import beast.evolution.branchratemodel.StrictClockModel;
 import beast.evolution.likelihood.TreeLikelihood;
 import beast.evolution.sitemodel.SiteModel;
+import beast.evolution.tree.Node;
+import beast.evolution.tree.Tree;
 import beast.evolution.tree.TreeInterface;
 import snap.Data;
 import snap.NodeData;
@@ -95,8 +97,8 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
 	boolean m_bUsenNonPolymorphic;
 	boolean m_bMutationOnlyAtRoot;
 	boolean m_bHasDominantMarkers;
-	double [] fSiteProbs;
-	double [] fStoredSiteProbs;
+//	double [] fSiteProbs;
+//	double [] fStoredSiteProbs;
 	
 	double m_fP0 = 0.0, m_fP1 = 0.0;
 	double m_fStoredP0 = 0.0, m_fStoredP1 = 0.0;
@@ -112,10 +114,12 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
 	
 	// Sampled parameter equal to the number of sites which have been removed from the data during ascertainment
 	IntegerParameter ascSiteCount;
-	
+	QMatrix Q;
+
 	@Override
 	public void initAndValidate() {
 		N =  NInput.get();
+		QMatrix Q = new QMatrix(N);
 		// check N = 2^k + 1 for some k
 		int k = N - 1;
 		while (k > 1) {
@@ -188,8 +192,6 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
     	}
 
 		int numPatterns = m_data2.getPatternCount();
-		fSiteProbs = new double[numPatterns];
-		fStoredSiteProbs = new double[numPatterns];
 		
 		
 		
@@ -238,6 +240,21 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
             }
     	}
 		
+    	
+    	int nodeCount = tree.getNodeCount();
+        m_branchLengths = new double[nodeCount];
+        storedBranchLengths = new double[nodeCount];
+
+        patternLogLikelihoods = new double[numPatterns];
+        m_fRootPartials = new double[numPatterns * N];
+        
+        m_core.initialize(
+                nodeCount,
+                numPatterns,
+                m_siteModel.getCategoryCount(),
+                true, m_useAmbiguities.get()
+        );
+
     }
 
     private double logBinom(int k, int n) {
@@ -282,39 +299,16 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
 					fCategoryRates[i] *= branchRate;
 				}
 			}
-			double [] fCategoryProportions = m_siteModel.getCategoryProportions(null);
-			double [][] patternProbs = new double[m_siteModel.getCategoryCount()][];
-			int nCategories = m_siteModel.getCategoryCount();
 			
-			// calculate pattern probabilities for all categories
-			for (int iCategory = 0; iCategory < nCategories; iCategory++) {
-				patternProbs[iCategory] = m_core.computeLogLikelihood(root, 
-						u, 
-						v, 
-						fCategoryRates[iCategory], 
-		    			m_nSampleSizes, 
-		    			m_data2,
-		    			coalescenceRate,
-		    			m_bMutationOnlyAtRoot,
-						m_bHasDominantMarkers,											  
-		    			useCache,
-		    			dprint /*= false*/);
-			}
+			traverse(root);
 			
 			// amalgamate site probabilities over categories
 			int numPatterns = m_data2.getPatternCount();
-			fSiteProbs = new double[numPatterns];
-			for (int i = 0; i < nCategories; i++) {
-				double[] patternProb = patternProbs[i]; 
-				for(int id = 0; id < numPatterns; id++) {
-					fSiteProbs[id] += patternProb[id] * fCategoryProportions[i];
-				}
-			}
 			// claculate log prob
 			logP = 0;
 			for(int id = 0; id < numPatterns - (m_bUsenNonPolymorphic ? 0 : 2); id++) {
 				double freq = m_data2.getPatternWeight(id);
-				double siteL = fSiteProbs[id];
+				double siteL = patternLogLikelihoods[id];
 				if (siteL==0.0) {
 					logP = -10e100;
 					break;
@@ -327,8 +321,8 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
 			// by the probability that a site is not ascertained (or more correctly,
 			// subtract the log probability.
 			if (!m_bUsenNonPolymorphic) {
-				m_fP0 =  fSiteProbs[numPatterns - 2];
-				m_fP1 =  fSiteProbs[numPatterns - 1];
+				m_fP0 =  patternLogLikelihoods[numPatterns - 2];
+				m_fP1 =  patternLogLikelihoods[numPatterns - 1];
 				if (ascSiteCount != null) {   
 					ascLogP = (double)ascSiteCount.getValue(0) * Math.log(m_fP0) +
 							  (double)ascSiteCount.getValue(1) * Math.log(m_fP1);
@@ -373,9 +367,7 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
 	public void store() {
         storedLogP = logP;
     	m_core.m_bReuseCache = true;
-    	System.arraycopy(fSiteProbs, 0, fStoredSiteProbs, 0, fStoredSiteProbs.length);
-    	// DO NOT CALL super.store, since the super class TreeLikelihood has nothing to store
-    	//super.store();
+    	super.store();
     	m_fStoredP0 = m_fP0;
     	m_fStoredP1 = m_fP1;
     	storedAscLogP = ascLogP; 
@@ -385,11 +377,7 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
     public void restore() {
         logP = storedLogP;
     	m_core.m_bReuseCache = false;
-    	double [] tmp = fStoredSiteProbs;
-    	fStoredSiteProbs = fSiteProbs;
-    	fSiteProbs = tmp;
-    	// DO NOT CALL super.restore, since the super class TreeLikelihood has nothing to store
-    	//super.restore();
+    	super.restore();
     	m_fP0 = m_fStoredP0;
     	m_fP1 = m_fStoredP1;
     	ascLogP = storedAscLogP; 
@@ -426,70 +414,6 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
 		}
 	}
 
-	// return site probability
-	public double getSitesProbs(int pattern) {
-		if (pattern >= 0)
-			return fSiteProbs[pattern];
-		return fSiteProbs[fSiteProbs.length + pattern];
-	}
-
-	public double[] calcNewConstProbs() {
-		try {
-			NodeData root = (NodeData) treeInput.get().getRoot();
-			Double[] coalescenceRate = m_substitutionmodel.m_pCoalescenceRate.get().getValues();
-			Double[] scaledCoalescenceRates = new Double[coalescenceRate.length];
-			double u = m_substitutionmodel.m_pU.get().getValue();
-			double v = m_substitutionmodel.m_pV.get().getValue();
-			boolean useCache = true;
-			// boolean useCache = false;
-			boolean dprint = showPatternLikelihoodsAndQuit.get();
-			if (dprint) {
-				System.out.println("Log Likelihood Correction = " + m_fLogLikelihoodCorrection);
-			}
-
-			double[] fCategoryRates = m_siteModel.getCategoryRates(null);
-			double[] fCategoryProportions = m_siteModel.getCategoryProportions(null);
-			double[][] patternProbs = new double[m_siteModel.getCategoryCount()][];
-			int nCategories = m_siteModel.getCategoryCount();
-
-			// calculate pattern probabilities for all categories
-			for (int iCategory = 0; iCategory < nCategories; iCategory++) {
-				for (int i = 0; i < scaledCoalescenceRates.length; i++) {
-					scaledCoalescenceRates[i] = coalescenceRate[i] / fCategoryRates[iCategory];
-				}
-				patternProbs[iCategory] = m_core.computeConstantSitesLogLikelihood(root, u, v, fCategoryRates[iCategory], m_nSampleSizes, m_data2,
-						scaledCoalescenceRates, m_bMutationOnlyAtRoot, m_bHasDominantMarkers, useCache, dprint /*
-																												 * =
-																												 * false
-																												 */);
-			}
-
-			// amalgamate site probabilities over categories
-			int numPatterns = m_data2.getPatternCount();
-			double[] constProbs = new double[2];
-			for (int i = 0; i < nCategories; i++) {
-				double[] patternProb = patternProbs[i];
-				constProbs[0] += patternProb[numPatterns - 2] * fCategoryProportions[i];
-				constProbs[1] += patternProb[numPatterns - 1] * fCategoryProportions[i];
-			}
-			return constProbs;
-		} catch (Exception e) {
-			e.printStackTrace();
-			return new double[2];
-		}
-	}
-
-	public double getNewProbVariableSites() {
-		if (!m_bUsenNonPolymorphic) {
-			double[] constProbs = calcNewConstProbs();
-
-			double constSiteProbabiliy = constProbs[0] + constProbs[1];
-
-			return 1.0 - constSiteProbabiliy;
-		} else {
-			return 1.0;
-		}
-	}
 	
 	// return contribution of ascertained sites to log likelihood
 	public double getAscSitesLogP() {
@@ -499,4 +423,94 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
 			return 0.0;
 		}
 	}
-} // class SSSTreeLikelihood
+	
+	
+    /* Assumes there IS a branch rate model as opposed to traverse() */
+    private int traverse(final Node node) {
+
+        int update = (node.isDirty() | hasDirt);
+
+        final int nodeIndex = node.getNr();
+
+        final double branchRate = branchRateModel.getRateForBranch(node);
+        final double branchTime = node.getLength() * branchRate;
+
+        // First update the transition probability matrix(ices) for this branch
+        //if (!node.isRoot() && (update != Tree.IS_CLEAN || branchTime != m_StoredBranchLengths[nodeIndex])) {
+        if (!node.isRoot() && (update != Tree.IS_CLEAN || branchTime != m_branchLengths[nodeIndex])) {
+            m_branchLengths[nodeIndex] = branchTime;
+            final Node parent = node.getParent();
+            likelihoodCore.setNodeMatrixForUpdate(nodeIndex);
+    		Double[] coalescenceRate = m_substitutionmodel.m_pCoalescenceRate.get().getValues();
+    		double u = m_substitutionmodel.m_pU.get().getValue();
+    		double v = m_substitutionmodel.m_pV.get().getValue();
+			double[] fCategoryRates = m_siteModel.getCategoryRates(null);
+			double [] time = m_core.time[nodeIndex];
+			
+    		for (int i = 0; i < m_siteModel.getCategoryCount(); i++) {
+    			double scaledCoalescenceRate = coalescenceRate[i] / fCategoryRates[i];
+            	final double jointBranchRate = m_siteModel.getRateForCategory(i, node) * branchRate;
+            	time[i] = jointBranchRate * branchTime;
+            	Q.setQ(u, v, scaledCoalescenceRate);
+                //System.out.println(node.getNr() + " " + Arrays.toString(m_fProbabilities));
+                m_core.setNodeMatrix(nodeIndex, i, Q.Q);
+            }
+            update |= Tree.IS_DIRTY;
+        }
+
+        // If the node is internal, update the partial likelihoods.
+        if (!node.isLeaf()) {
+
+            // Traverse down the two child nodes
+            final Node child1 = node.getLeft(); //Two children
+            final int update1 = traverse(child1);
+
+            final Node child2 = node.getRight();
+            final int update2 = traverse(child2);
+
+            // If either child node was updated then update this node too
+            if (update1 != Tree.IS_CLEAN || update2 != Tree.IS_CLEAN) {
+
+                final int childNum1 = child1.getNr();
+                final int childNum2 = child2.getNr();
+
+                m_core.setNodePartialsForUpdate(nodeIndex);
+                update |= (update1 | update2);
+                if (update >= Tree.IS_FILTHY) {
+                	m_core.setNodeStatesForUpdate(nodeIndex);
+                }
+
+                if (m_siteModel.integrateAcrossCategories()) {
+                	m_core.calculatePartials(childNum1, childNum2, nodeIndex);
+                } else {
+                    throw new RuntimeException("Error TreeLikelihood 201: Site categories not supported");
+                    //m_pLikelihoodCore->calculatePartials(childNum1, childNum2, nodeNum, siteCategories);
+                }
+
+                if (node.isRoot()) {
+                    // No parent this is the root of the beast.tree -
+                    // calculate the pattern likelihoods
+                    final double[] frequencies = getFrequencies();
+
+                    final double[] proportions = m_siteModel.getCategoryProportions(node);
+                    m_core.integratePartials(node.getNr(), proportions, m_fRootPartials);
+
+                    m_core.calculateLogLikelihoods(m_fRootPartials, frequencies, patternLogLikelihoods);
+                }
+
+            }
+        }
+        return update;
+    } // traverseWithBRM
+
+    ChebyshevPolynomial freqs = null;
+	private double[] getFrequencies() {
+		if (freqs == null) {
+			freqs = new ChebyshevPolynomial(N);
+			freqs.a[0] = 1;
+			freqs.aToF();
+		}
+		return freqs.f;
+	}
+
+} // class SnapperTreeLikelihood
