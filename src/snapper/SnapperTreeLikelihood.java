@@ -119,7 +119,7 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
 	@Override
 	public void initAndValidate() {
 		N =  NInput.get();
-		QMatrix Q = new QMatrix(N);
+		Q = new QMatrix(N);
 		// check N = 2^k + 1 for some k
 		int k = N - 1;
 		while (k > 1) {
@@ -219,7 +219,10 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
 		System.err.println("Log Likelihood Correction = " + m_fLogLikelihoodCorrection);
 		
 		branchRateModel = branchRateModelInput.get();
-		if (branchRateModel != null && !(branchRateModel instanceof StrictClockModel)) {
+		if (branchRateModel == null) {
+			branchRateModel = new StrictClockModel();
+		}
+		if (!(branchRateModel instanceof StrictClockModel)) {
 			//We assume that the mutation rate (but not theta) is constant for the species tree.
 			throw new IllegalArgumentException("Only strict clock model allowed for branchRateModel, not " + branchRateModel.getClass().getName());
 		}
@@ -309,11 +312,11 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
 			for(int id = 0; id < numPatterns - (m_bUsenNonPolymorphic ? 0 : 2); id++) {
 				double freq = m_data2.getPatternWeight(id);
 				double siteL = patternLogLikelihoods[id];
-				if (siteL==0.0) {
+				if (Double.isInfinite(siteL)) {
 					logP = -10e100;
 					break;
 				}
-				logP += (double)freq * Math.log(siteL);
+				logP += (double)freq * siteL;
 			}
 			// correction for constant sites. If we are sampling the numbers of constant sites 
 			// (stored in ascSiteCount) then we include these probabilities. Otherwise we 
@@ -426,7 +429,7 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
 	
 	
     /* Assumes there IS a branch rate model as opposed to traverse() */
-    private int traverse(final Node node) {
+    int traverse(final Node node) {
 
         int update = (node.isDirty() | hasDirt);
 
@@ -440,7 +443,7 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
         if (!node.isRoot() && (update != Tree.IS_CLEAN || branchTime != m_branchLengths[nodeIndex])) {
             m_branchLengths[nodeIndex] = branchTime;
             final Node parent = node.getParent();
-            likelihoodCore.setNodeMatrixForUpdate(nodeIndex);
+            m_core.setNodeMatrixForUpdate(nodeIndex);
     		Double[] coalescenceRate = m_substitutionmodel.m_pCoalescenceRate.get().getValues();
     		double u = m_substitutionmodel.m_pU.get().getValue();
     		double v = m_substitutionmodel.m_pV.get().getValue();
@@ -450,7 +453,7 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
     		for (int i = 0; i < m_siteModel.getCategoryCount(); i++) {
     			double scaledCoalescenceRate = coalescenceRate[i] / fCategoryRates[i];
             	final double jointBranchRate = m_siteModel.getRateForCategory(i, node) * branchRate;
-            	time[i] = jointBranchRate * branchTime;
+            	time[i] = jointBranchRate * branchTime * 2 /scaledCoalescenceRate;
             	Q.setQ(u, v, scaledCoalescenceRate);
                 //System.out.println(node.getNr() + " " + Arrays.toString(m_fProbabilities));
                 m_core.setNodeMatrix(nodeIndex, i, Q.Q);

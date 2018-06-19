@@ -137,7 +137,7 @@ public class ChebyshevPolynomial {
     	double [] delta = new double[N];
     	delta[0] = d[0]/2.0;
     	for (int m = 1; m < N - 1; m++) {
-    		delta[m] = 0.5*(d[m]+d[m+1]);
+    		delta[m] = 0.5*(d[m-1]+d[m]);
     	}
     	delta[N-1] = d[N-2]/2.0;
     	

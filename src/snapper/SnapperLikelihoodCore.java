@@ -139,7 +139,7 @@ public class SnapperLikelihoodCore extends BeerLikelihoodCore {
                 
                 double [] f = partials3[k].f; 
                 for (int i = 0; i < N; i++) {
-                	f[i] = v1[i] * v2[i];
+                	f[i] = Math.max(v1[i] * v2[i], 0);
                 }
             }
         }
@@ -166,7 +166,7 @@ public class SnapperLikelihoodCore extends BeerLikelihoodCore {
                 
                 double [] f = partials3[k].f; 
                 for (int i = 0; i < N; i++) {
-                	f[i] = v1[i] * v2[i];
+                	f[i] = Math.max(v1[i] * v2[i], 0);
                 }
             }
         }
@@ -195,7 +195,7 @@ public class SnapperLikelihoodCore extends BeerLikelihoodCore {
                 
                 double [] f = partials3[k].f; 
                 for (int i = 0; i < N; i++) {
-                	f[i] = v1[i] * v2[i];
+                	f[i] = Math.max(v1[i] * v2[i], 0);
                 }
             }
         }
@@ -216,15 +216,13 @@ public class SnapperLikelihoodCore extends BeerLikelihoodCore {
 	protected void calculateIntegratePartials(ChebyshevPolynomial[] inPartials, double[] proportions, double[] outPartials) {
 
         int u = 0;
-        int v = 0;
+//        int v = 0;
         double [] f;
         for (int k = 0; k < nrOfPatterns; k++) {
-        	f = inPartials[v].f;
+        	f = inPartials[k].f;
             for (int i = 0; i < nrOfStates; i++) {
-
                 outPartials[u] = f[i] * proportions[0];
                 u++;
-                v++;
             }
         }
 
@@ -233,13 +231,12 @@ public class SnapperLikelihoodCore extends BeerLikelihoodCore {
             u = 0;
 
             for (int k = 0; k < nrOfPatterns; k++) {
-            	f = inPartials[v].f;
+            	f = inPartials[k].f;
 
                 for (int i = 0; i < nrOfStates; i++) {
 
                     outPartials[u] += f[i] * proportions[l];
                     u++;
-                    v++;
                 }
             }
         }
