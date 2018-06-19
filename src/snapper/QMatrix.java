@@ -101,7 +101,12 @@ public class QMatrix  extends AbstractMatrix {
 		Q = new double[N*N];
 	}
 
-    public void setQ(double [] a, double [] b) {
+    public QMatrix(double[] matrix) {
+		Q = matrix;
+		N = (int)(Math.sqrt(Q.length) + 0.5);
+	}
+    
+	public void setQ(double [] a, double [] b) {
     	if (Q.length != N * N) {
     		throw new IllegalArgumentException("Exepected matrix of site " + N + "x" + N);
     	}
@@ -115,12 +120,13 @@ public class QMatrix  extends AbstractMatrix {
     	add(Q, 0.5*b[2], S2D2);
     }
 
-    public void setQ(double u, double v, double coalescentRate) {
+    public void setQ(double u, double v, double theta) {
     	if (Q.length != N * N) {
     		throw new IllegalArgumentException("Exepected matrix of site " + N + "x" + N);
     	}
+    	theta=1.0/theta;
 		setQ(/* a= */ new double[]{u, -(u+v), 0, 0},
-			 /* b= */	new double[]{0, 0.5/coalescentRate, -0.5/coalescentRate, 0});
+			 /* b= */	new double[]{0, 0.5*theta/2, -0.5*theta/2, 0});
     }
     
     

@@ -29,8 +29,8 @@ package snapper;
 
 
 
+
 import java.io.PrintStream;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -49,7 +49,6 @@ import beast.evolution.tree.Tree;
 import beast.evolution.tree.TreeInterface;
 import snap.Data;
 import snap.NodeData;
-import snap.likelihood.SnapSubstitutionModel;
 
 
 @Description("Implements a tree Likelihood Function for Single Site Sorted-sequences on a tree.") 
@@ -146,28 +145,28 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
     	
     	TreeInterface tree = treeInput.get();
     	m_substitutionmodel = ((SnapSubstitutionModel)m_siteModel.substModelInput.get());
-    	Input<RealParameter> coalescenceRatenput = m_substitutionmodel.m_pCoalescenceRate;
+    	Input<RealParameter> thetaInput = m_substitutionmodel.thetaInput;
 		
 		Double [] values = new Double[tree.getNodeCount()];
-		String sCoalescenceRateValues = "";
+		String sTheta = "";
 		if (m_bInitFromTree.get() == true) {
 			tree.getMetaData(tree.getRoot(), values, m_pPattern.get());
 			for (Double d : values) {
-				sCoalescenceRateValues += d + " ";
+				sTheta += d + " ";
 			}
 		} else {
-	    	List<Double> sValues = coalescenceRatenput.get().valuesInput.get();
+	    	List<Double> sValues = thetaInput.get().valuesInput.get();
 	        for (int i = 0; i < values.length; i++) {
 	            values[i] = new Double(sValues.get(i % sValues.size()));
-				sCoalescenceRateValues += values[i] + " ";
+	            sTheta += values[i] + " ";
 	        }
 			tree.setMetaData(tree.getRoot(), values, m_pPattern.get());
 		}
-		RealParameter pCoalescenceRate = coalescenceRatenput.get();
-		RealParameter coalescenceRate = new RealParameter();
-		coalescenceRate.initByName("value", sCoalescenceRateValues, "upper", pCoalescenceRate.getUpper(), "lower", pCoalescenceRate.getLower(), "dimension", values.length);
-		coalescenceRate.setID(pCoalescenceRate.getID());
-		coalescenceRatenput.get().assignFrom(coalescenceRate);
+		RealParameter pTheta = thetaInput.get();
+		RealParameter theta = new RealParameter();
+		theta.initByName("value", sTheta, "upper", pTheta.getUpper(), "lower", pTheta.getLower(), "dimension", values.length);
+		theta.setID(pTheta.getID());
+		thetaInput.get().assignFrom(theta);
 	
     	
     	
@@ -278,15 +277,15 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
     	try {
     		// get current tree
 	    	NodeData root = (NodeData) treeInput.get().getRoot();
-	    	Double [] coalescenceRate = m_substitutionmodel.m_pCoalescenceRate.get().getValues();
+	    	//Double [] theta = m_substitutionmodel.thetaInput.get().getValues();
 	    	// assing gamma values to tree
 //	    	if (m_pGamma.get().somethingIsDirty()) {
 //	    		// sync gammas in parameter with gammas in tree, if necessary
 //	    		m_pGamma.get().prepare();
 //	    	}
 	    	
-	    	double u = m_substitutionmodel.m_pU.get().getValue();
-	    	double v  = m_substitutionmodel.m_pV.get().getValue();
+	    	//double u = m_substitutionmodel.m_pU.get().getValue();
+	    	//double v  = m_substitutionmodel.m_pV.get().getValue();
 			boolean useCache = false;
 			//boolean useCache = false;
 			boolean dprint = showPatternLikelihoodsAndQuit.get();
@@ -432,6 +431,7 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
     int traverse(final Node node) {
 
         int update = (node.isDirty() | hasDirt);
+        update = Tree.IS_FILTHY;
 
         final int nodeIndex = node.getNr();
 
@@ -439,22 +439,22 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
         final double branchTime = node.getLength() * branchRate;
 
         // First update the transition probability matrix(ices) for this branch
-        //if (!node.isRoot() && (update != Tree.IS_CLEAN || branchTime != m_StoredBranchLengths[nodeIndex])) {
-        if (!node.isRoot() && (update != Tree.IS_CLEAN || branchTime != m_branchLengths[nodeIndex])) {
+        if (!node.isRoot() && (update != Tree.IS_CLEAN || branchTime != m_branchLengths[nodeIndex] ||
+        		m_substitutionmodel.thetaInput.get().getStoredValue(nodeIndex) != m_substitutionmodel.thetaInput.get().getValue(nodeIndex))) {
             m_branchLengths[nodeIndex] = branchTime;
             final Node parent = node.getParent();
             m_core.setNodeMatrixForUpdate(nodeIndex);
-    		Double[] coalescenceRate = m_substitutionmodel.m_pCoalescenceRate.get().getValues();
+    		Double[] theta = m_substitutionmodel.thetaInput.get().getValues();
     		double u = m_substitutionmodel.m_pU.get().getValue();
     		double v = m_substitutionmodel.m_pV.get().getValue();
 			double[] fCategoryRates = m_siteModel.getCategoryRates(null);
 			double [] time = m_core.time[nodeIndex];
 			
     		for (int i = 0; i < m_siteModel.getCategoryCount(); i++) {
-    			double scaledCoalescenceRate = coalescenceRate[i] / fCategoryRates[i];
+    			double scaledTheta = theta[i] / fCategoryRates[i];
             	final double jointBranchRate = m_siteModel.getRateForCategory(i, node) * branchRate;
-            	time[i] = jointBranchRate * branchTime * 2 /scaledCoalescenceRate;
-            	Q.setQ(u, v, scaledCoalescenceRate);
+            	time[i] = jointBranchRate * branchTime * scaledTheta / 2;
+            	Q.setQ(u, v, scaledTheta);
                 //System.out.println(node.getNr() + " " + Arrays.toString(m_fProbabilities));
                 m_core.setNodeMatrix(nodeIndex, i, Q.Q);
             }
