@@ -26,6 +26,8 @@
 package snapper;
 
 
+import java.util.Arrays;
+
 import beast.evolution.alignment.Alignment;
 import beast.evolution.likelihood.BeerLikelihoodCore;
 import beast.evolution.tree.Node;
@@ -33,6 +35,7 @@ import beast.evolution.tree.Node;
 public class SnapperLikelihoodCore extends BeerLikelihoodCore {
     boolean m_bReuseCache = false;
     final double MIN_STEP = 0.01;
+    final static boolean debug = false;
     
     
     // 2 x #nodes x #patterns at bottom of branch 
@@ -64,6 +67,8 @@ public class SnapperLikelihoodCore extends BeerLikelihoodCore {
     	Q2 = new double[N*N];
     	
     	delta = ChebyshevPolynomial.getInterValContributions(N);
+    	
+    	states = new int[nodeCount][];
     }
     
     void exponentiate(double time, double [] matrix, double [] a) {
@@ -130,7 +135,13 @@ public class SnapperLikelihoodCore extends BeerLikelihoodCore {
                 		chebPoly[currentPartialsIndex[nodeIndex3]][nodeIndex3]);
             }
         }
-
+        if (debug) {
+        	System.out.println(nodeIndex1 + " x " + nodeIndex2 + " => " + nodeIndex3);
+        	System.out.println(Arrays.toString(chebPoly[currentPartialsIndex[nodeIndex1]][nodeIndex1][0].f));
+        	System.out.println(Arrays.toString(chebPoly[currentPartialsIndex[nodeIndex2]][nodeIndex2][0].f));
+        	System.out.println(Arrays.toString(chebPoly[currentPartialsIndex[nodeIndex3]][nodeIndex3][0].f));
+        }
+        
         if (useScaling) {
             scalePartials(nodeIndex3);
         }
@@ -149,11 +160,15 @@ public class SnapperLikelihoodCore extends BeerLikelihoodCore {
             System.arraycopy(matrices2, w, Q2, 0, matrixSize);
             for (int k = 0; k < nrOfPatterns; k++) {
 
+                if (debug) System.out.println(nodeIndex1 + ":exp(" + Arrays.toString(chebPoly[0][nodeIndex1][0].f)+")");
                 System.arraycopy(chebPoly[0][nodeIndex1][k].a, 0, v1, 0, N);
                 exponentiate(time[nodeIndex1][l], Q1, v1);
+                if (debug) System.out.println("="+Arrays.toString(v1));
                 
+                if (debug) System.out.println(nodeIndex2 + ":exp(" + Arrays.toString(chebPoly[0][nodeIndex2][0].f)+")");
                 System.arraycopy(chebPoly[0][nodeIndex2][k].a, 0, v2, 0, N);
                 exponentiate(time[nodeIndex2][l], Q2, v2);
+                if (debug) System.out.println("="+Arrays.toString(v2));
                 
                 double [] f = partials3[k].f; 
                 for (int i = 0; i < N; i++) {

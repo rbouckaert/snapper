@@ -228,19 +228,6 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
 
 		
 		
-		// set up Chebyshef functions for leaf observations
-		// not particularly efficient, but we only do this once
-		double [] f = new double[N];
-    	for (int i = 0; i < numPatterns; i++) {
-            int [] thisSite = m_data2.getPattern(i);
-            int [] lineageCounts = m_data2.getPatternLineagCounts(i);
-            
-            for (int j = 0; j < thisSite.length; j++) {
-            	int r = thisSite[j];
-            	int n = lineageCounts[j];
-            	m_core.setLeafPolyFactors(j, i, r, n);
-            }
-    	}
 		
     	
     	int nodeCount = tree.getNodeCount();
@@ -257,6 +244,21 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
                 true, m_useAmbiguities.get()
         );
 
+		// set up Chebyshef functions for leaf observations
+		// not particularly efficient, but we only do this once
+		double [] f = new double[N];
+    	for (int i = 0; i < numPatterns; i++) {
+            int [] thisSite = m_data2.getPattern(i);
+            int [] lineageCounts = m_data2.getPatternLineagCounts(i);
+            
+            for (int j = 0; j < thisSite.length; j++) {
+            	int r = thisSite[j];
+            	int n = lineageCounts[j];
+            	m_core.setLeafPolyFactors(j, i, r, n);
+            	// hack: set nodeStates to some non-null value, so m_core knows that it is a leaf 
+            	m_core.setNodeStates(j, thisSite);
+            }
+    	}
     }
 
     private double logBinom(int k, int n) {
@@ -304,7 +306,7 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
 			
 			traverse(root);
 			
-			// amalgamate site probabilities over categories
+			// amalgamate site probabilities over patterns
 			int numPatterns = m_data2.getPatternCount();
 			// claculate log prob
 			logP = 0;
