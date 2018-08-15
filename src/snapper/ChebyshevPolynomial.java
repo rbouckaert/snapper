@@ -129,17 +129,17 @@ public class ChebyshevPolynomial {
     		f[m] = 0.5 - Math.cos(-m/(N-1.0)*Math.PI) / 2.0;
     	}
     	f[N-1] = 1.0;
-		double [] d = new double[N-1];
+		double [] w = new double[N-1];
     	for (int m = 0; m < N - 1; m++) {
-    		d[m] = f[m+1] - f[m];
+    		w[m] = f[m+1] - f[m];
     	}
     	
     	double [] delta = new double[N];
-    	delta[0] = d[0]/2.0;
+    	delta[0] = w[0]/2.0;
     	for (int m = 1; m < N - 1; m++) {
-    		delta[m] = 0.5*(d[m-1]+d[m]);
+    		delta[m] = 0.5*(w[m-1]+w[m]);
     	}
-    	delta[N-1] = d[N-2]/2.0;
+    	delta[N-1] = w[N-2]/2.0;
     	
 		return delta;
 	}

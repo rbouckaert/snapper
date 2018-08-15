@@ -50,10 +50,12 @@ public class SnapperLikelihoodCore extends BeerLikelihoodCore {
 	double [] delta;
 
     public SnapperLikelihoodCore(Node root, Alignment data, int N) {
+    	this(root.getNodeCount(), data.getPatternCount(), N); 
+    }
+    
+    public SnapperLikelihoodCore(int nodeCount, int patternCount, int N) {
     	super(N);
     	this.N = N;
-    	int nodeCount = root.getNodeCount();
-    	int patternCount = data.getPatternCount(); 
     	chebPoly = new ChebyshevPolynomial[2][nodeCount][patternCount];
     	for (int i = 0; i < nodeCount; i++) {
     		for (int j = 0; j < patternCount; j++) {
@@ -173,7 +175,9 @@ public class SnapperLikelihoodCore extends BeerLikelihoodCore {
                 double [] f = partials3[k].f; 
                 for (int i = 0; i < N; i++) {
                 	f[i] = Math.max(v1[i] * v2[i], 0);
+                	//f[i] = (v1[i] * v2[i]);
                 }
+                if (debug) System.out.println("="+Arrays.toString(f));
             }
         }
     }
@@ -200,6 +204,7 @@ public class SnapperLikelihoodCore extends BeerLikelihoodCore {
                 double [] f = partials3[k].f; 
                 for (int i = 0; i < N; i++) {
                 	f[i] = Math.max(v1[i] * v2[i], 0);
+                	//f[i] = (v1[i] * v2[i]);
                 }
             }
         }
@@ -229,6 +234,7 @@ public class SnapperLikelihoodCore extends BeerLikelihoodCore {
                 double [] f = partials3[k].f; 
                 for (int i = 0; i < N; i++) {
                 	f[i] = Math.max(v1[i] * v2[i], 0);
+                	//f[i] = (v1[i] * v2[i]);
                 }
             }
         }
