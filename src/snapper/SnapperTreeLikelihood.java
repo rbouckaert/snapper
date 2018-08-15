@@ -34,6 +34,9 @@ import java.io.PrintStream;
 import java.util.List;
 import java.util.Random;
 
+import org.apache.commons.math.distribution.BetaDistribution;
+import org.apache.commons.math.distribution.BetaDistributionImpl;
+
 import beast.app.BeastMCMC;
 import beast.core.Description;
 import beast.core.Input;
@@ -455,7 +458,7 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
     		for (int i = 0; i < m_siteModel.getCategoryCount(); i++) {
     			double scaledTheta = theta[i] / fCategoryRates[i];
             	final double jointBranchRate = m_siteModel.getRateForCategory(i, node) * branchRate;
-            	time[i] = jointBranchRate * branchTime * scaledTheta / 2;
+            	time[i] = jointBranchRate * branchTime;// * scaledTheta / 2;
             	Q.setQ(u, v, scaledTheta);
                 //System.out.println(node.getNr() + " " + Arrays.toString(m_fProbabilities));
                 m_core.setNodeMatrix(nodeIndex, i, Q.Q);
@@ -514,7 +517,16 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
 			freqs = new ChebyshevPolynomial(N);
 			freqs.a[0] = 1;
 			freqs.aToF();
+			
+//			BetaDistribution beta = new BetaDistributionImpl(0.006, 0.006);
+//			freqs.f[0] = 10;
+//			freqs.f[N-1] = 10;
+//			for (int i = 1; i < N-1; i++) {
+//	    		double x = 0.5 - Math.cos(-i/(N-1.0)*Math.PI) / 2.0;
+//				freqs.f[i] = beta.density(x);
+//			}
 		}
+		
 		return freqs.f;
 	}
 
