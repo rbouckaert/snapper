@@ -294,11 +294,18 @@ public class SnapperLikelihoodCore extends BeerLikelihoodCore {
         for (int k = 0; k < nrOfPatterns; k++) {
 
             double sum = 0.0;
+            ChebyshevPolynomial c = new ChebyshevPolynomial(nrOfStates);
+            double [] f = c.f;
             for (int i = 0; i < nrOfStates; i++) {
-
-                sum += frequencies[i] * partials[v] * delta[i];
+            	f[i] = frequencies[i] * partials[v];
+                //sum += frequencies[i] * partials[v] * delta[i];
                 v++;
             }
+            c.fToA();
+            for (int i = 0; i < nrOfStates; i+= 2) {
+            	sum += c.a[i] / (1.0 - i * i);
+            }            
+            
             outLogLikelihoods[k] = Math.log(sum) + getLogScalingFactor(k);
         }
     }

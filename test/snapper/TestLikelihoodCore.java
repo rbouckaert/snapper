@@ -49,7 +49,8 @@ public class TestLikelihoodCore extends TestCase {
 		Arrays.fill(frequencies, 1);
 		core.calculateLogLikelihoods(rootPartials, frequencies, outLogLikelihoods);
 		System.out.println("logL = " + outLogLikelihoods[0]);
-		//    logL = -16.359225817728493
+		//    logL = -16.359225817728493 // trapezoid
+		//    logL = -16.35761892714236  // Clenshaw-Curtis quadrature
 		assertEquals(-16.357618928099296, outLogLikelihoods[0], 1e-4);
 	
 	}
