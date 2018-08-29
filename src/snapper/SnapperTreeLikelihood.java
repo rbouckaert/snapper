@@ -258,8 +258,6 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
             	int r = thisSite[j];
             	int n = lineageCounts[j];
             	m_core.setLeafPolyFactors(j, i, r, n);
-            	// hack: set nodeStates to some non-null value, so m_core knows that it is a leaf 
-            	m_core.setNodeStates(j, thisSite);
             }
     	}
     }
@@ -456,7 +454,7 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
 			double [] time = m_core.time[nodeIndex];
 			
     		for (int i = 0; i < m_siteModel.getCategoryCount(); i++) {
-    			double scaledTheta = theta[i] / fCategoryRates[i];
+    			double scaledTheta = theta[nodeIndex] / fCategoryRates[i];
             	final double jointBranchRate = m_siteModel.getRateForCategory(i, node) * branchRate;
             	time[i] = jointBranchRate * branchTime;// * scaledTheta / 2;
             	Q.setQ(u, v, scaledTheta);

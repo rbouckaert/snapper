@@ -105,6 +105,8 @@ public class SnapperLikelihoodCore extends BeerLikelihoodCore {
     public void setLeafPolyFactors(int nodeIndex, int patternIndex, int r, int n) {
     	chebPoly[0][nodeIndex][patternIndex].init(r, n);
     	chebPoly[1][nodeIndex][patternIndex].init(r, n);
+    	// hack: set nodeStates to some non-null value, so m_core knows that it is a leaf 
+    	this.states[nodeIndex] = new int[0];
     }
 
   
