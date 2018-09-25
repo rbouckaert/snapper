@@ -34,7 +34,7 @@ import beast.evolution.tree.Node;
 
 public class SnapperLikelihoodCore extends BeerLikelihoodCore {
     boolean m_bReuseCache = false;
-    final double MIN_STEP = 0.01;
+    final double MIN_STEP = 0.001;
     final static boolean debug = false;
     
     
