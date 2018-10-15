@@ -1,0 +1,183 @@
+<!-- Simulation test 1: species = 4, lineages/species = 2, samples = 100
+
+u=v=1.0 alpha=2, beta=0.2 lambda=10
+<1.0>((A[theta=0.1]:0.01,B[theta=0.1]:0.01)[theta=0.1]:0.01,(C[theta=0.1]:0.01,D[theta=0.1]:0.01)[theta=0.1]:0.01)[theta=0.1]
+
+--> 
+
+<beast version='2.0' namespace='snap:beast.util:beast.core.util:beast.evolution'>
+
+<map name='snapprior'>snap.likelihood.SnAPPrior</map>
+
+	<!-- n = 100 -->
+<!--	
+	<data spec='snap.Data' id='alignment' dataType='integerdata' statecount='21'>
+		<sequence taxon='A' totalcount='21'>
+17,20,19,0,0,20,20,19,20,19,13,19,0,20,19,0,20,0,20,2,0,11,16,20,9,20,4,20,0,20,17,5,16,5,20,9,1,12,20,1,12,20,3,0,4,0,2,17,11,0,6,0,0,0,20,16,20,1,0,18,0,20,20,11,19,20,20,0,20,16,15,4,0,0,19,0,5,3,20,4,19,20,0,0,20,0,20,20,19,20,7,20,20,2,20,16,20,1,13,20,
+		</sequence>
+		<sequence taxon='B' totalcount='21'>
+8,16,20,0,0,20,19,20,20,19,16,15,0,20,20,3,18,0,18,8,1,0,20,20,0,20,0,19,8,17,16,4,5,20,20,7,13,8,19,0,5,13,3,0,0,0,0,20,13,0,0,0,0,1,20,8,20,0,0,20,0,16,11,9,20,17,19,0,20,18,8,0,5,3,16,0,0,0,20,0,20,20,0,0,20,0,20,20,20,15,12,20,20,0,20,19,20,0,20,19,
+		</sequence>
+		<sequence taxon='C' totalcount='21'>
+19,20,20,1,2,20,19,19,14,14,4,20,0,20,20,0,20,12,20,7,0,0,18,16,0,19,1,20,2,20,14,8,18,0,20,0,0,7,20,0,10,16,0,0,9,0,1,18,17,6,4,8,0,1,16,12,20,1,0,20,0,19,14,13,20,20,20,5,19,12,0,5,3,0,13,1,0,0,19,6,20,12,4,0,8,0,19,20,20,20,9,10,19,0,20,15,20,0,20,16,
+		</sequence>
+		<sequence taxon='D' totalcount='21'>
+19,20,20,0,0,19,16,18,12,20,1,17,1,18,20,0,20,5,20,1,0,0,15,6,0,20,0,20,1,20,16,10,14,0,19,0,0,6,20,0,19,18,0,3,3,7,0,20,20,0,0,1,2,0,20,5,17,0,2,20,1,18,17,16,20,19,19,0,20,3,0,0,1,0,10,4,0,0,20,6,15,20,0,4,7,2,20,11,20,20,0,18,20,0,11,8,11,0,20,20,
+		</sequence>
+	</data>
+-->
+        <!-- n = 100 -->
+        <data spec='snap.Data' id='alignment' dataType='integerdata' statecount='101'>
+        <!--
+                <sequence taxon='A' totalcount='51'>
+50,6,1,35,49,28,9,0,50,0,50,49,0,35,47,49,41,50,29,50,0,50,0,19,50,0,50,50,50,0,8,0,2,35,25,0,12,21,13,0,0,0,0,3,47,49,32,0,37,48,0,50,0,49,48,26,0,50,0,22,0,1,19,49,40,50,50,39,35,0,0,27,0,50,46,0,1,0,50,50,50,0,0,1,38,50,50,15,4,0,50,49,4,0,0,0,50,47,50,50,
+                </sequence>
+                <sequence taxon='B' totalcount='51'>
+48,0,15,44,36,14,0,9,50,13,50,48,0,42,50,50,50,50,29,50,5,49,2,19,50,2,32,50,50,25,35,2,4,33,11,0,21,34,1,0,1,0,0,1,45,50,42,3,38,50,1,50,0,50,50,40,43,45,0,3,0,0,23,48,41,50,50,37,32,1,0,18,0,48,48,0,27,0,50,48,50,0,0,0,27,50,27,12,27,4,49,50,0,7,0,5,46,50,50,49,
+                </sequence>
+                <sequence taxon='C' totalcount='51'>
+50,0,1,34,50,3,9,2,50,0,49,50,2,41,50,33,50,50,28,50,26,50,7,31,50,0,50,49,50,6,45,5,12,22,28,0,18,0,0,0,0,4,1,11,38,47,48,0,36,50,3,49,2,50,50,41,48,50,0,0,0,0,46,49,24,50,34,6,37,0,0,37,6,50,50,2,19,2,46,50,43,0,1,8,5,37,50,0,0,0,26,50,0,14,1,41,44,29,50,49,
+                </sequence>
+                <sequence taxon='D' totalcount='51'>
+50,0,0,50,50,2,9,0,49,0,45,50,0,45,44,33,50,48,26,45,30,50,23,26,48,1,50,50,49,0,13,19,19,36,40,2,6,20,17,1,0,0,0,0,31,50,44,0,39,50,0,50,0,50,43,36,50,50,7,0,5,0,35,50,28,49,33,4,12,6,2,28,1,50,50,6,14,0,50,50,50,5,6,13,7,44,49,1,0,0,38,48,0,10,0,2,50,39,48,50,
+                </sequence>
+                -->
+                <sequence taxon='A' totalcount='101'>
+6
+                </sequence>
+                <sequence taxon='B' totalcount='101'>
+0
+                </sequence>
+                <sequence taxon='C' totalcount='101'>
+0
+                </sequence>
+                <sequence taxon='D' totalcount='101'>
+0
+                </sequence>
+        </data>
+
+<run id="mcmc" spec='beast.core.MCMC' chainLength="1000">
+        <state>
+        <!--
+          <parameter name='stateNode' id='theta' lower="1e-10" upper="1">0.5 0.5 0.05 0.05 0.5 0.5 0.5</parameter>
+          -->
+          <parameter name='stateNode' id='theta' lower="1e-10" upper="1">0.5 0.5 0.5 0.5 0.001 0.001 0.001</parameter>
+          
+          <parameter name='stateNode' id='v' value='1.0' lower='0.0'/>
+          <parameter name='stateNode' id='u' value='1.0' lower='0.0'/>
+          <parameter name='stateNode' id='alpha'  value='2' lower='0.0'/>
+          <parameter name='stateNode' id='beta'   value='200' lower='0.0'/>
+          <parameter name='stateNode' id='lambda' value='10' lower='0.0'/>
+          <tree name='stateNode' spec='beast.util.TreeParser' id='tree' nodetype='snap.NodeData'
+          IsLabelledNewick="true"
+          newick="((A:0.015,C:0.015):0.08,(B:0.015,D:0.015):0.08):0.0">
+<!--
+          newick="((A:0.098,D:0.098):0.002,(B:0.098,C:0.098):0.002):0.0">
+          newick="(((D:6.935004505920564E-5,C:6.935004505920564E-5):0.015990047502836658,B:0.016059397547895864):0.003895666349670597,A:0.01995506389756646):0.0">
+          -->
+          <!--tree name='stateNode' spec='beast.evolution.tree.SimpleRandomTree' id='tree' nodetype='snap.NodeData'-->          
+               <input name='taxa' idref='alignment'/>
+          </tree>
+        </state>
+
+        <distribution id="posterior" spec='CompoundDistribution'>
+        <!--
+     	    <snapprior name='distribution' id='prior'>
+    	        <alpha idref='alpha'/>
+        		<beta idref='beta'/>
+    	    	<lambda idref='lambda'/>
+        		<input name='tree' idref='tree'/>
+       	        <coalescenceRate idref='theta'/>
+             </snapprior>
+             <distribution id="prior" spec="beast.math.distributions.Prior" x="@theta">
+             	<distr spec="beast.math.distributions.Normal" mean="0.1" sigma="0.0001"/>
+             </distribution>
+             <distribution id="ABPrior" spec="beast.math.distributions.MRCAPrior" monophyletic="true"  tree="@tree">
+             	<taxonset id="AB" spec="beast.evolution.alignment.TaxonSet">
+             		<taxon idref="A"/>
+             		<taxon idref="B"/>
+             	</taxonset>
+             </distribution>
+             -->
+             <distribution id="prior" spec="beast.math.distributions.MRCAPrior" tree="@tree">
+             	<taxonset id="ABCD" spec="beast.evolution.alignment.TaxonSet">
+             		<taxon id="A" spec="beast.evolution.alignment.Taxon"/>
+             		<taxon id="B" spec="beast.evolution.alignment.Taxon"/>
+             		<taxon id="C" spec="beast.evolution.alignment.Taxon"/>
+             		<taxon id="D" spec="beast.evolution.alignment.Taxon"/>
+             	</taxonset>
+             	<distr spec="beast.math.distributions.Uniform" upper="0.1"/>
+             </distribution>
+             <distribution spec="snapper.SnapperTreeLikelihood" id='treeLikelihood' initFromTree='false' pattern='theta' >
+                <data idref='alignment'/>
+                <tree idref='tree'/>
+                <siteModel spec='sitemodel.SiteModel' id="siteModel">
+                    <substModel spec='snapper.SnapSubstitutionModel'>
+                        <mutationRateU idref='u'/>
+                        <mutationRateV idref='v'/>
+            	        <theta idref='theta'/>
+                    </substModel>
+                </siteModel>
+            </distribution>
+        </distribution>
+
+
+        <operator spec='operators.NodeSwapper' weight='0.5'>
+            <tree name='tree' idref='tree'/>
+        </operator>
+
+        <operator spec='operators.NodeBudger' weight='5' size="0.5" tree='@tree'/>
+        <operator spec='operators.ScaleOperator' scaleFactor='0.25' weight='1' tree='@tree'/>
+
+        <operator spec='operators.GammaMover' scale='0.75' weight='1' coalescenceRate="@theta"/>
+
+        <operator spec='operators.RateMixer' scaleFactors='0.25' weight='1'>
+            <tree name='tree' idref='tree'/>
+            <parameter name='coalescenceRate' idref='theta'/>
+        </operator>
+
+
+
+        <logger id="screenlog" logEvery="25">
+            <distribution name='log' idref="treeLikelihood"/>
+            <distribution name='log' idref="posterior"/>
+            <log idref="theta"/>
+            <!--
+            <distribution name='log' idref="prior"/>
+    	    <log spec='snap.ThetaLogger'>
+	        	<coalescenceRate idref='coalescenceRate'/>
+    	    </log>
+	        <log spec='beast.evolution.tree.TreeHeightLogger'>
+	        	<tree idref='tree'/>
+    	    </log>
+    	    -->
+        </logger>
+        <logger logEvery="100" fileName="test.log">
+	        <model idref='posterior'/>
+            <parameter name='log' idref="u"/>
+            <parameter name='log' idref="v"/>
+            <distribution name='log' idref="prior"/>
+            <distribution name='log' idref="treeLikelihood"/>
+            <distribution name='log' idref="posterior"/>
+            <log idref="theta"/>
+            <!--
+    	    <parameter name='log' idref='coalescenceRate'/>
+    	    <log spec='snap.ThetaLogger'>
+        		<coalescenceRate idref='coalescenceRate'/>
+    	    </log>
+    	    -->
+    	    <log spec='beast.evolution.tree.TreeHeightLogger'>
+        		<tree idref='tree'/>
+    	    </log>
+    	    <log spec='TreeLengthLogger'>
+	        	<tree idref='tree'/>
+    	    </log>
+        </logger>
+        <logger logEvery="1000" fileName="test.trees" mode='tree'>
+            <log spec='beast.evolution.tree.TreeWithMetaDataLogger' tree="@tree" metadata='@theta'/>
+        </logger>
+        
+</run>
+
+</beast>
+
