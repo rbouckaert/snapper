@@ -15,6 +15,12 @@ public class QMatrix  extends AbstractMatrix {
 	double [] SD2;
 	double [] S2D2;
 	double [] Q;
+	
+	boolean isUptodate = false;
+	double [] A2;
+	double [] A2Q;
+	double [][] L;
+	double [][] U;
 
 	private double [] x_times_Tx() { //Transpose of Operator B defined as x*f(x) (Gordon's thesis Propositon.5 page. 78)
 		    //B = sp.sparse.diags([0.25, 0.5, 0.25], [-1, 0, 1], shape=(N, N)).toarray()
@@ -118,6 +124,8 @@ public class QMatrix  extends AbstractMatrix {
     	add(Q, 0.5*b[0], D2);
     	add(Q, 0.5*b[1], SD2);
     	add(Q, 0.5*b[2], S2D2);
+    	
+    	isUptodate = false;
     }
 
     public void setQ(double u, double v, double theta) {
@@ -216,5 +224,52 @@ public class QMatrix  extends AbstractMatrix {
 			trace += Q[i*N+i];
 		}
 		return trace;
-	};
+	}
+	
+	
+	public void getLU(int index, double [] L, double [] U) {
+		if (!isUptodate) {
+			if (this.L == null) {
+				this.L = new double[12][N*N];
+				this.U = new double[12][N*N];
+			}
+			initA2();
+			dot(A2, Q, A2Q);
+			
+			double [] X = new double[N*N];
+			for (int i = 0; i < 12; i++) {
+				// X = Q-(z[i]/delta_t)*A2
+				System.arraycopy(Q, 0, X, 0, N*N);
+				
+			}
+			
+			isUptodate = true;
+		}
+		System.arraycopy(this.L[index], 0, L, 0, L.length);
+		System.arraycopy(this.U[index], 0, U, 0, U.length);
+	}
+	
+	protected void initA2() {
+		if (A2 != null && A2.length == N*N) {
+			return;
+		}
+		A2 = new double [N*N];
+		A2Q = new double[N*N];
+				
+		// sparse diagonal
+		A2[1] = 0.5; A2[(N-1)*N + N - 2] = 0.5;
+		for (int i = 1; i < N - 1; i++) {
+			A2[i*N + i - 1] = 0.25/i;
+			A2[i*N + i + 1] = -0.25/i;
+		}
+		
+		
+		// boundary cases
+	    //A2[0*N + 0] = 0;
+	    A2[0*N + 1] = 0;
+	    A2[1*N + 0] = 1/2.0;
+	    //A2[2*N + 1] = 1/8.0;
+		A2[(N-1)*N + (N-2)] /= 2.0*(N-1);
+	}
+	
 }

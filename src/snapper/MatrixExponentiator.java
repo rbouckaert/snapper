@@ -776,4 +776,53 @@ public class MatrixExponentiator {
 		System.arraycopy(v, 0, vOut, 0, N);
 		return vOut;
 	}
+	
+	
+	double [] c_real = {0.000818433612497,-0.068571505514864,1.319411815998137
+	                   ,-8.238258033274786,18.785982629476070,-11.799383335697918,-11.799383335697890
+	                   ,18.785982629476067,-8.238258033274763,1.319411815998138,-0.068571505514865
+	                   ,0.000818433612497};
+	double [] c_imag = {0.000581353207069,-0.038419074245887,0.183523497750480
+	                   ,2.796192505614474,-20.237292093573895,46.411650777279597,-46.411650777279569
+	                   ,20.237292093573895,-2.796192505614448,-0.183523497750480,0.038419074245888
+	                   ,-0.000581353207069};
+	double [] z_real = {-6.998688082445778,-2.235968223749446,0.851707264834878
+	                   ,2.917868800307170,4.206124506834328,4.827493775040721,4.827493775040721
+	                   ,4.206124506834328,2.917868800307170,0.851707264834878,-2.235968223749446
+	                   ,-6.998688082445778};
+	double [] z_imag = {-13.995917029301355,-11.109296400461870,-8.503832905826961
+	                   ,-6.017345968518187,-3.590920783130140,-1.193987999180278,1.193987999180278
+	                   ,3.590920783130140,6.017345968518187,8.503832905826961,11.109296400461870
+	                   ,13.995917029301355};
+	                   
+	
+//	public static void expM_CF(Q,double [] v,double [] LL,double branch_length,double delta_t) {   
+//	    double [] w_real = new double [c_real.length][v.length];
+//	    double [] w_imag = new double [c_real.length][v.length];
+//	    double [] x_real = new double [c_real.length][v.length];
+//	    double [] x_imag = new double [c_real.length][v.length];
+//	    System.arraycopy(v, 0, w_real[0], 0, v.length);
+//	    	
+//	    for t in range(0,int(branch_length/delta_t)): 
+//	        vi = np.sum(w,axis=0)
+//	        for i in range(0,len(c_real)):
+//	            x = fast_solver(LL,Q-(z[i]/delta_t)*A2,np.dot(A2,vi/delta_t),vi/delta_t,z[i]/delta_t)
+//	            w[i] = x*c[i]                             
+//	    return(w)
+//	}
+//	
+//	def fast_solver(LL,AA,A2c,c_i,z_i):
+//	# Here we solve a system A u = b via LU decomposition
+//	# that is solve Ly = b, Ux = y, 
+//	# We take the last two values from LLu = b since this can be
+//	# computed efficiently from the uppertriangular system, LL.
+//	# Note that L,U is just computed here for clarity 
+//	    L = sp.linalg.lu(AA,permute_l=True)[0]
+//	    U = sp.linalg.lu(AA,permute_l=True)[1]
+//	    y = sp.linalg.solve(L,A2c)
+//	    y2 = sp.linalg.solve((LL-np.identity(N)*z_i)[N-2:,N-2:],c_i[N-2:])  
+//	    U[N-2:,N-2:] = np.identity(2)
+//	    y[N-2:] = y2
+//	    return(sp.linalg.solve(U,y))	
+	
 } // class MatrixExponentiator
