@@ -42,26 +42,26 @@ u=v=1.0 alpha=2, beta=0.2 lambda=10
 50,0,0,50,50,2,9,0,49,0,45,50,0,45,44,33,50,48,26,45,30,50,23,26,48,1,50,50,49,0,13,19,19,36,40,2,6,20,17,1,0,0,0,0,31,50,44,0,39,50,0,50,0,50,43,36,50,50,7,0,5,0,35,50,28,49,33,4,12,6,2,28,1,50,50,6,14,0,50,50,50,5,6,13,7,44,49,1,0,0,38,48,0,10,0,2,50,39,48,50,
                 </sequence>
                 -->
-                <sequence taxon='A' totalcount='101'>
-6
-                </sequence>
-                <sequence taxon='B' totalcount='101'>
-0
-                </sequence>
-                <sequence taxon='C' totalcount='101'>
-0
-                </sequence>
-                <sequence taxon='D' totalcount='101'>
-0
-                </sequence>
+		<sequence taxon='A' totalcount='101'>
+60,
+		</sequence>
+		<sequence taxon='B' totalcount='101'>
+70,
+		</sequence>
+		<sequence taxon='C' totalcount='101'>
+65,
+		</sequence>
+		<sequence taxon='D' totalcount='101'>
+50,
+		</sequence>
         </data>
 
 <run id="mcmc" spec='beast.core.MCMC' chainLength="1000">
         <state>
-        <!--
           <parameter name='stateNode' id='theta' lower="1e-10" upper="1">0.5 0.5 0.05 0.05 0.5 0.5 0.5</parameter>
-          -->
+        <!--
           <parameter name='stateNode' id='theta' lower="1e-10" upper="1">0.5 0.5 0.5 0.5 0.001 0.001 0.001</parameter>
+          -->
           
           <parameter name='stateNode' id='v' value='1.0' lower='0.0'/>
           <parameter name='stateNode' id='u' value='1.0' lower='0.0'/>
@@ -81,25 +81,19 @@ u=v=1.0 alpha=2, beta=0.2 lambda=10
         </state>
 
         <distribution id="posterior" spec='CompoundDistribution'>
-        <!--
-     	    <snapprior name='distribution' id='prior'>
+	        <distribution id="prior" spec='CompoundDistribution'>
+
+<!--
+     	    <snapprior name='distribution' id='Snap-prior'>
     	        <alpha idref='alpha'/>
         		<beta idref='beta'/>
     	    	<lambda idref='lambda'/>
         		<input name='tree' idref='tree'/>
        	        <coalescenceRate idref='theta'/>
              </snapprior>
-             <distribution id="prior" spec="beast.math.distributions.Prior" x="@theta">
-             	<distr spec="beast.math.distributions.Normal" mean="0.1" sigma="0.0001"/>
-             </distribution>
-             <distribution id="ABPrior" spec="beast.math.distributions.MRCAPrior" monophyletic="true"  tree="@tree">
-             	<taxonset id="AB" spec="beast.evolution.alignment.TaxonSet">
-             		<taxon idref="A"/>
-             		<taxon idref="B"/>
-             	</taxonset>
-             </distribution>
-             -->
-             <distribution id="prior" spec="beast.math.distributions.MRCAPrior" tree="@tree">
+-->
+
+             <distribution id="MRCAprior" spec="beast.math.distributions.MRCAPrior" tree="@tree">
              	<taxonset id="ABCD" spec="beast.evolution.alignment.TaxonSet">
              		<taxon id="A" spec="beast.evolution.alignment.Taxon"/>
              		<taxon id="B" spec="beast.evolution.alignment.Taxon"/>
@@ -107,6 +101,7 @@ u=v=1.0 alpha=2, beta=0.2 lambda=10
              		<taxon id="D" spec="beast.evolution.alignment.Taxon"/>
              	</taxonset>
              	<distr spec="beast.math.distributions.Uniform" upper="0.1"/>
+             </distribution>
              </distribution>
              <distribution spec="snapper.SnapperTreeLikelihood" id='treeLikelihood' initFromTree='false' pattern='theta' >
                 <data idref='alignment'/>

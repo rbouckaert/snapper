@@ -1,0 +1,247 @@
+<!-- Build snapper. -->
+<project basedir="." default="build_all_snapper" name="BUILD_snapper">
+	<description>
+	    Build snapper. 
+            Also used by Hudson snapper project. 
+	    JUnit test is available for this build.
+	    $Id: build_snapper.xml $
+	</description>
+
+	<!-- set global properties for this build -->
+	<property name="src" location="../snapper/src" />
+	<property name="build" location="../snapper/build" />
+	<!--property name="lib" location="../snapper/lib" /-->
+	<property name="dist" location="../snapper/dist" />
+        <property name="beast2path" location="../beast2" />
+        <property name="beast2build" location="../beast2/build" />
+        <property name="libBeast2" location="${beast2path}/lib" />
+        <property name="srcBeast2" location="${beast2path}/src" />
+        <property name="beast2classpath" location="${beast2path}/build" />
+
+        <property name="libSNAPP" location="../SNAPP/lib" />
+        <property name="SNAPPclasspath" location="../SNAPP/build" />
+        <property name="SNAPPbuild" location="../SNAPP/build" />
+        
+	<property name="report"  value="${build}/junitreport"/>
+	<property name="main_class_snapper" value="beast.app.beastapp.BeastMain"/>
+
+	<path id="classpath">
+		<fileset dir="${libBeast2}" includes="antlr-runtime-4.7.jar"/>
+		<fileset dir="${libBeast2}" includes="jam.jar"/>
+		<fileset dir="${libBeast2}" includes="commons-math3-3.1.1.jar"/>
+		<fileset dir="${libSNAPP}" includes="mtj.jar"/>
+		<pathelement path="${SNAPPclasspath}"/>
+		<pathelement path="${beast2classpath}"/>
+	</path>
+
+	<!-- start -->
+	<target name="init">
+		<echo message="${ant.project.name}: ${ant.file}" />
+	</target>
+
+
+	<target name="clean">
+		<delete dir="${build}" />
+	</target>
+
+	<!-- clean previous build, and then compile Java source code, and Juint test -->
+	<target name="build_all_snapper" depends="clean,compile-all,dist_all_snapper"
+        description="Clean and Build all run-time stuff">
+	</target>
+
+	<!-- clean previous build, compile Java source code, and Junit test, and make the snap.jar -->
+	<target name="test" depends="clean,compile-all,junit,dist_all_snapper"
+        description="Clean and Build all run-time stuff">
+	</target>
+
+	<!-- No JUnit Test, clean previous build, compile Java source code, and make the snapper.jar -->
+	<target name="build_jar_all_snapper_NoJUnitTest" depends="clean,compile-all,dist_all_snapper"
+        description="Clean and Build all run-time stuff">
+	</target>
+
+	<!-- compile Java source code -->
+	<target name="compile-all" depends="init">
+		<mkdir dir="${build}" />
+
+		<!-- Compile the java code from ${src} into ${build} /bin -->
+		<javac srcdir="${src}" destdir="${build}" classpathref="classpath" 
+		       fork="true" includeantruntime='false'
+			   source="1.8"
+		       target="1.8"			
+		       memoryinitialsize="256m"
+		       memorymaximumsize="256m">
+			<include name="snapper/**/**" />
+			<include name="beast/**/**" />
+			<!-- compile JUnit test classes -->
+			<include name="test/snapper/**" />
+		</javac>
+        <copy todir="${build}">
+            <fileset dir="${src}" includes="**/*.properties"/>
+            <fileset dir="${src}" includes="**/*.png"/>
+        </copy>
+		<echo message="Successfully compiled." />
+	</target>
+
+	<!-- make snapper.jar -->
+	<target name="dist_all_snapper" depends="compile-all" description="create snapper jar">
+		<!-- Create the distribution directory -->
+		<mkdir dir="${dist}" />
+
+		<!-- Put everything in ${build} into the snapper.jar file -->
+		<jar jarfile="${dist}/snapper.jar">
+			<manifest>
+				<attribute name="Built-By" value="${user.name}" />
+				<attribute name="Main-Class" value="${main_class_snapper}" />
+			</manifest>
+			<zipgroupfileset dir="${libSNAPP}" includes="mtj.jar" />
+			<!--zipgroupfileset dir="${lib}" includes="beast.jar" /-->
+			<fileset dir="${beast2build}">
+				<include name="**/*.class"/>
+			</fileset>
+			<fileset dir="${SNAPPbuild}">
+				<include name="**/*.class"/>
+			</fileset>
+			<zipgroupfileset dir="${libBeast2}" includes="jam.jar"/>
+			<zipgroupfileset dir="${libBeast2}" includes="antlr-runtime-4.7.jar"/>
+			<zipgroupfileset dir="${libBeast2}" includes="commons-math3-3.1.1.jar"/>
+			<zipgroupfileset dir="${libSNAPP}" includes="mtj.jar"/>
+			<fileset dir="${build}">
+				<include name="snapper/**/*.class" />
+				<include name="beast/**/*.class" />
+				<include name="**/*.properties" />
+			</fileset>
+		</jar>
+
+
+		<jar jarfile="${dist}/snapper.addon.jar">
+			<manifest>
+				<attribute name="Built-By" value="${user.name}" />
+				<attribute name="Main-Class" value="${main_class_snapper}" />
+			</manifest>
+			<fileset dir="${build}">
+				<include name="snapper/**/*.class" />
+				<include name="snapper/**/*.png" />
+				<include name="beast/**/*.class" />
+				<include name="**/*.properties" />
+			</fileset>
+		</jar>
+		<jar jarfile="${dist}/snapper.src.jar">
+			<fileset dir="${src}">
+				<include name="snapper/**/*.java" />
+				<include name="**/*.properties" />
+				<include name="snapper/**/*.png" />
+				<include name="snapper/**/*.xsl" />
+			</fileset>
+        </jar>
+	</target>
+
+	<!-- run snapper.jar -->
+	<target name="run_snapper">
+		<java jar="${dist}/snapper.jar" fork="true" />
+	</target>
+
+	
+	<!-- JUnit test -->
+	<target name="junit">
+		<mkdir dir="${report}" />
+		<junit printsummary="yes">
+			<classpath>
+				<path refid="classpath" />
+				<path location="${build}" />
+			</classpath>
+
+			<formatter type="xml" />
+
+			<batchtest fork="yes" todir="${report}">
+				<fileset dir="${src}">
+                    <include name="test/**/*Test.java"/>                                         
+				</fileset>
+			</batchtest>
+		</junit>
+		<echo message="JUnit test finished." />
+	</target>
+    
+    <target name="junitreport">
+		<junitreport todir="${report}">
+			<fileset dir="${report}" includes="*.xml"/>
+			<report format="frames" todir="${report}"/>
+		</junitreport>
+		<echo message="JUnit test report finished." />
+	</target>
+	
+	
+    <target name="doc">
+        <exec executable="pdflatex" dir="${basedir}/doc">
+                <arg value="snapper.tex" />
+        </exec>
+        <exec executable="pdflatex" dir="${basedir}/doc">
+                <arg value="snapper.tex" />
+        </exec>
+        <copy file="doc/snapper.pdf" tofile="release/common/doc/snapper.pdf" />
+    </target>
+
+	
+	
+	<!-- Release -->
+	<property name="version" value="0.0.1" />
+	<property name="release_dir" value="release" />
+	<property name="copyright" value="snapper development team 2011-2018"/>
+
+	<property name="snapper_name" value="snapper" />
+	<property name="BEAUti_name" value="BEAUti" />
+	<property name="TSA_name" value="TreeSetAnalyser" />
+
+	<property name="common_dir" value="${release_dir}/common" />
+	<property name="Mac_dir" value="${release_dir}/Mac" />
+	<property name="Linux_dir" value="${release_dir}/Linux" />
+	<property name="Windows_dir" value="${release_dir}/Windows" />
+	<property name="tools_dir" value="${common_dir}/tools" />
+
+	<property name="Mac_package_dir" value="${Mac_dir}/${snapper_name}" />
+	<property name="Linux_package_dir" value="${Linux_dir}/${snapper_name}" />
+	<property name="Add_on_dir" value="${release_dir}/add-on" />
+	<property name="Windows_package_dir" value="${Windows_dir}/${snapper_name}" />
+
+
+	<target name="addon" 
+	        depends="build_jar_all_snapper_NoJUnitTest"
+	        description="release BEAST 2 add-on version of snapper">
+
+		<delete dir="${Add_on_dir}" />
+		<!-- Create the release directory -->
+		<mkdir dir="${Add_on_dir}" />
+		<mkdir dir="${Add_on_dir}/templates" />
+		<mkdir dir="${Add_on_dir}/examples" />
+		<mkdir dir="${Add_on_dir}/examples/nexus" />
+		<mkdir dir="${Add_on_dir}/doc" />
+
+		<copy todir="${Add_on_dir}">
+			<fileset file="version.xml"/>
+		</copy>
+		<copy todir="${Add_on_dir}/lib">
+			<fileset dir="${dist}" includes="snap.addon.jar" />
+		</copy>
+		<copy todir="${Add_on_dir}">
+			<fileset dir="${dist}" includes="snap.src.jar" />
+		</copy>
+<!--
+		<copy todir="${Add_on_dir}/templates">
+			<fileset file="templates/snapper.xml" />
+		</copy>
+        <copy file="doc/snapper.pdf" tofile="${Add_on_dir}/doc/snapper.pdf" />
+-->        
+        <copy todir="${Add_on_dir}/examples" >
+			<fileset dir="examples" includes="*.xml" />
+			<fileset dir="examples" includes="*.json" />
+		</copy>
+
+		<jar jarfile="${dist}/snapper.addon.v${version}.zip">
+			<fileset dir="${Add_on_dir}">
+				<include name="**/*" />
+			</fileset>
+        </jar>
+		<echo message="Add-on version release is finished." />
+	</target>
+
+
+</project>
