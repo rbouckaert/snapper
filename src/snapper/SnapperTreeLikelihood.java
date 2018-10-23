@@ -443,7 +443,8 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
 
         // First update the transition probability matrix(ices) for this branch
         if (!node.isRoot() && (update != Tree.IS_CLEAN || branchTime != m_branchLengths[nodeIndex] ||
-        		m_substitutionmodel.thetaInput.get().getStoredValue(nodeIndex) != m_substitutionmodel.thetaInput.get().getValue(nodeIndex))) {
+        		m_substitutionmodel.thetaInput.get().isDirty(nodeIndex))) {
+        		//m_substitutionmodel.thetaInput.get().getStoredValue(nodeIndex) != m_substitutionmodel.thetaInput.get().getValue(nodeIndex)
             m_branchLengths[nodeIndex] = branchTime;
             final Node parent = node.getParent();
             m_core.setNodeMatrixForUpdate(nodeIndex);
