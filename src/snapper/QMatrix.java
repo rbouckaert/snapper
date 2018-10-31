@@ -257,7 +257,8 @@ public class QMatrix  extends AbstractMatrix {
 		A2Q = new double[N*N];
 				
 		// sparse diagonal
-		A2[1] = 0.5; A2[(N-1)*N + N - 2] = 0.5;
+		//A2[1] = 0.5; 
+		//A2[(N-1)*N + N - 2] = 0.5;
 		for (int i = 1; i < N - 1; i++) {
 			A2[i*N + i - 1] = 0.25/i;
 			A2[i*N + i + 1] = -0.25/i;
@@ -266,10 +267,44 @@ public class QMatrix  extends AbstractMatrix {
 		
 		// boundary cases
 	    //A2[0*N + 0] = 0;
-	    A2[0*N + 1] = 0;
+	    //A2[0*N + 1] = 0;
 	    A2[1*N + 0] = 1/2.0;
 	    //A2[2*N + 1] = 1/8.0;
-		A2[(N-1)*N + (N-2)] /= 2.0*(N-1);
+		A2[(N-1)*N + (N-2)] = 0.25/(N-1);
+	}
+	
+	
+	/**
+	 * Algorithm 4.3.1 Band Gaussian Elimination
+	 * Golub, Gene H., and Charles F. Van Loan. Matrix computations. Vol. 3. JHU Press, 2012.
+
+		@book{golub2012matrix,
+		  title={Matrix computations},
+		  author={Golub, Gene H and Van Loan, Charles F},
+		  volume={3},
+		  year={2012},
+		  publisher={JHU Press}
+		}
+ 
+	 * @param A banded matrix
+	 * @param p lower bandwidth
+	 * @param q upper bandwith
+	 * A[i,j] is overwritten with L[i,j] if i > j and U[i,j] otherwise
+	 */
+	public void bandedLU(double [] A, int p, int q) {
+		for (int k = 1; k < N-1; k++) {
+			int endi = Math.min(k+p, N);
+			for (int i = k + 1; i < endi; i++) {
+				A[i*N+k] /= A[k*N+k];
+			}
+			int endj = Math.min(k+q, N);
+			for (int j = k+1; j < endj; j++) {
+				double c =  A[k*N+j];
+				for (int i = k + 1; i < endi; i++) {
+					A[i*N+j] -= A[i*N+k] * c;
+				}				
+			}
+		}
 	}
 	
 }

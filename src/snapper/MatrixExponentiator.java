@@ -825,4 +825,406 @@ public class MatrixExponentiator {
 //	    y[N-2:] = y2
 //	    return(sp.linalg.solve(U,y))	
 	
+
+
+
+//	def get_values_tridag(LL,AA,A2c,c_i,z_i):
+//	    a = np.array([])
+//	    b = np.array([])
+//	    c = np.array([])
+//	    d = np.array([])
+//	    b = np.append(b, AA[1,1])
+//	    c = np.append(c, AA[1,3])
+//	    d = np.append(d, A2c[1])
+//	    for i in range(2,N-2):
+//	        if (i % 2 == 1):
+//	            a = np.append(a, AA[i,i-2])     
+//	            b = np.append(b, AA[i,i]) 
+//	            c = np.append(c, AA[i,i+2])
+//	            d = np.append(d, A2c[i])
+//	    d = np.append(d, A2c[N-2])
+//	    a = np.append(a, AA[N-2,N-4])
+//	    b = np.append(b, AA[N-2,N-2])
+//	    return a, b, c, d
+	
+	
+	void getValuesTridag(double [] AA_re, double [] AA_im, 
+			             double[] A2c_re, double [] A2c_im, 
+			             double [][] out_re, double [][] out_im) {
+		int N = A2c_re.length;
+		int a = 0, b = 0, c = 0, d = 0;
+		
+		out_re[1][b] = AA_re[N*1+1]; out_im[1][b++] = AA_im[N*1+1];
+		out_re[2][c] = AA_re[N*1+3]; out_im[2][c++] = AA_im[N*1+3];
+		out_re[3][d] = A2c_re[1];    out_im[3][d++] = A2c_im[1];
+		
+		for (int i = 2; i < N-2; i++) {
+			if (i % 2 == 1) {
+				out_re[0][a] = AA_re[i*N+i-2];     
+				out_im[0][a++] = AA_im[i*N+i-2];     
+
+				out_re[1][b] = AA_re[i*N+i]; 
+	            out_im[1][b++] = AA_im[i*N+i]; 
+
+	            out_re[2][c] = AA_re[i*N+i+2];
+	            out_im[2][c++] = AA_im[i*N+i+2];
+
+	            out_re[3][d] = A2c_re[i];
+	            out_im[3][d++] = A2c_im[i];				
+			}
+		}
+	    out_re[0][a] = AA_re[(N-2)*N+N-4];
+		out_im[0][a++] = AA_im[(N-2)*N+N-4];
+
+		out_re[1][b] = AA_re[(N-2)*N+N-2];
+	    out_im[1][b++] = AA_im[(N-2)*N+N-2];
+
+	    out_re[3][d] = A2c_re[N-2];
+		out_im[3][d++] = A2c_im[N-2];
+	}
+	
+	
+	void getValuesTridag(COMPLEX [] AA, 
+			COMPLEX[] A2c, 
+			COMPLEX [][] out) {
+		int N = A2c.length;
+		int a = 0, b = 0, c = 0, d = 0;
+		
+		out[1][b++] = AA[N*1+1];
+		out[2][c++] = AA[N*1+3];
+		out[3][d++] = A2c[1];
+		
+		for (int i = 2; i < N-2; i++) {
+			if (i % 2 == 1) {
+				out[0][a++] = AA[i*N+i-2];     			
+			    out[1][b++] = AA[i*N+i]; 			
+			    out[2][c++] = AA[i*N+i+2];			
+			    out[3][d++] = A2c[i];				
+			}
+		}
+		out[0][a++] = AA[(N-2)*N+N-4];		
+		out[1][b++] = AA[(N-2)*N+N-2];		
+		out[3][d++] = A2c[N-2];
+	}
+	
+//	def get_values_uband(LL,AA,A2c,c_i,z_i):
+//	    a = np.array([])
+//	    b = np.array([])
+//	    c = np.array([])
+//	    d = np.array([])
+//	    for i in range(1,N-1):
+//	        if (i % 2 == 0):
+//	            a = np.append(a, AA[i,i-2])     
+//	            b = np.append(b, AA[i,i]) 
+//	            c = np.append(c, AA[i,i+2])
+//	            d = np.append(d, A2c[i])
+//	    
+//	    a = np.append(a, (LL-np.identity(N)*z_i)[N-3,N-3])
+//	    a = np.append(a, (LL-np.identity(N)*z_i)[N-1,N-1])
+//	    b = np.append(b, (LL-np.identity(N)*z_i)[N-3,N-1])
+//	    d = np.append(d, c_i[N-3])
+//	    d = np.append(d, c_i[N-1])
+//	    return a, b, c, d
+
+	void getValuesUBand(
+			double [] LL_re, double [] LL_im,
+			double [] AA_re, double [] AA_im,
+			double [] A2c_re, double [] A2c_im, 
+			double [] c_i_re, double [] c_i_im, 
+			double z_re, double z_im, 
+			double [][] out_re, double [][] out_im) {
+		int N = A2c_re.length;
+		int a = 0, b = 0, c = 0, d = 0;
+		
+		for (int i = 1; i < N-1; i++) {
+			if (i % 2 == 0) {
+	            out_re[0][a] = AA_re[i*N+i-2];     
+	            out_im[0][a++] = AA_im[i*N+i-2];     
+
+	            out_re[1][b] = AA_re[i*N+i];
+	            out_im[1][b++] = AA_im[i*N+i];
+	            
+	            out_re[2][c] = AA_re[i*N+i+2];
+	            out_im[2][c++] = AA_im[i*N+i+2];
+	            
+	            out_re[3][d] = A2c_re[i];
+	            out_im[3][d++] = A2c_im[i];
+			}
+		}
+
+		// a = np.append(a, (LL-np.identity(N)*z_i)[N-3,N-3])
+        out_re[0][a] = LL_re[(N-3)*N+(N-3)] - z_re;     
+        out_im[0][a++] = LL_im[(N-3)*N+(N-3)] - z_im;     
+
+        // a = np.append(a, (LL-np.identity(N)*z_i)[N-1,N-1])
+        out_re[0][a] = LL_re[(N-3)*N+(N-1)] - z_re;
+        out_im[0][a++] = LL_im[(N-3)*N+(N-1)] - z_im;     
+
+        // b = np.append(b, (LL-np.identity(N)*z_i)[N-3,N-1])
+        out_re[1][b] = LL_re[(N-3)*N+(N-1)] - z_re;
+        out_im[1][b++] = LL_im[(N-3)*N+(N-1)] - z_im;
+		
+        // d = np.append(d, c_i[N-3])
+		out_re[3][d] = c_i_re[N-3];
+		out_im[3][d++] = c_i_im[N-3];
+		
+		// d = np.append(d, c_i[N-1])
+		out_re[3][d] = c_i_re[N-1];
+		out_im[3][d++] = c_i_im[N-1];
+
+	}
+	
+	void getValuesUBand(
+			COMPLEX [] LL,
+			COMPLEX [] AA,
+			COMPLEX [] A2c, 
+			COMPLEX [] c_i, 
+			COMPLEX z, 
+			COMPLEX [][] out) {
+		int N = A2c.length;
+		int a = 0, b = 0, c = 0, d = 0;
+		
+		for (int i = 1; i < N-1; i++) {
+			if (i % 2 == 0) {
+	            out[0][a++] = AA[i*N+i-2];     
+	            out[1][b++] = AA[i*N+i];
+	            out[2][c++] = AA[i*N+i+2];
+	            out[3][d++] = A2c[i];
+			}
+		}
+
+		// a = np.append(a, (LL-np.identity(N)*z_i)[N-3,N-3])
+		COMPLEX x = LL[(N-3)*N+(N-3)];
+        out[0][a].m_fRe = x.m_fRe - z.m_fRe;
+        out[0][a++].m_fIm = x.m_fIm - z.m_fIm;     
+
+        // a = np.append(a, (LL-np.identity(N)*z_i)[N-1,N-1])
+        x = LL[(N-1)*N+(N-1)];
+        out[0][a].m_fRe = x.m_fRe - z.m_fRe;
+        out[0][a++].m_fIm = x.m_fIm - z.m_fIm;     
+
+        // b = np.append(b, (LL-np.identity(N)*z_i)[N-3,N-1])
+        x = LL[(N-3)*N+(N-1)];
+        out[1][b].m_fRe = x.m_fRe - z.m_fRe;
+        out[1][b++].m_fIm = x.m_fIm - z.m_fIm;     
+		
+        // d = np.append(d, c_i[N-3])
+		out[3][d++] = c_i[N-3];
+		
+		// d = np.append(d, c_i[N-1])
+		out[3][d++] = c_i[N-1];
+
+	}
+	
+	
+	
+	//
+//
+//	def expM_CF_faster(Q,v,LL,branch_length,delta_t):   
+//	    w = np.zeros([len(c_real),len(v)],dtype=np.complex)
+//	    x = np.zeros([len(v)],dtype=np.complex)
+//	    w[0,:] = v
+//	    for t in range(0,int(branch_length/delta_t)): 
+//	        vi = np.sum(w,axis=0)
+//	        for i in range(0,len(c_real)):
+//	            x = faster_solver(LL,Q-(z[i]/delta_t)*A2,np.dot(A2,vi/delta_t),vi/delta_t,z[i]/delta_t)
+//	            w[i] = x*c[i]                             
+//	    return(w)
+
+	void expCF(double [] v, QMatrix M, double dt) {
+//	    w = np.zeros([len(c_real),len(v)],dtype=np.complex)
+		
+		double [] Q = M.Q;
+		
+		COMPLEX [][] w = new COMPLEX[v.length][ci_real.length];
+		for (int i = 0; i < v.length; i++) {
+			for (int j = 0; j < ci_real.length; i++) {
+				w[i][j] = new COMPLEX();
+			}
+		}
+		COMPLEX [] vi = new COMPLEX[v.length];
+		for (int i = 0; i < vi.length; i++) {
+			vi[i] = new COMPLEX(dt,0);
+		}		
+		
+		COMPLEX [] LL = new COMPLEX[M.Q.length];
+		for (int i = 0; i < vi.length; i++) {
+			vi[i] = new COMPLEX(M.Q[i],0);
+		}		
+		COMPLEX [] AA = new COMPLEX[M.Q.length];
+		for (int i = 0; i < vi.length; i++) {
+			vi[i] = new COMPLEX(M.Q[i],0);
+		}		
+		
+		int N = M.N;
+		COMPLEX [] A2c = new COMPLEX[N];
+		for (int i = 0; i < vi.length; i++) {
+			double sum = 0;
+			for (int k = 0; k < N; k++) {
+				sum += M.A2[i*N + k];
+			}
+			A2c[i] = new COMPLEX(sum, 0);
+		}		
+		
+		for (int i = 0; i < ci_real.length; i++) {
+			// vi = np.sum(w,axis=0)
+			for (int j = 0; j < N; j++) {
+				for (int k = 0; k < N; k++) {
+					AA[j*N + k].m_fRe = Q[j*N + k] - z_real[j] * M.A2[j*N + k];
+					AA[j*N + k].m_fIm =            - z_imag[j] * M.A2[j*N + k];
+				}
+			}
+			
+			fasterSolver(LL, AA, A2c, vi, new COMPLEX(z_real[i]/dt, z_imag[i]/dt));
+			
+			for (int j = 0; j < ci_real.length; i++) {
+				w[i][j].mul(solvEven[i], c_real[i], c_imag[i]);
+			}
+		}
+		
+		
+		// v = np.real(np.sum(w, axis=0))
+		for (int i = 0; i < v.length; i++) {
+			double sum = 0;
+			for (int j = 0; j < ci_real.length; i++) {
+				sum += w[i][j].m_fRe;
+			}
+			v[i] = sum;
+		}
+		
+	}
+	
+	
+	
+//	def faster_solver(LL,AA,A2c,c_i,z_i):
+//	    uband = get_values_uband(LL,AA,A2c,c_i,z_i)
+//	    sol_even = uband_solver(uband[0],uband[1],uband[2],uband[3])
+//	    triband = get_values_tridag(LL,AA,A2c,c_i,z_i)
+//	    sol_odd = tridag_solver(triband[0],triband[1],triband[2],triband[3])
+//	    sol = np.zeros(len(sol_odd) + len(sol_even), dtype = complex)
+//	#Sorry for the vector usage, but we are just splicing the solution back together sol_even = [ e e ... e e]
+//	# sol_odd = [ o o ... o o] , then we have sol = [e o e o ... e o e o]
+//	    sol[0::2] = sol_even
+//	    sol[1::2] = sol_odd
+//	    return sol
+
+	
+	COMPLEX [][] out1;
+	COMPLEX [][] out2;
+	COMPLEX [] solvEven;
+	COMPLEX [] solvOdd;
+	
+	void fasterSolver(COMPLEX [] LL, COMPLEX [] AA, COMPLEX [] A2c, COMPLEX [] c_i, COMPLEX z) {
+		if (out1 == null ) {
+			out1 = new COMPLEX[4][A2c.length];
+			out2 = new COMPLEX[4][A2c.length];
+			solvEven = new COMPLEX[A2c.length];
+			solvOdd = new COMPLEX[A2c.length];
+			for (int i = 0;  i < out1.length; i++) {
+				out1[0][i] = new COMPLEX();
+				out1[1][i] = new COMPLEX();
+				out1[2][i] = new COMPLEX();
+				out1[3][i] = new COMPLEX();
+				out2[0][i] = new COMPLEX();
+				out2[1][i] = new COMPLEX();
+				out2[2][i] = new COMPLEX();
+				out2[3][i] = new COMPLEX();
+				solvEven[i] = new COMPLEX();
+				solvOdd[i] = new COMPLEX();
+			}
+		}
+		
+		getValuesUBand(LL, AA, A2c, c_i, z, out1);
+		ubandSolver(out1, solvEven);
+		getValuesTridag(AA, A2c, out2);
+		triDiagSolver(out2, solvOdd);
+
+		for (int i = A2c.length - 2; i >= 0; i -= 2) {
+			solvEven[i].m_fRe = solvEven[i/2].m_fRe;
+			solvEven[i].m_fIm = solvEven[i/2].m_fIm;
+			solvEven[i+1].m_fRe = solvOdd[i/2].m_fRe;
+			solvEven[i+1].m_fIm = solvOdd[i/2].m_fIm;
+		}
+	}
+	
+//	def uband_solver(a,b,c,d):
+//	    '''
+//	    Backward subsitution for an upper matrix diagonal matrix w. upperband 1  '''
+//	    nf = len(d)
+//	    ac, bc, cc, dc = map(np.array, (a, b, c, d)) # copy arrays
+//	    xc = dc
+//	    xc[-1] = dc[-1]/ac[-1]
+//	    xc[-2] = (dc[-2] - bc[-1]*xc[-1])/ac[-2]
+//	    for il in range(nf-3, -1, -1):
+//	        xc[il] = (dc[il] - bc[il]*xc[il+1]- cc[il]*xc[il+2])/ac[il]        
+//	    return xc
+	
+	void ubandSolver(COMPLEX [][] in, COMPLEX [] x) {
+		int nf = in[3].length;
+		
+//	    xc[-1] = dc[-1]/ac[-1]
+		x[nf - 1].divide(in[3][nf-1], in[0][nf-1]);
+		
+//	    xc[-2] = (dc[-2] - bc[-1]*xc[-1])/ac[-2]
+		COMPLEX tmp = new COMPLEX(in[2][nf-2]);
+		tmp.mulsub(in[1][nf-1], x[nf-1]);
+		x[nf - 2].divide(tmp, in[0][nf-2]);
+		for (int i = nf - 3; i >= 0 ; i--) {
+			// xc[il] = (dc[il] - bc[il]*xc[il+1]- cc[il]*xc[il+2])/ac[il]
+			tmp = new COMPLEX(in[2][i]);
+			tmp.mulsub(in[1][i], x[i+1]);
+			tmp.mulsub(in[2][i], x[i+2]);
+			x[i].divide(tmp, in[0][i]);
+		}
+	}
+	
+	
+//	## Tri Diagonal Matrix Algorithm(a.k.a Thomas algorithm) solver
+//	def tridag_solver(a, b, c, d):
+//	    '''
+//	    TDMA solver, a b c d can be NumPy array type or Python list type.
+//	    refer to http://en.wikipedia.org/wiki/Tridiagonal_matrix_algorithm
+//	    and to http://www.cfd-online.com/Wiki/Tridiagonal_matrix_algorithm_-_TDMA_(Thomas_algorithm)
+//	    '''
+//	    nf = len(d) # number of equations
+//	    ac, bc, cc, dc = map(np.array, (a, b, c, d)) # copy arrays
+//	    for it in range(1, nf):
+//	        mc = ac[it-1]/bc[it-1]
+//	        bc[it] = bc[it] - mc*cc[it-1] 
+//	        dc[it] = dc[it] - mc*dc[it-1]
+//	        	    
+//	    xc = bc
+//	    xc[-1] = dc[-1]/bc[-1]
+//
+//	    for il in range(nf-2, -1, -1):
+//	        xc[il] = (dc[il]-cc[il]*xc[il+1])/bc[il]
+//
+//	    return xc
+
+
+	void triDiagSolver(COMPLEX [][] in, COMPLEX [] x) {
+		int nf = in[3].length;
+		
+		for (int i = 1; i <= nf; i++) {
+			COMPLEX tmp = new COMPLEX();
+			tmp.divide(in[0][i-1], in[1][i-1]);
+			in[1][i].mulsub(tmp, in[2][i-1]);
+			in[3][i].mulsub(tmp, in[3][i-1]);
+		}
+		
+//	    xc = bc
+		for (int i = 0; i < nf; i++) {
+			x[i].m_fRe = in[1][i].m_fRe;
+			x[i].m_fIm = in[1][i].m_fIm;
+		}
+//	    xc[-1] = dc[-1]/bc[-1]
+		x[nf-1].divide(in[2][nf-1], in[1][nf-1]);
+		for (int i = nf - 2; i >= 0 ; i--) {
+			// xc[il] = (dc[il]-cc[il]*xc[il+1])/bc[il]
+			COMPLEX tmp = new COMPLEX(in[3][i]);
+			tmp.mulsub(in[2][i], x[i+1]);
+			x[i].divide(tmp, in[1][i]);
+		}
+	}
+
 } // class MatrixExponentiator

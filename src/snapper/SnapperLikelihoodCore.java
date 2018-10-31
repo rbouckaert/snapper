@@ -34,7 +34,7 @@ import beast.evolution.tree.Node;
 
 public class SnapperLikelihoodCore extends BeerLikelihoodCore {
     boolean m_bReuseCache = false;
-    final double MIN_STEP = 0.001;
+    final double MIN_STEP = 0.0001;
     final static boolean debug = false;
     
     
@@ -74,7 +74,12 @@ public class SnapperLikelihoodCore extends BeerLikelihoodCore {
     }
     
     void exponentiate(double time, double [] matrix, double [] a) {
-    	 MatrixExponentiator.expmvRK4(time, matrix, a, MIN_STEP);
+
+//    	MatrixExponentiator.cf_expmv(time, matrix, a);
+   	 
+	
+    	
+    	MatrixExponentiator.expmvRK4(time, matrix, a, MIN_STEP);
 
     	 ChebyshevPolynomial c = new ChebyshevPolynomial(N);
     	 c.a = a;
