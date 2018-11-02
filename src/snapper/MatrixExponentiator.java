@@ -975,7 +975,7 @@ public class MatrixExponentiator {
 	}
 	
 	void getValuesUBand(
-			COMPLEX [] LL,
+			double [] LL,
 			COMPLEX [] AA,
 			COMPLEX [] A2c, 
 			COMPLEX [] c_i, 
@@ -994,19 +994,19 @@ public class MatrixExponentiator {
 		}
 
 		// a = np.append(a, (LL-np.identity(N)*z_i)[N-3,N-3])
-		COMPLEX x = LL[(N-3)*N+(N-3)];
-        out[0][a].m_fRe = x.m_fRe - z.m_fRe;
-        out[0][a++].m_fIm = x.m_fIm - z.m_fIm;     
+		double x = LL[(N-3)*N+(N-3)];
+        out[0][a].m_fRe = x - z.m_fRe;
+        out[0][a++].m_fIm =  - z.m_fIm;     
 
         // a = np.append(a, (LL-np.identity(N)*z_i)[N-1,N-1])
         x = LL[(N-1)*N+(N-1)];
-        out[0][a].m_fRe = x.m_fRe - z.m_fRe;
-        out[0][a++].m_fIm = x.m_fIm - z.m_fIm;     
+        out[0][a].m_fRe = x - z.m_fRe;
+        out[0][a++].m_fIm = - z.m_fIm;     
 
         // b = np.append(b, (LL-np.identity(N)*z_i)[N-3,N-1])
         x = LL[(N-3)*N+(N-1)];
-        out[1][b].m_fRe = x.m_fRe - z.m_fRe;
-        out[1][b++].m_fIm = x.m_fIm - z.m_fIm;     
+        out[1][b].m_fRe = x;// - z.m_fRe;
+        out[1][b++].m_fIm = 0;// - z.m_fIm;     
 		
         // d = np.append(d, c_i[N-3])
 		out[3][d++] = c_i[N-3];
@@ -1047,14 +1047,11 @@ public class MatrixExponentiator {
 			vi[i] = new COMPLEX(dt,0);
 		}		
 		
-		COMPLEX [] LL = new COMPLEX[M.Q.length];
-		for (int i = 0; i < vi.length; i++) {
-			vi[i] = new COMPLEX(M.Q[i],0);
-		}		
 		COMPLEX [] AA = new COMPLEX[M.Q.length];
-		for (int i = 0; i < vi.length; i++) {
-			vi[i] = new COMPLEX(M.Q[i],0);
-		}		
+		// TODO: initialise AA
+//		for (int i = 0; i < vi.length; i++) {
+//			vi[i] = new COMPLEX(M.Q[i],0);
+//		}		
 		
 		int N = M.N;
 		COMPLEX [] A2c = new COMPLEX[N];
@@ -1075,7 +1072,7 @@ public class MatrixExponentiator {
 				}
 			}
 			
-			fasterSolver(LL, AA, A2c, vi, new COMPLEX(z_real[i]/dt, z_imag[i]/dt));
+			fasterSolver(M.Q, AA, A2c, vi, new COMPLEX(z_real[i]/dt, z_imag[i]/dt));
 			
 			for (int j = 0; j < ci_real.length; i++) {
 				w[i][j].mul(solvEven[i], c_real[i], c_imag[i]);
@@ -1114,7 +1111,7 @@ public class MatrixExponentiator {
 	COMPLEX [] solvEven;
 	COMPLEX [] solvOdd;
 	
-	void fasterSolver(COMPLEX [] LL, COMPLEX [] AA, COMPLEX [] A2c, COMPLEX [] c_i, COMPLEX z) {
+	void fasterSolver(double [] LL, COMPLEX [] AA, COMPLEX [] A2c, COMPLEX [] c_i, COMPLEX z) {
 		if (out1 == null ) {
 			out1 = new COMPLEX[4][A2c.length];
 			out2 = new COMPLEX[4][A2c.length];
