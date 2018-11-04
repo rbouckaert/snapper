@@ -131,6 +131,69 @@ public class TestMatrixExponentiatorCF extends TestCase {
 		compare(out[3], d);
 	}
 
+	@Test
+	public void testUBandSolver() throws IOException {
+		COMPLEX [] a = readComplexArray("test/snapper/test1/a0.txt");
+		COMPLEX [] b = readComplexArray("test/snapper/test1/b0.txt");
+		COMPLEX [] c = readComplexArray("test/snapper/test1/c0.txt");
+		COMPLEX [] d = readComplexArray("test/snapper/test1/d0.txt");
+		
+		COMPLEX [] solvEven = readComplexArray("test/snapper/test1/sol_even.txt");
+		COMPLEX [] x = new COMPLEX[solvEven.length]; init(x);
+		
+		MatrixExponentiator e = new MatrixExponentiator();
+		COMPLEX [][] in = new COMPLEX[4][];
+		in[0] = a;
+		in[1] = b;
+		in[2] = c;
+		in[3] = d;
+
+		e.ubandSolver(in, x, 33);
+		
+		compare(x, solvEven);
+	}
+	
+	@Test
+	public void testTriDagSolver() throws IOException {
+		COMPLEX [] a = readComplexArray("test/snapper/test1/a.txt");
+		COMPLEX [] b = readComplexArray("test/snapper/test1/b.txt");
+		COMPLEX [] c = readComplexArray("test/snapper/test1/c.txt");
+		COMPLEX [] d = readComplexArray("test/snapper/test1/d.txt");
+		
+		COMPLEX [] solvOdd = readComplexArray("test/snapper/test1/sol_odd.txt");
+		COMPLEX [] x = new COMPLEX[solvOdd.length]; init(x);
+		
+		MatrixExponentiator e = new MatrixExponentiator();
+		COMPLEX [][] in = new COMPLEX[4][];
+		in[0] = a;
+		in[1] = b;
+		in[2] = c;
+		in[3] = d;
+
+		e.triDiagSolver(in, x, 33);
+		
+		compare(x, solvOdd);
+	}
+
+	@Test
+	public void testFasterSolver() throws IOException {
+		COMPLEX [] AA = readComplexMatrix("test/snapper/test1/AA.txt");
+		double [] LL = readDoubleMatrix("test/snapper/test1/LL.txt");
+
+		COMPLEX [] c_i = readComplexArray("test/snapper/test1/c_i.txt");
+
+		COMPLEX [] A2c = readComplexArray("test/snapper/test1/A2c.txt");
+		
+		COMPLEX z = new COMPLEX(-699.8688082445777,1399.5917029301354);
+
+		MatrixExponentiator e = new MatrixExponentiator();
+
+		COMPLEX [] x = e.fasterSolver(LL, AA, A2c, c_i, z);
+		
+		COMPLEX [] solv = readComplexArray("test/snapper/test1/solve.txt");
+		compare(x, solv);
+	}
+	
 	private void compare(COMPLEX[] out, COMPLEX[] d) {
 		assertEquals(out.length, d.length);
 		for (int i = 0; i < out.length; i++) {

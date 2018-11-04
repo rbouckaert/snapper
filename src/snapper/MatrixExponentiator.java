@@ -1111,37 +1111,42 @@ public class MatrixExponentiator {
 	COMPLEX [] solvEven;
 	COMPLEX [] solvOdd;
 	
-	void fasterSolver(double [] LL, COMPLEX [] AA, COMPLEX [] A2c, COMPLEX [] c_i, COMPLEX z) {
+	COMPLEX [] fasterSolver(double [] LL, COMPLEX [] AA, COMPLEX [] A2c, COMPLEX [] c_i, COMPLEX z) {
 		if (out1 == null ) {
 			out1 = new COMPLEX[4][A2c.length];
 			out2 = new COMPLEX[4][A2c.length];
 			solvEven = new COMPLEX[A2c.length];
 			solvOdd = new COMPLEX[A2c.length];
-			for (int i = 0;  i < out1.length; i++) {
+			for (int i = 0;  i < out1[0].length; i++) {
 				out1[0][i] = new COMPLEX();
 				out1[1][i] = new COMPLEX();
 				out1[2][i] = new COMPLEX();
 				out1[3][i] = new COMPLEX();
+				
 				out2[0][i] = new COMPLEX();
 				out2[1][i] = new COMPLEX();
 				out2[2][i] = new COMPLEX();
 				out2[3][i] = new COMPLEX();
+				
 				solvEven[i] = new COMPLEX();
 				solvOdd[i] = new COMPLEX();
 			}
 		}
 		
+		int N = A2c.length;
+		
 		getValuesUBand(LL, AA, A2c, c_i, z, out1);
-		ubandSolver(out1, solvEven);
+		ubandSolver(out1, solvEven, N);
 		getValuesTridag(AA, A2c, out2);
-		triDiagSolver(out2, solvOdd);
+		triDiagSolver(out2, solvOdd, N);
 
-		for (int i = A2c.length - 2; i >= 0; i -= 2) {
+		for (int i = A2c.length - 1; i >= 1; i -= 2) {
 			solvEven[i].m_fRe = solvEven[i/2].m_fRe;
 			solvEven[i].m_fIm = solvEven[i/2].m_fIm;
-			solvEven[i+1].m_fRe = solvOdd[i/2].m_fRe;
-			solvEven[i+1].m_fIm = solvOdd[i/2].m_fIm;
+			solvEven[i-1].m_fRe = solvOdd[i/2-1].m_fRe;
+			solvEven[i-1].m_fIm = solvOdd[i/2-1].m_fIm;
 		}
+		return solvEven;
 	}
 	
 //	def uband_solver(a,b,c,d):
@@ -1156,19 +1161,20 @@ public class MatrixExponentiator {
 //	        xc[il] = (dc[il] - bc[il]*xc[il+1]- cc[il]*xc[il+2])/ac[il]        
 //	    return xc
 	
-	void ubandSolver(COMPLEX [][] in, COMPLEX [] x) {
-		int nf = in[3].length;
+	void ubandSolver(COMPLEX [][] in, COMPLEX [] x, int N) {
+		int nf = N/2;
 		
 //	    xc[-1] = dc[-1]/ac[-1]
 		x[nf - 1].divide(in[3][nf-1], in[0][nf-1]);
 		
 //	    xc[-2] = (dc[-2] - bc[-1]*xc[-1])/ac[-2]
-		COMPLEX tmp = new COMPLEX(in[2][nf-2]);
-		tmp.mulsub(in[1][nf-1], x[nf-1]);
+		COMPLEX tmp = new COMPLEX(in[3][nf-2]);
+		tmp.mulsub(in[1][in[1].length-1], x[nf-1]);
 		x[nf - 2].divide(tmp, in[0][nf-2]);
+		
 		for (int i = nf - 3; i >= 0 ; i--) {
 			// xc[il] = (dc[il] - bc[il]*xc[il+1]- cc[il]*xc[il+2])/ac[il]
-			tmp = new COMPLEX(in[2][i]);
+			tmp = new COMPLEX(in[3][i]);
 			tmp.mulsub(in[1][i], x[i+1]);
 			tmp.mulsub(in[2][i], x[i+2]);
 			x[i].divide(tmp, in[0][i]);
@@ -1199,10 +1205,10 @@ public class MatrixExponentiator {
 //	    return xc
 
 
-	void triDiagSolver(COMPLEX [][] in, COMPLEX [] x) {
-		int nf = in[3].length;
+	void triDiagSolver(COMPLEX [][] in, COMPLEX [] x, int N) {
+		int nf = N / 2;
 		
-		for (int i = 1; i <= nf; i++) {
+		for (int i = 1; i < nf; i++) {
 			COMPLEX tmp = new COMPLEX();
 			tmp.divide(in[0][i-1], in[1][i-1]);
 			in[1][i].mulsub(tmp, in[2][i-1]);
@@ -1215,7 +1221,7 @@ public class MatrixExponentiator {
 			x[i].m_fIm = in[1][i].m_fIm;
 		}
 //	    xc[-1] = dc[-1]/bc[-1]
-		x[nf-1].divide(in[2][nf-1], in[1][nf-1]);
+		x[nf-1].divide(in[3][nf-1], in[1][nf-1]);
 		for (int i = nf - 2; i >= 0 ; i--) {
 			// xc[il] = (dc[il]-cc[il]*xc[il+1])/bc[il]
 			COMPLEX tmp = new COMPLEX(in[3][i]);
