@@ -1096,8 +1096,8 @@ public class MatrixExponentiator {
 			
 			fasterSolver(LL, AA, A2c, vi, new COMPLEX(zi_real, zi_imag));
 			
-			for (int j = 0; j < ci_real.length; j++) {
-				w[i][j].mul(solvEven[i], ci_real[i], ci_imag[i]);
+			for (int j = 0; j < N; j++) {
+				w[j][i].mul(solvEven[j], ci_real[i], ci_imag[i]);
 			}
 		}
 	}

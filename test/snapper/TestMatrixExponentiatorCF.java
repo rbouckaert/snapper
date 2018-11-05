@@ -37,10 +37,10 @@ public class TestMatrixExponentiatorCF extends TestCase {
 			}
 		}
 		
-		COMPLEX [] AA = new COMPLEX[array.length * array.length];
+		COMPLEX [] AA = new COMPLEX[array.length * array[0].length];
 		for (int i = 0; i < array.length; i++) {			
-			for (int j = 0; j < array.length; j++) {
-				AA[i*array.length + j] = array[i][j];
+			for (int j = 0; j < array[0].length; j++) {
+				AA[i*array[0].length + j] = array[i][j];
 			}
 		}
 		return AA;
@@ -222,10 +222,10 @@ public class TestMatrixExponentiatorCF extends TestCase {
 		compare(A2Q, Q.A2Q);
 
 		
-		COMPLEX [][] w = new COMPLEX[v.length][e.ci_real.length];
+		COMPLEX [][] w = new COMPLEX[e.ci_real.length][v.length];
 		for (int i = 0; i < v.length; i++) {
 			for (int j = 0; j < e.ci_real.length; j++) {
-				w[i][j] = new COMPLEX();
+				w[j][i] = new COMPLEX();
 			}
 		}
 		
@@ -259,6 +259,7 @@ public class TestMatrixExponentiatorCF extends TestCase {
 		COMPLEX [] z_iExp = readComplexArray(TEST2_DIR + "z_i.txt");
 		
 		for (int i = 0; i < MatrixExponentiator.ci_real.length; i++) {
+			System.err.println("Round " + i);
 			// vi = np.sum(w,axis=0)
 			double zi_real = MatrixExponentiator.zi_real[i]/dt; 
 			double zi_imag = MatrixExponentiator.zi_imag[i]/dt;
@@ -314,7 +315,7 @@ public class TestMatrixExponentiatorCF extends TestCase {
 			
 			e.triDiagSolver(e.out2, e.solvOdd, N);
 			array = readComplexArray(TEST2_DIR + "sol_odd" + i +".txt");
-			compareShortest(array, e.solvOdd);
+			compareShortest(array, e.solvOdd, 1e-6);
 
 			for (int k = A2c.length - 1; k >= 1; k -= 2) {
 				e.solvEven[k].m_fRe = e.solvEven[k/2].m_fRe;
@@ -324,67 +325,89 @@ public class TestMatrixExponentiatorCF extends TestCase {
 			}
 
 			COMPLEX [] xExp = readComplexArray(TEST2_DIR + "x" + i +".txt");
-			compare(xExp, e.solvEven);
+			compare(xExp, e.solvEven, 1e-8);
 
 			
-			for (int j = 0; j < e.ci_real.length; j++) {
-				w[i][j].mul(e.solvEven[i], e.ci_real[i], e.ci_imag[i]);
+			for (int j = 0; j < N; j++) {
+				w[i][j].mul(e.solvEven[j], e.ci_real[i], e.ci_imag[i]);
 			}
 			COMPLEX [] wExpected = readComplexMatrix(TEST2_DIR + "w" + i +".txt");
-			compare(wExpected, w);
+			compare(wExpected, w, 1e-7);
 		}
 		
+		w = new COMPLEX[v.length][e.ci_real.length];
+		for (int i = 0; i < v.length; i++) {
+			for (int j = 0; j < e.ci_real.length; j++) {
+				w[i][j] = new COMPLEX();
+			}
+		}
 		e.expCF(v, Q, dt, w);
-		COMPLEX [] wExpected = readComplexMatrix(TEST1_DIR + "w.txt");
-		compare(wExpected, w);
+		//COMPLEX [] wExpected = readComplexMatrix(TEST1_DIR + "w.txt");
+		//compare(wExpected, w, 1e-7);
 
 		
 		
 		double [] solv = new double[] {6.27377023e+00, 1.01641829e+01, 7.83332873e+00, 4.67503450e+00, 2.44284918e+00, 9.87181265e-01, 3.49305166e-01, 9.53919313e-02, 2.28199240e-02, 4.20205496e-03, 6.78490321e-04, 8.40547742e-05, 9.14713971e-06, 7.60753774e-07, 5.57178962e-08, 3.10680883e-09, 1.58673691e-10, -8.78717848e-13, -8.64448521e-12, -6.42884437e-13, 4.84353951e-12, 3.03469205e-12, -1.52385764e-12, -5.03889921e-12, -6.27086328e-12, -4.78906219e-12, -2.96315858e-12, -9.96341618e-13, 2.05139472e-13, 3.59732682e-13, 2.76602908e-13, -7.37648180e-13, -1.30750063e-12};
 
-		compare(v, solv);
+		e.expCF(v, Q, dt);
+		compare(v, solv, 1e-7);
 	}
 	
 
 	
 	private void compare(COMPLEX[] out, COMPLEX[] d) {
+		compare(out, d, 1e-10);
+	}
+	
+	private void compare(COMPLEX[] out, COMPLEX[] d, double epsilon) {
 		assertEquals(out.length, d.length);
 		for (int i = 0; i < out.length; i++) {
-			if (Math.abs(d[i].m_fRe - out[i].m_fRe) > 1e-10 ||
-				Math.abs(d[i].m_fIm - out[i].m_fIm) > 1e-10) {
+			if (Math.abs(d[i].m_fRe - out[i].m_fRe) > epsilon ||
+				Math.abs(d[i].m_fIm - out[i].m_fIm) > epsilon) {
 				System.err.println(i + " " + d[i] + " != " + out[i]);
 			}
-			assertEquals(d[i].m_fRe, out[i].m_fRe, 1e-10);
-			assertEquals(d[i].m_fIm, out[i].m_fIm, 1e-10);
+			assertEquals(d[i].m_fRe, out[i].m_fRe, epsilon);
+			assertEquals(d[i].m_fIm, out[i].m_fIm, epsilon);
 		}
 	}
 
 	private void compareShortest(COMPLEX[] out, COMPLEX[] d) {
+		compareShortest(out, d, 1e-10);
+	}
+	private void compareShortest(COMPLEX[] out, COMPLEX[] d, double epsilon) {
 		int n = Math.min(out.length, d.length);
 		for (int i = 0; i < n; i++) {
-			if (Math.abs(d[i].m_fRe - out[i].m_fRe) > 1e-10 ||
-				Math.abs(d[i].m_fIm - out[i].m_fIm) > 1e-10) {
+			if (Math.abs(d[i].m_fRe - out[i].m_fRe) > epsilon ||
+				Math.abs(d[i].m_fIm - out[i].m_fIm) > epsilon) {
 				System.err.println(i + " " + d[i] + " != " + out[i]);
 			}
-			assertEquals(d[i].m_fRe, out[i].m_fRe, 1e-10);
-			assertEquals(d[i].m_fIm, out[i].m_fIm, 1e-10);
+			assertEquals(d[i].m_fRe, out[i].m_fRe, epsilon);
+			assertEquals(d[i].m_fIm, out[i].m_fIm, epsilon);
 		}
 	}
 
 	private void compare(COMPLEX[] out, COMPLEX[][] d) {
+		compare(out, d, 1e-10);
+	}
+	
+	private void compare(COMPLEX[] out, COMPLEX[][] d, double epsilon) {
 		int N = d[0].length;
 		//assertEquals(out.length, d.length * N);
 		for (int i = 0; i < out.length; i++) {
-			assertEquals(d[i/N][i%N].m_fRe, out[i].m_fRe, 1e-10);
-			assertEquals(d[i/N][i%N].m_fIm, out[i].m_fIm, 1e-10);
+			assertEquals(d[i/N][i%N].m_fRe, out[i].m_fRe, epsilon);
+			assertEquals(d[i/N][i%N].m_fIm, out[i].m_fIm, epsilon);
 		}
 	}
 
 	private void compare(double[] out, double[] d) {
+		compare(out, d, 1e-10);
+	}
+	
+	private void compare(double[] out, double[] d, double epsilon) {
 		assertEquals(out.length, d.length);
 		int n = 0;
 		for (int i = 0; i < out.length; i++) {
-			if (Math.abs(d[i] - out[i]) > 1e-10) {
+			if (Math.abs(d[i] - out[i]) > epsilon) {
 				System.err.println(i + " " + d[i] + " != " + out[i]);
 				n++;
 			}
@@ -393,7 +416,7 @@ public class TestMatrixExponentiatorCF extends TestCase {
 			System.err.println(n + " mismatches");
 		}
 		for (int i = 0; i < out.length; i++) {
-			assertEquals(d[i], out[i], 1e-10);
+			assertEquals(d[i], out[i], epsilon);
 		}
 	}
 
