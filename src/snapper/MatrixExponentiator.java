@@ -536,6 +536,24 @@ public class MatrixExponentiator {
 		11.109296400461870,
 	13.995917029301355};
 	
+//	double [] c_real = {0.000818433612497,-0.068571505514864,1.319411815998137
+//            ,-8.238258033274786,18.785982629476070,-11.799383335697918,-11.799383335697890
+//            ,18.785982629476067,-8.238258033274763,1.319411815998138,-0.068571505514865
+//            ,0.000818433612497};
+//double [] c_imag = {0.000581353207069,-0.038419074245887,0.183523497750480
+//            ,2.796192505614474,-20.237292093573895,46.411650777279597,-46.411650777279569
+//            ,20.237292093573895,-2.796192505614448,-0.183523497750480,0.038419074245888
+//            ,-0.000581353207069};
+//double [] z_real = {-6.998688082445778,-2.235968223749446,0.851707264834878
+//            ,2.917868800307170,4.206124506834328,4.827493775040721,4.827493775040721
+//            ,4.206124506834328,2.917868800307170,0.851707264834878,-2.235968223749446
+//            ,-6.998688082445778};
+//double [] z_imag = {-13.995917029301355,-11.109296400461870,-8.503832905826961
+//            ,-6.017345968518187,-3.590920783130140,-1.193987999180278,1.193987999180278
+//            ,3.590920783130140,6.017345968518187,8.503832905826961,11.109296400461870
+//            ,13.995917029301355};
+
+	
 	public static COMPLEX r_inf = new COMPLEX(0,0);
 	
 	public static double [] cf_expmv(double time, AbstractMatrix A, double [] v) throws Exception {
@@ -778,22 +796,6 @@ public class MatrixExponentiator {
 	}
 	
 	
-	double [] c_real = {0.000818433612497,-0.068571505514864,1.319411815998137
-	                   ,-8.238258033274786,18.785982629476070,-11.799383335697918,-11.799383335697890
-	                   ,18.785982629476067,-8.238258033274763,1.319411815998138,-0.068571505514865
-	                   ,0.000818433612497};
-	double [] c_imag = {0.000581353207069,-0.038419074245887,0.183523497750480
-	                   ,2.796192505614474,-20.237292093573895,46.411650777279597,-46.411650777279569
-	                   ,20.237292093573895,-2.796192505614448,-0.183523497750480,0.038419074245888
-	                   ,-0.000581353207069};
-	double [] z_real = {-6.998688082445778,-2.235968223749446,0.851707264834878
-	                   ,2.917868800307170,4.206124506834328,4.827493775040721,4.827493775040721
-	                   ,4.206124506834328,2.917868800307170,0.851707264834878,-2.235968223749446
-	                   ,-6.998688082445778};
-	double [] z_imag = {-13.995917029301355,-11.109296400461870,-8.503832905826961
-	                   ,-6.017345968518187,-3.590920783130140,-1.193987999180278,1.193987999180278
-	                   ,3.590920783130140,6.017345968518187,8.503832905826961,11.109296400461870
-	                   ,13.995917029301355};
 	                   
 	
 //	public static void expM_CF(Q,double [] v,double [] LL,double branch_length,double delta_t) {   
@@ -1031,59 +1033,15 @@ public class MatrixExponentiator {
 //	            w[i] = x*c[i]                             
 //	    return(w)
 
-	void expCF(double [] v, double [] Q, double dt) {
-//	    w = np.zeros([len(c_real),len(v)],dtype=np.complex)
-		Arrays.fill(v, 1.0);
-				
+	void expCF(double [] v, QMatrix Q, double dt) {
 		COMPLEX [][] w = new COMPLEX[v.length][ci_real.length];
 		for (int i = 0; i < v.length; i++) {
 			for (int j = 0; j < ci_real.length; j++) {
 				w[i][j] = new COMPLEX();
 			}
 		}
-		COMPLEX [] vi = new COMPLEX[v.length];
-		for (int i = 0; i < vi.length; i++) {
-			vi[i] = new COMPLEX(dt,0);
-		}		
-		
-		COMPLEX [] AA = new COMPLEX[Q.length];
-		// TODO: initialise AA
-		for (int i = 0; i < AA.length; i++) {
-			AA[i] = new COMPLEX();
-		}		
-		
-		int N = v.length;
-		COMPLEX [] A2c = new COMPLEX[N];
-		QMatrix.initA2(N);
-		for (int i = 0; i < vi.length; i++) {
-			double sum = 0;
-			for (int k = 0; k < N; k++) {
-				sum += QMatrix.A2[i*N + k];
-			}
-			A2c[i] = new COMPLEX(sum, 0);
-		}		
-		
-		for (int i = 0; i < ci_real.length; i++) {
-			// vi = np.sum(w,axis=0)
-			double zi_real = z_real[i]; 
-			double zi_imag = z_imag[i];
-			int x = 0;
-			for (int j = 0; j < AA.length; j++) {
-				//for (int k = 0; k < N; k++) {
-					AA[x].m_fRe = Q[x] - zi_real * QMatrix.A2[x];
-					AA[x].m_fIm =      - zi_imag * QMatrix.A2[x];
-					x++;
-				//}
-			}
-			
-			fasterSolver(Q, AA, A2c, vi, new COMPLEX(z_real[i]/dt, z_imag[i]/dt));
-			
-			for (int j = 0; j < ci_real.length; j++) {
-				w[i][j].mul(solvEven[i], c_real[i], c_imag[i]);
-			}
-		}
-		
-		
+		expCF(v, Q, dt, w);
+
 		// v = np.real(np.sum(w, axis=0))
 		for (int i = 0; i < v.length; i++) {
 			double sum = 0;
@@ -1092,7 +1050,56 @@ public class MatrixExponentiator {
 			}
 			v[i] = sum;
 		}
+	}
+	
+	void expCF(double [] v, QMatrix Q, double dt, COMPLEX[][] w) {
+		int N = 33;
+		Arrays.fill(v, 1.0);
+		double [] LL = Q.Q;
+				
+		COMPLEX [] vi = new COMPLEX[v.length];
+		for (int i = 0; i < vi.length; i++) {
+			vi[i] = new COMPLEX(1/dt,0);
+		}		
 		
+		COMPLEX [] AA = new COMPLEX[LL.length];
+		// TODO: initialise AA
+		for (int i = 0; i < AA.length; i++) {
+			AA[i] = new COMPLEX();
+		}		
+		
+		COMPLEX [] A2c = new COMPLEX[N];
+//		QMatrix.initA2(N);
+		for (int i = 0; i < vi.length; i++) {
+			double sum = 0;
+			for (int k = 0; k < N; k++) {
+				sum += Q.A2[i*N + k];
+			}
+			A2c[i] = new COMPLEX(sum/dt, 0);
+		}		
+		
+		
+		for (int i = 0; i < MatrixExponentiator.ci_real.length; i++) {
+			// vi = np.sum(w,axis=0)
+			double zi_real = MatrixExponentiator.zi_real[i]/dt; 
+			double zi_imag = MatrixExponentiator.zi_imag[i]/dt;
+			
+			
+			int x = 0;
+			for (int j = 0; j < AA.length; j++) {
+				//for (int k = 0; k < N; k++) {
+					AA[x].m_fRe = Q.A2Q[x] - zi_real * Q.A2[x];
+					AA[x].m_fIm =          - zi_imag * Q.A2[x];
+					x++;
+				//}
+			}
+			
+			fasterSolver(LL, AA, A2c, vi, new COMPLEX(zi_real, zi_imag));
+			
+			for (int j = 0; j < ci_real.length; j++) {
+				w[i][j].mul(solvEven[i], ci_real[i], ci_imag[i]);
+			}
+		}
 	}
 	
 	
@@ -1114,13 +1121,13 @@ public class MatrixExponentiator {
 	COMPLEX [][] out2;
 	COMPLEX [] solvEven;
 	COMPLEX [] solvOdd;
-	
-	COMPLEX [] fasterSolver(double [] LL, COMPLEX [] AA, COMPLEX [] A2c, COMPLEX [] c_i, COMPLEX z) {
+
+	void initMem(int N) {
 		if (out1 == null ) {
-			out1 = new COMPLEX[4][A2c.length];
-			out2 = new COMPLEX[4][A2c.length];
-			solvEven = new COMPLEX[A2c.length];
-			solvOdd = new COMPLEX[A2c.length];
+			out1 = new COMPLEX[4][N];
+			out2 = new COMPLEX[4][N];
+			solvEven = new COMPLEX[N];
+			solvOdd = new COMPLEX[N];
 			for (int i = 0;  i < out1[0].length; i++) {
 				out1[0][i] = new COMPLEX();
 				out1[1][i] = new COMPLEX();
@@ -1136,8 +1143,11 @@ public class MatrixExponentiator {
 				solvOdd[i] = new COMPLEX();
 			}
 		}
-		
+	}
+	
+	COMPLEX [] fasterSolver(double [] LL, COMPLEX [] AA, COMPLEX [] A2c, COMPLEX [] c_i, COMPLEX z) {
 		int N = A2c.length;
+		initMem(N);
 		
 		getValuesUBand(LL, AA, A2c, c_i, z, out1);
 		ubandSolver(out1, solvEven, N);
@@ -1166,18 +1176,18 @@ public class MatrixExponentiator {
 //	    return xc
 	
 	void ubandSolver(COMPLEX [][] in, COMPLEX [] x, int N) {
-		int nf = N/2;
+		int nf = N/2+1;
 		
-//	    xc[-1] = dc[-1]/ac[-1]
+//	    x[-1] = d[-1]/a[-1]
 		x[nf - 1].divide(in[3][nf-1], in[0][nf-1]);
 		
-//	    xc[-2] = (dc[-2] - bc[-1]*xc[-1])/ac[-2]
+//	    x[-2] = (d[-2] - b[-1]*x[-1])/a[-2]
 		COMPLEX tmp = new COMPLEX(in[3][nf-2]);
-		tmp.mulsub(in[1][in[1].length-1], x[nf-1]);
+		tmp.mulsub(in[1][nf-2], x[nf-1]);
 		x[nf - 2].divide(tmp, in[0][nf-2]);
 		
 		for (int i = nf - 3; i >= 0 ; i--) {
-			// xc[il] = (dc[il] - bc[il]*xc[il+1]- cc[il]*xc[il+2])/ac[il]
+			// x[il] = (d[il] - b[il]*x[il+1]- c[il]*x[il+2])/a[il]
 			tmp = new COMPLEX(in[3][i]);
 			tmp.mulsub(in[1][i], x[i+1]);
 			tmp.mulsub(in[2][i], x[i+2]);
