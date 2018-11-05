@@ -1,6 +1,7 @@
 package snapper;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import org.junit.Test;
 
@@ -193,6 +194,26 @@ public class TestMatrixExponentiatorCF extends TestCase {
 		COMPLEX [] solv = readComplexArray("test/snapper/test1/solve.txt");
 		compare(x, solv);
 	}
+
+	@Test
+	public void testExpCF() throws IOException {
+
+		MatrixExponentiator e = new MatrixExponentiator();
+		double [] v = new double[33];
+		QMatrix Q = new QMatrix(33);
+		double tt = 1;
+		double u_ = 0.001;
+		double v_ = 0.001;
+		double [] a = new double[]{u_,-(u_ + v_),0,0};
+		double [] b = new double[]{0,1,-1,0};
+
+		Q.setQ(a, b);
+		e.expCF(v, Q.Q, tt);
+		double [] solv = new double[] {1.52243470e+001, 1.58564913e+001, 1.65842228e+000, 2.44590626e-002, 5.44686091e-005, 1.58507873e-008, 6.76217216e-013, 3.70858069e-018, 2.95950235e-024, 3.01419867e-031, 4.45878137e-039, 8.37584314e-048, 2.28665015e-057, 7.89072733e-068, 3.96602854e-079, 2.50676180e-091, 2.31619252e-104, 2.67464499e-118, 4.53870264e-133, 9.54988368e-149, 2.97428242e-165, 1.13656637e-182, 6.49374835e-201, 4.48569695e-220, 4.70002123e-240, 5.82483864e-261, 1.11895592e-282, 2.45305418e-305, 0.00000000e+000, 0.00000000e+000, 0.00000000e+000, 0.00000000e+000, 0.00000000e+000};
+		compare(v, solv);
+	}
+	
+
 	
 	private void compare(COMPLEX[] out, COMPLEX[] d) {
 		assertEquals(out.length, d.length);
@@ -202,6 +223,12 @@ public class TestMatrixExponentiatorCF extends TestCase {
 		}
 	}
 
+	private void compare(double[] out, double[] d) {
+		assertEquals(out.length, d.length);
+		for (int i = 0; i < out.length; i++) {
+			assertEquals(d[i], out[i], 1e-10);
+		}
+	}
 
 	private void init(COMPLEX[] array) {
 		for (int i = 0; i < array.length; i++) {

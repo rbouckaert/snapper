@@ -1031,14 +1031,13 @@ public class MatrixExponentiator {
 //	            w[i] = x*c[i]                             
 //	    return(w)
 
-	void expCF(double [] v, QMatrix M, double dt) {
+	void expCF(double [] v, double [] Q, double dt) {
 //	    w = np.zeros([len(c_real),len(v)],dtype=np.complex)
-		
-		double [] Q = M.Q;
-		
+		Arrays.fill(v, 1.0);
+				
 		COMPLEX [][] w = new COMPLEX[v.length][ci_real.length];
 		for (int i = 0; i < v.length; i++) {
-			for (int j = 0; j < ci_real.length; i++) {
+			for (int j = 0; j < ci_real.length; j++) {
 				w[i][j] = new COMPLEX();
 			}
 		}
@@ -1047,34 +1046,39 @@ public class MatrixExponentiator {
 			vi[i] = new COMPLEX(dt,0);
 		}		
 		
-		COMPLEX [] AA = new COMPLEX[M.Q.length];
+		COMPLEX [] AA = new COMPLEX[Q.length];
 		// TODO: initialise AA
-//		for (int i = 0; i < vi.length; i++) {
-//			vi[i] = new COMPLEX(M.Q[i],0);
-//		}		
+		for (int i = 0; i < AA.length; i++) {
+			AA[i] = new COMPLEX();
+		}		
 		
-		int N = M.N;
+		int N = v.length;
 		COMPLEX [] A2c = new COMPLEX[N];
+		QMatrix.initA2(N);
 		for (int i = 0; i < vi.length; i++) {
 			double sum = 0;
 			for (int k = 0; k < N; k++) {
-				sum += M.A2[i*N + k];
+				sum += QMatrix.A2[i*N + k];
 			}
 			A2c[i] = new COMPLEX(sum, 0);
 		}		
 		
 		for (int i = 0; i < ci_real.length; i++) {
 			// vi = np.sum(w,axis=0)
-			for (int j = 0; j < N; j++) {
-				for (int k = 0; k < N; k++) {
-					AA[j*N + k].m_fRe = Q[j*N + k] - z_real[j] * M.A2[j*N + k];
-					AA[j*N + k].m_fIm =            - z_imag[j] * M.A2[j*N + k];
-				}
+			double zi_real = z_real[i]; 
+			double zi_imag = z_imag[i];
+			int x = 0;
+			for (int j = 0; j < AA.length; j++) {
+				//for (int k = 0; k < N; k++) {
+					AA[x].m_fRe = Q[x] - zi_real * QMatrix.A2[x];
+					AA[x].m_fIm =      - zi_imag * QMatrix.A2[x];
+					x++;
+				//}
 			}
 			
-			fasterSolver(M.Q, AA, A2c, vi, new COMPLEX(z_real[i]/dt, z_imag[i]/dt));
+			fasterSolver(Q, AA, A2c, vi, new COMPLEX(z_real[i]/dt, z_imag[i]/dt));
 			
-			for (int j = 0; j < ci_real.length; i++) {
+			for (int j = 0; j < ci_real.length; j++) {
 				w[i][j].mul(solvEven[i], c_real[i], c_imag[i]);
 			}
 		}
@@ -1083,7 +1087,7 @@ public class MatrixExponentiator {
 		// v = np.real(np.sum(w, axis=0))
 		for (int i = 0; i < v.length; i++) {
 			double sum = 0;
-			for (int j = 0; j < ci_real.length; i++) {
+			for (int j = 0; j < ci_real.length; j++) {
 				sum += w[i][j].m_fRe;
 			}
 			v[i] = sum;

@@ -17,7 +17,7 @@ public class QMatrix  extends AbstractMatrix {
 	double [] Q;
 	
 	boolean isUptodate = false;
-	double [] A2;
+	static double [] A2;
 	double [] A2Q;
 	double [][] L;
 	double [][] U;
@@ -232,8 +232,9 @@ public class QMatrix  extends AbstractMatrix {
 			if (this.L == null) {
 				this.L = new double[12][N*N];
 				this.U = new double[12][N*N];
+				A2Q = new double[N*N];
 			}
-			initA2();
+			initA2(N);
 			dot(A2, Q, A2Q);
 			
 			double [] X = new double[N*N];
@@ -249,12 +250,11 @@ public class QMatrix  extends AbstractMatrix {
 		System.arraycopy(this.U[index], 0, U, 0, U.length);
 	}
 	
-	protected void initA2() {
+	static protected void initA2(int N) {
 		if (A2 != null && A2.length == N*N) {
 			return;
 		}
 		A2 = new double [N*N];
-		A2Q = new double[N*N];
 				
 		// sparse diagonal
 		//A2[1] = 0.5; 
