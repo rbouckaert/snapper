@@ -1063,17 +1063,15 @@ public class MatrixExponentiator {
 		}		
 		
 		COMPLEX [] AA = new COMPLEX[LL.length];
-		// TODO: initialise AA
 		for (int i = 0; i < AA.length; i++) {
 			AA[i] = new COMPLEX();
 		}		
 		
 		COMPLEX [] A2c = new COMPLEX[N];
-//		QMatrix.initA2(N);
 		for (int i = 0; i < vi.length; i++) {
 			double sum = 0;
 			for (int k = 0; k < N; k++) {
-				sum += Q.A2[i*N + k];
+				sum += QMatrix.A2[i*N + k];
 			}
 			A2c[i] = new COMPLEX(sum/dt, 0);
 		}		
@@ -1088,8 +1086,8 @@ public class MatrixExponentiator {
 			int x = 0;
 			for (int j = 0; j < AA.length; j++) {
 				//for (int k = 0; k < N; k++) {
-					AA[x].m_fRe = Q.A2Q[x] - zi_real * Q.A2[x];
-					AA[x].m_fIm =          - zi_imag * Q.A2[x];
+					AA[x].m_fRe = Q.A2Q[x] - zi_real * QMatrix.A2[x];
+					AA[x].m_fIm =          - zi_imag * QMatrix.A2[x];
 					x++;
 				//}
 			}
@@ -1101,9 +1099,64 @@ public class MatrixExponentiator {
 			}
 		}
 	}
-	
-	
-	
+
+	void expCF(double dt, double [] LL, double [] v) {
+		int N = v.length;
+		
+		COMPLEX [] vi = new COMPLEX[N];
+		for (int i = 0; i < vi.length; i++) {
+			vi[i] = new COMPLEX(v[i]/dt,0);
+		}		
+		Arrays.fill(v, 0);
+		
+		COMPLEX [] AA = new COMPLEX[N*N];
+		for (int i = 0; i < AA.length; i++) {
+			AA[i] = new COMPLEX();
+		}		
+
+		double [] A2 = QMatrix.A2;
+		double [] A2Q = new double[N*N];
+		dotA2Q(A2, LL, A2Q,N);
+		
+		COMPLEX [] A2c = new COMPLEX[N];
+		for (int i = 0; i < vi.length; i++) {
+			A2c[i] = new COMPLEX(QMatrix.A2sum[i]/dt, 0);
+		}		
+		
+		for (int i = 0; i < MatrixExponentiator.ci_real.length; i++) {
+			// vi = np.sum(w,axis=0)
+			
+			double zi_real = MatrixExponentiator.zi_real[i]/dt; 
+			double zi_imag = MatrixExponentiator.zi_imag[i]/dt;
+			
+			int x = 0;
+			for (int j = 0; j < AA.length; j++) {
+				AA[x].m_fRe =   A2Q[x] - zi_real * A2[x];
+				AA[x].m_fIm =          - zi_imag * A2[x];
+				x++;
+			}
+			
+			fasterSolver(LL, AA, A2c, vi, new COMPLEX(zi_real, zi_imag));
+			
+			for (int j = 0; j < N; j++) {
+				v[j] += solvEven[j].m_fRe * ci_real[i] - solvEven[j].m_fIm * ci_imag[i];
+			}
+		}
+	}
+
+	private double [] dotA2Q(double [] A2, double [] Q, double [] A2Q, int N) {
+		for (int i = 0; i < N; i++) {
+			for (int j = Math.max(i - 2, 0); j < Math.min(i + 3, N); j++) {
+				double sum = 0;
+				for (int k = Math.max(j - 4, 0); k < Math.min(j + 1, N); k++) {
+					sum += A2[i*N+k] * Q[k*N+j];
+				}
+				A2Q[i*N+j] = sum;
+			}
+		}
+		return A2Q;		
+	}
+
 //	def faster_solver(LL,AA,A2c,c_i,z_i):
 //	    uband = get_values_uband(LL,AA,A2c,c_i,z_i)
 //	    sol_even = uband_solver(uband[0],uband[1],uband[2],uband[3])

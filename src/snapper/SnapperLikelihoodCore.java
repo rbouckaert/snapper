@@ -79,8 +79,10 @@ public class SnapperLikelihoodCore extends BeerLikelihoodCore {
    	 
 	
     	
-    	MatrixExponentiator.expmvRK4(time, matrix, a, MIN_STEP);
+//    	MatrixExponentiator.expmvRK4(time, matrix, a, MIN_STEP);
 
+    	 MatrixExponentiator e = new MatrixExponentiator();
+    	 e.expCF(time, matrix, a);
     	 ChebyshevPolynomial c = new ChebyshevPolynomial(N);
     	 c.a = a;
     	 c.aToF();

@@ -204,6 +204,7 @@ public class TestMatrixExponentiatorCF extends TestCase {
 		MatrixExponentiator e = new MatrixExponentiator();
 		e.initMem(N);
 		double [] v = new double[N];
+		Arrays.fill(v, 1.0);
 		QMatrix Q = new QMatrix(N);
 		double dt = 0.1;
 		double u_ = 0.001;
@@ -214,7 +215,11 @@ public class TestMatrixExponentiatorCF extends TestCase {
 		double [] Qexpected = readDoubleMatrix(TEST1_DIR + "Q.txt");
 		compare(Qexpected, Q.Q);
 
-		Q.initA2(N);
+		double [] solv = new double[] {6.27377023e+00, 1.01641829e+01, 7.83332873e+00, 4.67503450e+00, 2.44284918e+00, 9.87181265e-01, 3.49305166e-01, 9.53919313e-02, 2.28199240e-02, 4.20205496e-03, 6.78490321e-04, 8.40547742e-05, 9.14713971e-06, 7.60753774e-07, 5.57178962e-08, 3.10680883e-09, 1.58673691e-10, -8.78717848e-13, -8.64448521e-12, -6.42884437e-13, 4.84353951e-12, 3.03469205e-12, -1.52385764e-12, -5.03889921e-12, -6.27086328e-12, -4.78906219e-12, -2.96315858e-12, -9.96341618e-13, 2.05139472e-13, 3.59732682e-13, 2.76602908e-13, -7.37648180e-13, -1.30750063e-12};
+		e.expCF(dt, Q.Q, v);
+		compare(v, solv, 1e-7);
+		
+		Q.initA2Q(N);
 		double [] A2 = readDoubleMatrix(TEST1_DIR + "A2.txt");
 		compare(A2, Q.A2);
 		
@@ -347,10 +352,10 @@ public class TestMatrixExponentiatorCF extends TestCase {
 
 		
 		
-		double [] solv = new double[] {6.27377023e+00, 1.01641829e+01, 7.83332873e+00, 4.67503450e+00, 2.44284918e+00, 9.87181265e-01, 3.49305166e-01, 9.53919313e-02, 2.28199240e-02, 4.20205496e-03, 6.78490321e-04, 8.40547742e-05, 9.14713971e-06, 7.60753774e-07, 5.57178962e-08, 3.10680883e-09, 1.58673691e-10, -8.78717848e-13, -8.64448521e-12, -6.42884437e-13, 4.84353951e-12, 3.03469205e-12, -1.52385764e-12, -5.03889921e-12, -6.27086328e-12, -4.78906219e-12, -2.96315858e-12, -9.96341618e-13, 2.05139472e-13, 3.59732682e-13, 2.76602908e-13, -7.37648180e-13, -1.30750063e-12};
 
 		e.expCF(v, Q, dt);
 		compare(v, solv, 1e-7);
+
 	}
 	
 
