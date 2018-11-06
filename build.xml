@@ -29,6 +29,10 @@
 		<fileset dir="${libBeast2}" includes="antlr-runtime-4.7.jar"/>
 		<fileset dir="${libBeast2}" includes="jam.jar"/>
 		<fileset dir="${libBeast2}" includes="commons-math3-3.1.1.jar"/>
+        <fileset dir="${libBeast2}" includes="beagle.jar"/>
+        <fileset dir="${libBeast2}" includes="colt.jar"/>
+        <fileset dir="${libBeast2}" includes="fest.jar"/>
+        <fileset dir="${libBeast2}" includes="antlr-runtime-4.7.jar"/>
 		<fileset dir="${libSNAPP}" includes="mtj.jar"/>
 		<pathelement path="${SNAPPclasspath}"/>
 		<pathelement path="${beast2classpath}"/>
@@ -104,6 +108,10 @@
 			<zipgroupfileset dir="${libBeast2}" includes="jam.jar"/>
 			<zipgroupfileset dir="${libBeast2}" includes="antlr-runtime-4.7.jar"/>
 			<zipgroupfileset dir="${libBeast2}" includes="commons-math3-3.1.1.jar"/>
+	        <zipgroupfileset dir="${libBeast2}" includes="beagle.jar"/>
+    	    <zipgroupfileset dir="${libBeast2}" includes="colt.jar"/>
+        	<zipgroupfileset dir="${libBeast2}" includes="fest.jar"/>
+	        <zipgroupfileset dir="${libBeast2}" includes="antlr-runtime-4.7.jar"/>
 			<zipgroupfileset dir="${libSNAPP}" includes="mtj.jar"/>
 			<fileset dir="${build}">
 				<include name="snapper/**/*.class" />
