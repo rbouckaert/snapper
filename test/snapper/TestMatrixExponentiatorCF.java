@@ -12,6 +12,8 @@ import snap.likelihood.COMPLEX;
 public class TestMatrixExponentiatorCF extends TestCase {
 	final static String TEST1_DIR = "test/snapper/test1/";
 	final static String TEST2_DIR = "test/snapper/test2/";
+	final static String TEST3_DIR = "test/snapper/test3/";
+	
 
 	COMPLEX [] readComplexArray(String fileName) throws IOException {
 		String s = BeautiDoc.load(fileName);
@@ -358,7 +360,176 @@ public class TestMatrixExponentiatorCF extends TestCase {
 
 	}
 	
+	@Test
+	public void testExpCF3() throws IOException {
+		int N = 33;
 
+		MatrixExponentiator e = new MatrixExponentiator();
+		e.initMem(N);
+		double [] v = new double[N];
+		Arrays.fill(v, 1.0);
+		QMatrix Q = new QMatrix(N);
+		double dt = 0.01;
+		double u_ = 0.5;
+		double v_ = 0.5;
+		double [] a = new double[]{u_,-(u_ + v_),0,0};
+		double [] b = new double[]{0,2,-2,0};
+		Q.setQ(a, b);
+
+		double [] solv = new double[] {6.46372099e-03, -2.53441817e-03, -1.12124939e-02, 6.39070763e-03, 7.07907284e-03, -7.49556373e-03, -2.71519609e-03, 6.12625130e-03, -1.66842601e-04, -3.74391581e-03, 1.22319602e-03, 1.70014038e-03, -1.11547485e-03, -5.21067457e-04, 6.51493218e-04, 5.56120317e-05, -2.79146776e-04, 4.73038355e-05, 8.93791482e-05, -3.68112586e-05, -2.02636837e-05, 1.55215264e-05, 2.43339381e-06, -4.64622800e-06, 3.22485500e-07, 1.04019478e-06, -2.69229540e-07, -1.73318450e-07, 8.58345327e-08, 2.05479822e-08, -2.07225604e-08, -1.35330441e-09, 2.58243417e-09};
+		v = new double[]{0.006463720994063693, -0.0025598894967633185, -0.011670084506784329, 0.006992547947822397, 0.008307368929750345, -0.009624494344782747, -0.003891770417487691, 0.009999979361246672, -3.164138031256699E-4, -0.008415978246663592, 0.003324991505858777, 0.0057013946826780845, -0.004708080014436136, -0.0028239150287447754, 0.004625163434420616, 5.276322657217052E-4, -0.0036109917030115145, 8.51152557681401E-4, 0.002282182301589475, -0.0013607669299408828, -0.0011063596425523177, 0.0012769476496068285, 3.077497378592821E-4, -9.215487768382256E-4, 1.0234023463673997E-4, 5.388342382900541E-4, -2.3224876169316427E-4, -2.5401044059004865E-4, 2.1803729621996514E-4, 9.22966179980842E-5, -1.679166495819626E-4, -2.0182056721659587E-5, 7.231106427389245E-5};
+		e.expCF(dt, Q.Q, v);
+		compare(v, solv, 1e-7);
+		
+		Q.initA2Q(N);
+		double [] A2 = readDoubleMatrix(TEST1_DIR + "A2.txt");
+		compare(A2, Q.A2);
+		
+//		double [] A2Q = readDoubleMatrix(TEST1_DIR + "A2Q.txt");
+//		compare(A2Q, Q.A2Q);
+
+		
+		COMPLEX [][] w = new COMPLEX[e.ci_real.length][v.length];
+		for (int i = 0; i < v.length; i++) {
+			for (int j = 0; j < e.ci_real.length; j++) {
+				w[j][i] = new COMPLEX();
+			}
+		}
+		
+		
+		
+//	    w = np.zeros([len(c_real),len(v)],dtype=np.complex)
+		Arrays.fill(v, 1.0);
+		
+		v = new double[]{0.006463720994063693, -0.0025598894967633185, -0.011670084506784329, 0.006992547947822397, 0.008307368929750345, -0.009624494344782747, -0.003891770417487691, 0.009999979361246672, -3.164138031256699E-4, -0.008415978246663592, 0.003324991505858777, 0.0057013946826780845, -0.004708080014436136, -0.0028239150287447754, 0.004625163434420616, 5.276322657217052E-4, -0.0036109917030115145, 8.51152557681401E-4, 0.002282182301589475, -0.0013607669299408828, -0.0011063596425523177, 0.0012769476496068285, 3.077497378592821E-4, -9.215487768382256E-4, 1.0234023463673997E-4, 5.388342382900541E-4, -2.3224876169316427E-4, -2.5401044059004865E-4, 2.1803729621996514E-4, 9.22966179980842E-5, -1.679166495819626E-4, -2.0182056721659587E-5, 7.231106427389245E-5};
+
+		double [] LL = Q.Q;
+				
+		COMPLEX [] vi = new COMPLEX[v.length];
+		for (int i = 0; i < vi.length; i++) {
+			vi[i] = new COMPLEX(v[i]/dt,0);
+		}		
+		
+		COMPLEX [] AA = new COMPLEX[LL.length];
+		// TODO: initialise AA
+		for (int i = 0; i < AA.length; i++) {
+			AA[i] = new COMPLEX();
+		}		
+		
+		COMPLEX [] A2c = new COMPLEX[N];
+		//QMatrix.initA2(N);
+		for (int i = 0; i < v.length; i++) {
+			double sum = 0;
+			for (int k = 0; k < N; k++) {
+				sum += v[k] * QMatrix.A2[i*N + k];
+			}
+			A2c[i] = new COMPLEX(sum/dt, 0);
+		}		
+		
+		COMPLEX [] z_iExp = readComplexArray(TEST3_DIR + "z_i.txt");
+		
+		for (int i = 0; i < MatrixExponentiator.ci_real.length; i++) {
+			System.err.println("Round " + i);
+			// vi = np.sum(w,axis=0)
+			double zi_real = MatrixExponentiator.zi_real[i]/dt; 
+			double zi_imag = MatrixExponentiator.zi_imag[i]/dt;
+			
+			assertEquals(z_iExp[i].m_fRe, zi_real, 2e-13);
+			assertEquals(z_iExp[i].m_fIm, zi_imag, 2e-13);
+			
+			int x = 0;
+			for (int j = 0; j < AA.length; j++) {
+				//for (int k = 0; k < N; k++) {
+					AA[x].m_fRe = Q.A2Q[x] - zi_real * Q.A2[x];
+					AA[x].m_fIm =          - zi_imag * Q.A2[x];
+					x++;
+				//}
+			}
+			
+			for (int j = 0; j < v.length; j++) {
+				double sum = 0;
+				for (int k = 0; k < N; k++) {
+					sum += v[k] * QMatrix.A2[j*N + k];
+				}
+				A2c[j] = new COMPLEX(sum/dt, 0);
+			}		
+
+			double [] LLExp = readDoubleMatrix(TEST3_DIR + "LL" + i +".txt");
+			compare(LLExp, LL);
+			COMPLEX [] viExp = readComplexArray(TEST3_DIR + "c_i" + i +".txt");
+			compare(viExp, vi);
+			COMPLEX [] A2cExp = readComplexArray(TEST3_DIR + "A2c" + i +".txt");
+			compare(A2cExp, A2c);
+			COMPLEX [] AAExp = readComplexMatrix(TEST3_DIR + "AA" + i +".txt");
+			compare(AAExp, AA);
+			
+			COMPLEX z = new COMPLEX(zi_real, zi_imag);
+			
+			// e.fasterSolver(LLExp, AAExp, A2cExp, vi, z);
+			e.getValuesUBand(LL, AA, A2c, vi, z, e.out1);
+			
+			COMPLEX [] array = readComplexArray(TEST3_DIR + "uband0" + i +".txt");
+			compareShortest(array, e.out1[0]);
+			array = readComplexArray(TEST3_DIR + "uband1" + i +".txt");
+			compareShortest(array, e.out1[1]);
+			array = readComplexArray(TEST3_DIR + "uband2" + i +".txt");
+			compareShortest(array, e.out1[2]);
+			array = readComplexArray(TEST3_DIR + "uband3" + i +".txt");
+			compareShortest(array, e.out1[3]);
+			
+			e.ubandSolver(e.out1, e.solvEven, N);
+			array = readComplexArray(TEST3_DIR + "sol_even" + i +".txt");
+			compareShortest(array, e.solvEven);
+
+			e.getValuesTridag(AA, A2c, e.out2);
+			array = readComplexArray(TEST3_DIR + "triband0" + i +".txt");
+			compareShortest(array, e.out2[0]);
+			array = readComplexArray(TEST3_DIR + "triband1" + i +".txt");
+			compareShortest(array, e.out2[1]);
+			array = readComplexArray(TEST3_DIR + "triband2" + i +".txt");
+			compareShortest(array, e.out2[2]);
+			array = readComplexArray(TEST3_DIR + "triband3" + i +".txt");
+			compareShortest(array, e.out2[3]);
+			
+			e.triDiagSolver(e.out2, e.solvOdd, N);
+			array = readComplexArray(TEST3_DIR + "sol_odd" + i +".txt");
+			compareShortest(array, e.solvOdd, 1e-6);
+
+			for (int k = A2c.length - 1; k >= 1; k -= 2) {
+				e.solvEven[k].m_fRe = e.solvEven[k/2].m_fRe;
+				e.solvEven[k].m_fIm = e.solvEven[k/2].m_fIm;
+				e.solvEven[k-1].m_fRe = e.solvOdd[k/2-1].m_fRe;
+				e.solvEven[k-1].m_fIm = e.solvOdd[k/2-1].m_fIm;
+			}
+
+			COMPLEX [] xExp = readComplexArray(TEST3_DIR + "sol" + i +".txt");
+			compare(xExp, e.solvEven, 1e-8);
+
+			
+			for (int j = 0; j < N; j++) {
+				w[i][j].mul(e.solvEven[j], e.ci_real[i], e.ci_imag[i]);
+			}
+//			COMPLEX [] wExpected = readComplexMatrix(TEST2_DIR + "w" + i +".txt");
+//			compare(wExpected, w, 1e-7);
+		}
+		
+		w = new COMPLEX[v.length][e.ci_real.length];
+		for (int i = 0; i < v.length; i++) {
+			for (int j = 0; j < e.ci_real.length; j++) {
+				w[i][j] = new COMPLEX();
+			}
+		}
+//		e.expCF(v, Q, dt, w);
+		//COMPLEX [] wExpected = readComplexMatrix(TEST1_DIR + "w.txt");
+		//compare(wExpected, w, 1e-7);
+
+		
+		
+
+//		e.expCF(v, Q, dt);
+//		compare(v, solv, 1e-7);
+
+	}
 	
 	private void compare(COMPLEX[] out, COMPLEX[] d) {
 		compare(out, d, 1e-10);

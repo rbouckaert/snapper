@@ -1071,7 +1071,7 @@ public class MatrixExponentiator {
 		for (int i = 0; i < vi.length; i++) {
 			double sum = 0;
 			for (int k = 0; k < N; k++) {
-				sum += QMatrix.A2[i*N + k];
+				sum += v[k] * QMatrix.A2[i*N + k];
 			}
 			A2c[i] = new COMPLEX(sum/dt, 0);
 		}		
@@ -1103,6 +1103,20 @@ public class MatrixExponentiator {
 	void expCF(double dt, double [] LL, double [] v) {
 		int N = v.length;
 		
+		COMPLEX [] A2c = new COMPLEX[N];
+		double [] A2cValues = new double[N];
+		for (int i = 0; i < N; i++) {
+			double sum = 0;
+			for (int k = 0; k < N; k++) {
+				sum += v[k] * QMatrix.A2[i*N + k];
+			}
+			A2cValues[i] = sum/dt;
+			A2c[i] = new COMPLEX(sum/dt, 0);
+		}		
+//		for (int i = 0; i < vi.length; i++) {
+//			A2c[i] = new COMPLEX(QMatrix.A2sum[i]/dt, 0);
+//		}		
+
 		COMPLEX [] vi = new COMPLEX[N];
 		for (int i = 0; i < vi.length; i++) {
 			vi[i] = new COMPLEX(v[i]/dt,0);
@@ -1118,12 +1132,12 @@ public class MatrixExponentiator {
 		double [] A2Q = new double[N*N];
 		dotA2Q(A2, LL, A2Q,N);
 		
-		COMPLEX [] A2c = new COMPLEX[N];
-		for (int i = 0; i < vi.length; i++) {
-			A2c[i] = new COMPLEX(QMatrix.A2sum[i]/dt, 0);
-		}		
 		
 		for (int i = 0; i < MatrixExponentiator.ci_real.length; i++) {
+			for (int j = 0; j < N; j++) {
+				A2c[j].m_fRe = A2cValues[j];
+			}
+
 			// vi = np.sum(w,axis=0)
 			
 			double zi_real = MatrixExponentiator.zi_real[i]/dt; 
