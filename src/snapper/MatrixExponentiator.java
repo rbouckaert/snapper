@@ -1107,7 +1107,7 @@ public class MatrixExponentiator {
 		double [] A2cValues = new double[N];
 		for (int i = 0; i < N; i++) {
 			double sum = 0;
-			for (int k = 0; k < N; k++) {
+			for (int k = Math.max(0, i-2); k < Math.min(N, i+3); k++) {
 				sum += v[k] * QMatrix.A2[i*N + k];
 			}
 			A2cValues[i] = sum/dt;
