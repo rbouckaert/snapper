@@ -223,7 +223,7 @@ public class TestMatrixExponentiatorCF extends TestCase {
 		
 		Q.initA2Q(N);
 		double [] A2 = readDoubleMatrix(TEST1_DIR + "A2.txt");
-		compare(A2, Q.A2);
+		compare(A2, QMatrix.getA2(N));
 		
 		double [] A2Q = readDoubleMatrix(TEST1_DIR + "A2Q.txt");
 		compare(A2Q, Q.A2Q);
@@ -255,10 +255,11 @@ public class TestMatrixExponentiatorCF extends TestCase {
 		
 		COMPLEX [] A2c = new COMPLEX[N];
 //		QMatrix.initA2(N);
+		double [] QA2 = QMatrix.getA2(N);
 		for (int i = 0; i < vi.length; i++) {
 			double sum = 0;
 			for (int k = 0; k < N; k++) {
-				sum += Q.A2[i*N + k];
+				sum += QA2[i*N + k];
 			}
 			A2c[i] = new COMPLEX(sum/dt, 0);
 		}		
@@ -277,8 +278,8 @@ public class TestMatrixExponentiatorCF extends TestCase {
 			int x = 0;
 			for (int j = 0; j < AA.length; j++) {
 				//for (int k = 0; k < N; k++) {
-					AA[x].m_fRe = Q.A2Q[x] - zi_real * Q.A2[x];
-					AA[x].m_fIm =          - zi_imag * Q.A2[x];
+					AA[x].m_fRe = Q.A2Q[x] - zi_real * QA2[x];
+					AA[x].m_fIm =          - zi_imag * QA2[x];
 					x++;
 				//}
 			}
@@ -383,7 +384,7 @@ public class TestMatrixExponentiatorCF extends TestCase {
 		
 		Q.initA2Q(N);
 		double [] A2 = readDoubleMatrix(TEST1_DIR + "A2.txt");
-		compare(A2, Q.A2);
+		compare(A2, Q.getA2(N));
 		
 //		double [] A2Q = readDoubleMatrix(TEST1_DIR + "A2Q.txt");
 //		compare(A2Q, Q.A2Q);
@@ -417,11 +418,12 @@ public class TestMatrixExponentiatorCF extends TestCase {
 		}		
 		
 		COMPLEX [] A2c = new COMPLEX[N];
+		double [] QA2 = QMatrix.getA2(N);
 		//QMatrix.initA2(N);
 		for (int i = 0; i < v.length; i++) {
 			double sum = 0;
 			for (int k = 0; k < N; k++) {
-				sum += v[k] * QMatrix.A2[i*N + k];
+				sum += v[k] * QA2[i*N + k];
 			}
 			A2c[i] = new COMPLEX(sum/dt, 0);
 		}		
@@ -440,8 +442,8 @@ public class TestMatrixExponentiatorCF extends TestCase {
 			int x = 0;
 			for (int j = 0; j < AA.length; j++) {
 				//for (int k = 0; k < N; k++) {
-					AA[x].m_fRe = Q.A2Q[x] - zi_real * Q.A2[x];
-					AA[x].m_fIm =          - zi_imag * Q.A2[x];
+					AA[x].m_fRe = Q.A2Q[x] - zi_real * QA2[x];
+					AA[x].m_fIm =          - zi_imag * QA2[x];
 					x++;
 				//}
 			}
@@ -449,7 +451,7 @@ public class TestMatrixExponentiatorCF extends TestCase {
 			for (int j = 0; j < v.length; j++) {
 				double sum = 0;
 				for (int k = 0; k < N; k++) {
-					sum += v[k] * QMatrix.A2[j*N + k];
+					sum += v[k] * QA2[j*N + k];
 				}
 				A2c[j] = new COMPLEX(sum/dt, 0);
 			}		
