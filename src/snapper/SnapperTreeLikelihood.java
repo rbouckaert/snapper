@@ -83,6 +83,10 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
 			"Bayes factors for different species assignments. There is (almost) no computational cost involved for the MCMC chain, but the log likelihood " +
 			"might be reported as positive number with this correction since the likelihood is not a proper likelihood any more.", true);
 	
+
+	public Input<Boolean> useBetaRootPriorInput = new Input<Boolean>("useBetaRootPrior", "instead of using a uniform prior for allele frequencies at the root, "
+			+ "use a beta root prior", false);
+	
 	public SnapperTreeLikelihood() throws Exception {
 		// suppress some validation rules
 		siteModelInput.setRule(Validate.OPTIONAL);
@@ -511,19 +515,31 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
     } // traverseWithBRM
 
     ChebyshevPolynomial freqs = null;
+    
+	// returns root allele frequencies
 	private double[] getFrequencies() {
 		if (freqs == null) {
-			freqs = new ChebyshevPolynomial(N);
-			freqs.a[0] = 1;
-			freqs.aToF();
-			
-//			BetaDistribution beta = new BetaDistributionImpl(0.006, 0.006);
-//			freqs.f[0] = 10;
-//			freqs.f[N-1] = 10;
-//			for (int i = 1; i < N-1; i++) {
-//	    		double x = 0.5 - Math.cos(-i/(N-1.0)*Math.PI) / 2.0;
-//				freqs.f[i] = beta.density(x);
-//			}
+			if (!useBetaRootPriorInput.get()) {
+				// use uniform prior for root allele frequencies
+				freqs = new ChebyshevPolynomial(N);
+				freqs.a[0] = 1;
+				freqs.aToF();
+			} else {
+	    		double u = m_substitutionmodel.m_pU.get().getValue();
+	    		double v = m_substitutionmodel.m_pV.get().getValue();
+	    		double alpha = u/v;
+	    		Double [] thetas = m_substitutionmodel.thetaInput.get().getValues();
+	    		double theta = thetas[thetas.length - 1]; // theta for the root	    				
+				double beta1 = (-alpha * theta - theta)/(2.0 * (alpha * alpha * theta + 2 * alpha * theta - 2 * alpha + theta));
+				double beta2 =  beta1 * alpha;
+				BetaDistribution distr = new BetaDistributionImpl(beta1, beta2);
+				freqs.f[0] = distr.density(0);
+				freqs.f[N-1] = distr.density(1);
+				for (int i = 1; i < N-1; i++) {
+		    		double x = 0.5 - Math.cos(-i/(N-1.0)*Math.PI) / 2.0;
+					freqs.f[i] = distr.density(x);
+				}
+			}			
 		}
 		
 		return freqs.f;
