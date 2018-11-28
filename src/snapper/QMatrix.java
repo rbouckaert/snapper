@@ -214,8 +214,10 @@ public class QMatrix  extends AbstractMatrix {
     		throw new IllegalArgumentException("Exepected matrix of site " + N + "x" + N);
     	}
     	theta=1.0/theta;
-		setQ(/* a= */ new double[]{u, -(u+v), 0, 0},
-			 /* b= */	new double[]{0, 0.5*theta/2, -0.5*theta/2, 0});
+//		setQ(/* a= */ new double[]{u, -(u+v), 0, 0},
+//			 /* b= */ new double[]{0, 0.5*theta/2, -0.5*theta/2, 0});
+		setQ(/* a= */ new double[]{theta/2, -theta, 0, 0},
+			 /* b= */ new double[]{0, 1, -1, 0});
     }
     
     

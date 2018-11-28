@@ -519,22 +519,30 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
 	// returns root allele frequencies
 	private double[] getFrequencies() {
 		if (freqs == null) {
+			freqs = new ChebyshevPolynomial(N);
 			if (!useBetaRootPriorInput.get()) {
 				// use uniform prior for root allele frequencies
-				freqs = new ChebyshevPolynomial(N);
 				freqs.a[0] = 1;
 				freqs.aToF();
 			} else {
 	    		double u = m_substitutionmodel.m_pU.get().getValue();
 	    		double v = m_substitutionmodel.m_pV.get().getValue();
-	    		double alpha = u/v;
 	    		Double [] thetas = m_substitutionmodel.thetaInput.get().getValues();
 	    		double theta = thetas[thetas.length - 1]; // theta for the root	    				
-				double beta1 = (-alpha * theta - theta)/(2.0 * (alpha * alpha * theta + 2 * alpha * theta - 2 * alpha + theta));
-				double beta2 =  beta1 * alpha;
-				BetaDistribution distr = new BetaDistributionImpl(beta1, beta2);
-				freqs.f[0] = distr.density(0);
-				freqs.f[N-1] = distr.density(1);
+
+	    		BetaDistribution distr;
+	    		if (Math.abs(u -v) < 1e-10) { 
+	    			// u == v
+	    			distr = new BetaDistributionImpl(theta/2.0, theta/2.0);
+	    		} else {
+	    			// u != v
+		    		double alpha = u/v;
+					double beta1 = (-alpha * theta - theta)/(2.0 * (alpha * alpha * theta + 2 * alpha * theta - 2 * alpha + theta));
+					double beta2 =  beta1 * alpha;
+					distr = new BetaDistributionImpl(beta1, beta2);
+				}
+				freqs.f[0] = distr.density(0.0001);
+				freqs.f[N-1] = distr.density(0.9999);
 				for (int i = 1; i < N-1; i++) {
 		    		double x = 0.5 - Math.cos(-i/(N-1.0)*Math.PI) / 2.0;
 					freqs.f[i] = distr.density(x);
