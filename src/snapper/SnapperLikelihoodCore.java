@@ -27,6 +27,7 @@ package snapper;
 
 
 import java.util.Arrays;
+import java.util.Map;
 
 import beast.evolution.alignment.Alignment;
 import beast.evolution.likelihood.BeerLikelihoodCore;
@@ -44,7 +45,9 @@ public class SnapperLikelihoodCore extends BeerLikelihoodCore {
     int N;
 
 	double [] v1;
+	double [] v1cache;
 	double [] v2;
+	double [] v2cache;
 	double [] Q1;
 	double [] Q2;
 	double [] delta;
@@ -63,14 +66,15 @@ public class SnapperLikelihoodCore extends BeerLikelihoodCore {
     			chebPoly[1][i][j] = new ChebyshevPolynomial(N);
     		}
     	}
-    	v1 = new double[N];
-    	v2 = new double[N];
+    	v1 = new double[N]; v1cache = new double[N * patternCount];
+    	v2 = new double[N]; v2cache = new double[N * patternCount];
     	Q1 = new double[N*N];
     	Q2 = new double[N*N];
     	
     	delta = ChebyshevPolynomial.getInterValContributions(N);
     	
     	states = new int[nodeCount][];
+    	stateMap = new int [nodeCount][][];
     }
     
     void exponentiate(double time, double [] matrix, double [] a) {
@@ -109,11 +113,36 @@ public class SnapperLikelihoodCore extends BeerLikelihoodCore {
     	time = new double[nodeCount][matrixCount];
     }
     
+    
+    /** maps state to list of sitepatterns that contain that state 
+     * stateMap[nodeIndex][leaf state value][pattern]**/
+    int [][][] stateMap;
+    
+    /**
+     * @param nodeIndex: identifies the node 
+     * @param patternIndex: identifies the site pattern
+     * @param r: number of green lineages
+     * @param n: total number of lineages
+     */
     public void setLeafPolyFactors(int nodeIndex, int patternIndex, int r, int n) {
+    	if (this.states[nodeIndex] == null) {
+        	// set nodeStates to some non-null value, so m_core knows that it is a leaf
+    		this.states[nodeIndex] = new int[nrOfPatterns];
+        	this.stateMap[nodeIndex] = new int[n + 1][];
+    	}
+    	this.states[nodeIndex][patternIndex] = r;
+    	int [] map = stateMap[nodeIndex][r];
+    	if (map == null) {
+    		stateMap[nodeIndex][r] = new int[1];
+    		stateMap[nodeIndex][r][0] = patternIndex;
+    	} else {
+    		int [] newmap = new int[map.length + 1];
+    		System.arraycopy(map, 0, newmap, 0, map.length);
+    		newmap[map.length] = patternIndex;
+    		stateMap[nodeIndex][r] = newmap;
+    	}
     	chebPoly[0][nodeIndex][patternIndex].init(r, n);
     	chebPoly[1][nodeIndex][patternIndex].init(r, n);
-    	// hack: set nodeStates to some non-null value, so m_core knows that it is a leaf 
-    	this.states[nodeIndex] = new int[0];
     }
 
   
@@ -169,14 +198,28 @@ public class SnapperLikelihoodCore extends BeerLikelihoodCore {
             int w = l * matrixSize;
             System.arraycopy(matrices1, w, Q1, 0, matrixSize);
             System.arraycopy(matrices2, w, Q2, 0, matrixSize);
+            
+            setupCache(stateMap[nodeIndex1], Q1, chebPoly[0][nodeIndex1], time[nodeIndex1][l], v1cache, v1);
+            setupCache(stateMap[nodeIndex2], Q2, chebPoly[0][nodeIndex2], time[nodeIndex2][l], v2cache, v2);
+
+        	for (int k = 0; k < nrOfPatterns; k++) {
+            	System.arraycopy(v1cache, k * N, v1, 0, N);
+            	System.arraycopy(v2cache, k * N, v2, 0, N);
+                double [] f = partials3[k].f; 
+                for (int i = 0; i < N; i++) {
+                	f[i] = Math.max(v1[i] * v2[i], 0);
+                }
+                if (debug) System.out.println("="+Arrays.toString(f));
+            }            
+/*            
             for (int k = 0; k < nrOfPatterns; k++) {
 
-                if (debug) System.out.println(nodeIndex1 + ":exp(" + Arrays.toString(chebPoly[0][nodeIndex1][0].f)+")");
+                //if (debug) System.out.println(nodeIndex1 + ":exp(" + Arrays.toString(chebPoly[0][nodeIndex1][0].f)+")");
                 System.arraycopy(chebPoly[0][nodeIndex1][k].a, 0, v1, 0, N);
                 exponentiate(time[nodeIndex1][l], Q1, v1);
                 if (debug) System.out.println("="+Arrays.toString(v1));
                 
-                if (debug) System.out.println(nodeIndex2 + ":exp(" + Arrays.toString(chebPoly[0][nodeIndex2][0].f)+")");
+                //if (debug) System.out.println(nodeIndex2 + ":exp(" + Arrays.toString(chebPoly[0][nodeIndex2][0].f)+")");
                 System.arraycopy(chebPoly[0][nodeIndex2][k].a, 0, v2, 0, N);
                 exponentiate(time[nodeIndex2][l], Q2, v2);
                 if (debug) System.out.println("="+Arrays.toString(v2));
@@ -188,10 +231,24 @@ public class SnapperLikelihoodCore extends BeerLikelihoodCore {
                 }
                 if (debug) System.out.println("="+Arrays.toString(f));
             }
+*/
         }
     }
 
-    /**
+    private void setupCache(int[][] map, double[] Q, ChebyshevPolynomial[] chebPoly0, double time, double[] vcache, double [] v) {
+        for (int [] map0 : map) {
+        	if (map0 != null) {
+        		int k = map0[0];
+                System.arraycopy(chebPoly0[k].a, 0, v, 0, N);
+                exponentiate(time, Q, v);
+                for (int j : map0) {
+                	System.arraycopy(v, 0, vcache, j * N, N);
+                }            		
+        	}
+        }		
+	}
+
+	/**
      * Calculates partial likelihoods at a node when one child has states and one has partials.
      */
     protected void calculateStatesPartialsPruning(int nodeIndex1, double[] matrices1,
@@ -201,10 +258,14 @@ public class SnapperLikelihoodCore extends BeerLikelihoodCore {
             int w = l * matrixSize;
             System.arraycopy(matrices1, w, Q1, 0, matrixSize);
             System.arraycopy(matrices2, w, Q2, 0, matrixSize);
+
+            setupCache(stateMap[nodeIndex1], Q1, chebPoly[0][nodeIndex1], time[nodeIndex1][l], v1cache, v1);
+
             for (int k = 0; k < nrOfPatterns; k++) {
 
-                System.arraycopy(chebPoly[0][nodeIndex1][k].a, 0, v1, 0, N);
-                exponentiate(time[nodeIndex1][l], Q1, v1);
+                //System.arraycopy(chebPoly[0][nodeIndex1][k].a, 0, v1, 0, N);
+                //exponentiate(time[nodeIndex1][l], Q1, v1);
+            	System.arraycopy(v1cache, k * N, v1, 0, N);
                 
                 partials2[k].fToA();
                 System.arraycopy(partials2[k].a, 0, v2, 0, N);
