@@ -31,22 +31,31 @@ package snapper;
 
 
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 
 import org.apache.commons.math.distribution.BetaDistribution;
 import org.apache.commons.math.distribution.BetaDistributionImpl;
 
 import beast.app.BeastMCMC;
+import beast.core.BEASTInterface;
 import beast.core.Description;
 import beast.core.Input;
 import beast.core.State;
 import beast.core.Input.Validate;
 import beast.core.parameter.IntegerParameter;
 import beast.core.parameter.RealParameter;
+import beast.evolution.alignment.Alignment;
+import beast.evolution.alignment.FilteredAlignment;
 import beast.evolution.branchratemodel.StrictClockModel;
 import beast.evolution.likelihood.TreeLikelihood;
 import beast.evolution.sitemodel.SiteModel;
+import beast.evolution.substitutionmodel.SubstitutionModel;
 import beast.evolution.tree.Node;
 import beast.evolution.tree.Tree;
 import beast.evolution.tree.TreeInterface;
@@ -86,8 +95,19 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
 
 	public Input<Boolean> useBetaRootPriorInput = new Input<Boolean>("useBetaRootPrior", "instead of using a uniform prior for allele frequencies at the root, "
 			+ "use a beta root prior", false);
+
+	final public Input<Integer> maxNrOfThreadsInput = new Input<>("threads", "maximum number of threads to use, if less than 1 the number of threads in BeastMCMC is used (default -1)", -1);
+    final public Input<String> proportionsInput = new Input<>("proportions", "specifies proportions of patterns used per thread as space "
+    		+ "delimited string. This is useful when using a mixture of BEAGLE devices that run at different speeds, e.g GPU and CPU. "
+    		+ "The string is duplicated if there are more threads than proportions specified. For example, "
+    		+ "'1 2' as well as '33 66' with 2 threads specifies that the first thread gets a third of the patterns and the second "
+    		+ "two thirds. With 3 threads, it is interpreted as '1 2 1' = 25%, 50%, 25% and with 7 threads it is "
+    		+ "'1 2 1 2 1 2 1' = 10% 20% 10% 20% 10% 20% 10%. If not specified, all threads get the same proportion of patterns.");
 	
-	public SnapperTreeLikelihood() throws Exception {
+    /** private list of likelihoods, to notify framework of TreeLikelihoods being created in initAndValidate() **/
+    final private Input<List<TreeLikelihood>> likelihoodsInput = new Input<>("*","",new ArrayList<>());
+
+    public SnapperTreeLikelihood() throws Exception {
 		// suppress some validation rules
 		siteModelInput.setRule(Validate.OPTIONAL);
 	}
@@ -122,8 +142,31 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
 	IntegerParameter ascSiteCount;
 	QMatrix Q;
 
+	
+    /** number of threads to use, changes when threading causes problems **/
+    private int threadCount;
+    private ExecutorService pool = null;
+    private final List<Callable<Double>> likelihoodCallers = new ArrayList<Callable<Double>>();
+	// specified a set ranges of patterns assigned to each thread
+	// first patternPoints contains 0, then one point for each thread
+    private int [] patternPoints;
+	
+	SnapperTreeLikelihood [] treelikelihood;
+	double [] logPByThread;
+	
+	
 	@Override
 	public void initAndValidate() {
+		threadCount = BeastMCMC.m_nThreads;
+
+		if (maxNrOfThreadsInput.get() > 0) {
+			threadCount = Math.min(maxNrOfThreadsInput.get(), BeastMCMC.m_nThreads);
+		}
+        String instanceCount = System.getProperty("beast.instance.count");
+        if (instanceCount != null && instanceCount.length() > 0) {
+        	threadCount = Integer.parseInt(instanceCount);
+        }
+
 		N =  NInput.get();
 		Q = new QMatrix(N);
 		// check N = 2^k + 1 for some k
@@ -176,17 +219,7 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
 		thetaInput.get().assignFrom(theta);
 	
     	
-    	
-    	
     	m_data2 = (Data) dataInput.get();
-    	if ( BeastMCMC.m_nThreads == 1) {
-    		// single threaded likelihood core
-    		m_core = new SnapperLikelihoodCore(treeInput.get().getRoot(), dataInput.get(), N);
-    	} else {
-    		// multi-threaded likelihood core
-    		throw new RuntimeException("Threading not implemented yet -- use single tread");
-    		//m_core = new SnapperLikelihoodCoreT(treeInput.get().getRoot(), dataInput.get());
-    	}
     	Integer [] nSampleSizes = m_data2.getStateCounts().toArray(new Integer[0]);
     	m_nSampleSizes = new int[nSampleSizes.length];
     	for (int i = 0; i < nSampleSizes.length; i++) {
@@ -199,6 +232,72 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
 
 		int numPatterns = m_data2.getPatternCount();
 		
+
+		branchRateModel = branchRateModelInput.get();
+		if (branchRateModel == null) {
+			branchRateModel = new StrictClockModel();
+		}
+		if (!(branchRateModel instanceof StrictClockModel)) {
+			//We assume that the mutation rate (but not theta) is constant for the species tree.
+			throw new IllegalArgumentException("Only strict clock model allowed for branchRateModel, not " + branchRateModel.getClass().getName());
+		}
+
+
+    	if (threadCount <= 1) {
+    		m_core = new SnapperLikelihoodCore(treeInput.get().getRoot(), dataInput.get(), N);
+    	} else {
+    		treelikelihood = new SnapperTreeLikelihood[threadCount];
+    		logPByThread = new double[threadCount];
+    		
+    		// multi-threaded likelihood core
+        	pool = Executors.newFixedThreadPool(threadCount);
+    		
+        	calcPatternPoints(dataInput.get().getSiteCount());
+        	for (int i = 0; i < threadCount; i++) {
+        		Alignment rawdata = dataInput.get();
+        		String filterSpec = (patternPoints[i] +1) + "-" + (patternPoints[i + 1]);
+        		if (rawdata.isAscertained) {
+        			filterSpec += rawdata.excludefromInput.get() + "-" + rawdata.excludetoInput.get() + "," + filterSpec;
+        		}
+        		SnapperTreeLikelihood likelihood = null;
+				try {
+					likelihood = new SnapperTreeLikelihood();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+        		likelihood.setID(getID() + i);
+        		likelihood.getOutputs().add(this);
+        		likelihoodsInput.get().add(likelihood);
+
+        		FilteredAlignment filter = new FilteredAlignment();
+        		if (i == 0 && dataInput.get() instanceof FilteredAlignment && ((FilteredAlignment)dataInput.get()).constantSiteWeightsInput.get() != null) {
+        			filter.initByName("data", dataInput.get()/*, "userDataType", m_data.get().getDataType()*/, 
+        							"filter", filterSpec, 
+        							"constantSiteWeights", ((FilteredAlignment)dataInput.get()).constantSiteWeightsInput.get()
+        							);
+        		} else {
+        			filter.initByName("data", dataInput.get()/*, "userDataType", m_data.get().getDataType()*/, 
+        							"filter", filterSpec,
+        							"userDataType", dataInput.get().getDataType()
+        							);
+        		}
+        		Data data = new Data();
+        		data.initByName("rawdata", filter, "userDataType", dataInput.get().getDataType());
+        		likelihood.initByName("data", data, 
+        				"tree", treeInput.get(), 
+        				"siteModel", duplicate((BEASTInterface) siteModelInput.get(), i), 
+        				"branchRateModel", duplicate(branchRateModelInput.get(), i), 
+        				"initFromTree", m_bInitFromTree.get(),
+                        "pattern" , m_pPattern.get() + ""
+        				);
+        	    treelikelihood[i] = likelihood;        		
+        		likelihoodCallers.add(new TreeLikelihoodCaller(i, likelihood));
+        	}
+        	return;
+    	}
+    	
+
 		
 		
 		// calculate Likelihood Correction. 
@@ -224,15 +323,6 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
     	}
 		System.err.println("Log Likelihood Correction = " + m_fLogLikelihoodCorrection);
 		
-		branchRateModel = branchRateModelInput.get();
-		if (branchRateModel == null) {
-			branchRateModel = new StrictClockModel();
-		}
-		if (!(branchRateModel instanceof StrictClockModel)) {
-			//We assume that the mutation rate (but not theta) is constant for the species tree.
-			throw new IllegalArgumentException("Only strict clock model allowed for branchRateModel, not " + branchRateModel.getClass().getName());
-		}
-
 		
 		
 		
@@ -274,6 +364,105 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
 		return f;
 	}
 
+    
+    class TreeLikelihoodCaller implements Callable<Double> {
+        private final int threadNr;
+        private final SnapperTreeLikelihood likelihood;
+        
+        public TreeLikelihoodCaller(int threadNr, SnapperTreeLikelihood likelihood) {
+        	this.threadNr = threadNr;
+        	this.likelihood = likelihood;
+        }
+
+        public Double call() throws Exception {
+  		  	try {
+	            logPByThread[threadNr] = likelihood.calculateLogP();
+  		  	} catch (Exception e) {
+  		  		System.err.println("Something went wrong in thread " + threadNr);
+				e.printStackTrace();
+				System.exit(0);
+			}
+            return 0.0;
+        }
+
+    }
+    
+    
+    /** create new instance of src object, connecting all inputs from src object
+     * Note if input is a SubstModel, it is duplicated as well.
+     * @param src object to be copied
+     * @param i index used to extend ID with.
+     * @return copy of src object
+     */
+    private Object duplicate(BEASTInterface src, int i) {
+    	if (src == null) { 
+    		return null;
+    	}
+    	BEASTInterface copy;
+		try {
+			copy = src.getClass().newInstance();
+        	copy.setID(src.getID() + "_" + i);
+		} catch (InstantiationException | IllegalAccessException e) {
+			e.printStackTrace();
+			throw new RuntimeException("Programmer error: every object in the model should have a default constructor that is publicly accessible: " + src.getClass().getName());
+		}
+        for (Input<?> input : src.listInputs()) {
+            if (input.get() != null) {
+                if (input.get() instanceof List) {
+                    // handle lists
+                	//((List)copy.getInput(input.getName())).clear();
+                    for (Object o : (List<?>) input.get()) {
+                        if (o instanceof BEASTInterface) {
+                        	// make sure it is not already in the list
+                            copy.setInputValue(input.getName(), o);
+                        }
+                    }
+                } else if (input.get() instanceof SubstitutionModel) {
+                	// duplicate subst models
+                	BEASTInterface substModel = (BEASTInterface) duplicate((BEASTInterface) input.get(), i);
+            		copy.setInputValue(input.getName(), substModel);
+            	} else {
+                    // it is some other value
+            		copy.setInputValue(input.getName(), input.get());
+            	}
+            }
+        }
+        copy.initAndValidate();
+		return copy;
+	}
+    
+	private void calcPatternPoints(int nPatterns) {
+		patternPoints = new int[threadCount + 1];
+		if (proportionsInput.get() == null) {
+			int range = nPatterns / threadCount;
+			for (int i = 0; i < threadCount - 1; i++) {
+				patternPoints[i+1] = range * (i+1);
+			}
+			patternPoints[threadCount] = nPatterns;
+		} else {
+			String [] strs = proportionsInput.get().split("\\s+");
+			double [] proportions = new double[threadCount];
+			for (int i = 0; i < threadCount; i++) {
+				proportions[i] = Double.parseDouble(strs[i % strs.length]);
+			}
+			// normalise
+			double sum = 0;
+			for (double d : proportions) {
+				sum += d;
+			}
+			for (int i = 0; i < threadCount; i++) {
+				proportions[i] /= sum;
+			}
+			// cummulative 
+			for (int i = 1; i < threadCount; i++) {
+				proportions[i] += proportions[i- 1];
+			}
+			// calc ranges
+			for (int i = 0; i < threadCount; i++) {
+				patternPoints[i+1] = (int) (proportions[i] * nPatterns + 0.5);
+			}
+		}
+    }
 	/**
      * Calculate the log likelihood of the current state.
      *
@@ -281,6 +470,20 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
      */
     @Override
     public double calculateLogP() {
+		if (threadCount > 1) {
+			try {
+	            pool.invokeAll(likelihoodCallers);
+			} catch (RejectedExecutionException | InterruptedException e) {
+				e.printStackTrace();
+				System.exit(0);
+			}
+			logP = 0;
+	    	for (double f : logPByThread) {
+	    		logP += f;
+	    	}
+	    	return logP;
+		}
+
     	try {
     		// get current tree
 	    	NodeData root = (NodeData) treeInput.get().getRoot();
@@ -364,6 +567,14 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
     
     @Override
     protected boolean requiresRecalculation() {
+    	if (treelikelihood != null) {
+    		boolean requiresRecalculation = false;
+    		for (SnapperTreeLikelihood b : treelikelihood) {
+    			requiresRecalculation |= b.requiresRecalculation();
+    		}
+    		return requiresRecalculation;    		
+    	}
+    	
     	boolean isDirty = super.requiresRecalculation();
     	if (ascSiteCount != null && ascSiteCount.somethingIsDirty()) {
     		isDirty = true;
@@ -512,7 +723,7 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
             }
         }
         return update;
-    } // traverseWithBRM
+    } // traverse
 
     ChebyshevPolynomial freqs = null;
     
