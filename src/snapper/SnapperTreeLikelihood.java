@@ -270,7 +270,7 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
         		likelihood.getOutputs().add(this);
         		likelihoodsInput.get().add(likelihood);
 
-        		FilteredAlignment filter = new FilteredAlignment();
+        		snap.FilteredAlignment filter = new snap.FilteredAlignment();
         		if (i == 0 && dataInput.get() instanceof FilteredAlignment && ((FilteredAlignment)dataInput.get()).constantSiteWeightsInput.get() != null) {
         			filter.initByName("data", dataInput.get()/*, "userDataType", m_data.get().getDataType()*/, 
         							"filter", filterSpec, 
