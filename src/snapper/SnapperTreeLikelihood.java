@@ -282,14 +282,13 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
         							"userDataType", dataInput.get().getDataType()
         							);
         		}
-        		Data data = new Data();
-        		data.initByName("rawdata", filter, "userDataType", dataInput.get().getDataType());
-        		likelihood.initByName("data", data, 
+        		likelihood.initByName("data", filter, 
         				"tree", treeInput.get(), 
         				"siteModel", duplicate((BEASTInterface) siteModelInput.get(), i), 
         				"branchRateModel", duplicate(branchRateModelInput.get(), i), 
         				"initFromTree", m_bInitFromTree.get(),
-                        "pattern" , m_pPattern.get() + ""
+                        "pattern" , m_pPattern.get() + "",
+                        "threads", 1
         				);
         	    treelikelihood[i] = likelihood;        		
         		likelihoodCallers.add(new TreeLikelihoodCaller(i, likelihood));
@@ -567,7 +566,7 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
     
     @Override
     protected boolean requiresRecalculation() {
-    	if (treelikelihood != null) {
+    	if (threadCount > 1) {
     		boolean requiresRecalculation = false;
     		for (SnapperTreeLikelihood b : treelikelihood) {
     			requiresRecalculation |= b.requiresRecalculation();
@@ -586,21 +585,25 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
 	@Override
 	public void store() {
         storedLogP = logP;
-    	m_core.m_bReuseCache = true;
-    	super.store();
-    	m_fStoredP0 = m_fP0;
-    	m_fStoredP1 = m_fP1;
-    	storedAscLogP = ascLogP; 
+    	if (threadCount == 1) {
+	    	m_core.m_bReuseCache = true;
+	    	m_fStoredP0 = m_fP0;
+	    	m_fStoredP1 = m_fP1;
+	    	storedAscLogP = ascLogP;
+	    	super.store();
+    	}
     }
 
 	@Override
     public void restore() {
-        logP = storedLogP;
-    	m_core.m_bReuseCache = false;
-    	super.restore();
-    	m_fP0 = m_fStoredP0;
-    	m_fP1 = m_fStoredP1;
-    	ascLogP = storedAscLogP; 
+		logP = storedLogP;
+    	if (threadCount == 1) {
+    		m_core.m_bReuseCache = false;
+    		m_fP0 = m_fStoredP0;
+    		m_fP1 = m_fStoredP1;
+    		ascLogP = storedAscLogP;
+        	super.restore();
+    	}
     }
 
 	
