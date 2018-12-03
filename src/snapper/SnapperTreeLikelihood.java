@@ -32,6 +32,7 @@ package snapper;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Callable;
@@ -43,6 +44,7 @@ import org.apache.commons.math.distribution.BetaDistribution;
 import org.apache.commons.math.distribution.BetaDistributionImpl;
 
 import beast.app.BeastMCMC;
+import beast.app.beauti.Beauti;
 import beast.core.BEASTInterface;
 import beast.core.Description;
 import beast.core.Input;
@@ -288,7 +290,8 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
         				"branchRateModel", duplicate(branchRateModelInput.get(), i), 
         				"initFromTree", m_bInitFromTree.get(),
                         "pattern" , m_pPattern.get() + "",
-                        "threads", 1
+                        "threads", 1,
+                        "useBetaRootPrior", useBetaRootPriorInput.get()                        
         				);
         	    treelikelihood[i] = likelihood;        		
         		likelihoodCallers.add(new TreeLikelihoodCaller(i, likelihood));
@@ -525,6 +528,7 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
 					break;
 				}
 				logP += (double)freq * siteL;
+				// System.out.println(Arrays.toString(m_data2.getPattern(id)) + " " + id + " " + (freq * siteL));
 			}
 			// correction for constant sites. If we are sampling the numbers of constant sites 
 			// (stored in ascSiteCount) then we include these probabilities. Otherwise we 
@@ -766,5 +770,15 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
 		
 		return freqs.f;
 	}
+
+    @Override
+    public List<Input<?>> listInputs() {
+    	List<Input<?>> list =  super.listInputs();
+    	if (!Beauti.isInBeauti() && System.getProperty("beast.is.junit.testing") == null) {
+    		// do not expose internal likelihoods to BEAUti or junit tests
+    		list.add(likelihoodsInput);
+    	}
+    	return list;
+    }
 
 } // class SnapperTreeLikelihood
