@@ -216,8 +216,12 @@ public class QMatrix  extends AbstractMatrix {
     	theta=1.0/theta;
 //		setQ(/* a= */ new double[]{u, -(u+v), 0, 0},
 //			 /* b= */ new double[]{0, 0.5*theta/2, -0.5*theta/2, 0});
-		setQ(/* a= */ new double[]{theta/2, -theta, 0, 0},
-			 /* b= */ new double[]{0, 1, -1, 0});
+//		setQ(/* a= */ new double[]{theta/2, -theta, 0, 0},
+//			 /* b= */ new double[]{0, 1, -1, 0});
+
+    	// scaled so branch lengths are in units of expected number of substitutions per site
+		setQ(/* a= */ new double[]{1/2, -1, 0, 0},
+				 /* b= */ new double[]{0, theta, -theta, 0});
     }
     
     
