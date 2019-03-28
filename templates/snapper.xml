@@ -94,7 +94,24 @@
             beast.evolution.tree.coalescent.BayesianSkyline.treeIntervals,
             beast.evolution.tree.coalescent.BayesianSkyline.groupSizes,
             beast.evolution.tree.coalescent.BayesianSkyline.popSizes,
-            beast.evolution.speciation.YuleModel.originHeight
+            beast.evolution.speciation.YuleModel.originHeight,
+            snapper.SnapSubstitutionModel.frequencies,
+            snapper.SnapperTreeLikelihood.data,
+            snapper.SnapperTreeLikelihood.scaling,
+            snapper.SnapperTreeLikelihood.siteModel,
+            snapper.SnapperTreeLikelihood.branchRateModel,
+            snapper.SnapperTreeLikelihood.initFromTree,
+            snapper.SnapperTreeLikelihood.pattern,
+            snapper.SnapperTreeLikelihood.useTipDates,
+            snapper.SnapperTreeLikelihood.useAmbiguities,
+            snapper.SnapperTreeLikelihood.tree,
+            snapper.SnapperTreeLikelihood.dominant,
+            snapper.SnapperTreeLikelihood.ascSiteCount,
+            snapper.SnapperTreeLikelihood.totalSiteCount,
+            snapper.SnapperTreeLikelihood.useTipLikelihoods,
+            snapper.SnapperTreeLikelihood.implementation,
+            snapper.SnapperTreeLikelihood.proportions,
+            snapper.SnapperTreeLikelihood.threads
             "
         buttonLabelMap="beast.app.beauti.BeautiInitDlg.&gt;&gt; details=Edit parameters"
     >
@@ -107,10 +124,12 @@
         />
 		<mergepoint id="aux-partitions-panels"/>
 
-		<panel spec="BeautiPanelConfig" panelname="Site Model" tiptext="Site model and substitution model specifications"
-            path="siteModel"
-            hasPartitions="SiteModel" icon="3.png.x" forceExpansion="TRUE"
+        <panel spec='beast.app.beauti.BeautiPanelConfig' panelname="Model Parameters" tiptext="Specification of model parameters"
+            path='distribution/distribution[id="likelihood"]/distribution'
+            hasPartitions="none" icon='4.png' forceExpansion='TRUE'
+            buttonStatus='NONE' type='snapper.SnapperTreeLikelihood'
         />
+
 		<mergepoint id="aux-sitemodel-panels"/>
 
 <!--
@@ -164,8 +183,8 @@
         </data>
 
 			<parameter name="stateNode" id="snapperTheta.t:$(n)" lower="1e-10" upper="10" spec="parameter.RealParameter">0.008</parameter>
-          	<parameter name="stateNode" id="snapperU.s:$(n)" value="1.0" lower="0.0" spec="parameter.RealParameter" />
-          	<parameter name="stateNode" id="snapperV.s:$(n)" value="1.0" lower="0.0" spec="parameter.RealParameter" />
+          	<parameter name="stateNode" id="snapperU.s:$(n)" value="1.0" lower="0.0" spec="parameter.RealParameter" estimate="false"/>
+          	<parameter name="stateNode" id="snapperV.s:$(n)" value="1.0" lower="0.0" spec="parameter.RealParameter" estimate="false"/>
 
             <distribution spec="snapper.SnapperTreeLikelihood" id="snapperTreeLikelihood.$(n)" initFromTree="false" pattern="theta" >
                 <data idref="snapper.$(n)"/>
@@ -193,7 +212,7 @@
 
             <!--plugin spec="beast.evolution.tree.RandomTree" id="RandomTree.t:$(n)" estimate="false" trait="@datetrait.$(n)" initial="@Tree.t:$(n)"-->
             <plugin spec="beast.evolution.tree.RandomTree" id="RandomTree.t:$(n)" estimate="false" initial="@Tree.t:$(n)">
-                <taxa idref="data"/>
+                <taxa idref="snapper.$(n)"/>
                 <populationModel id="ConstantPopulation0.t:$(n)" spec="ConstantPopulation">
             		<popSize id="randomPopSize.t:$(n)" spec="parameter.RealParameter" value="1"/>
 	            </populationModel>
@@ -225,6 +244,7 @@
     	    <operator id="SnapperNodeBudger.t:$(n)" spec="snap.operators.NodeBudger" weight="5" size="0.5" tree="@Tree.t:$(n)"/>
         	<operator id="SnapperGammaMover.t:$(n)" spec="snap.operators.GammaMover" scale="0.75" weight="1" coalescenceRate="@snapperTheta.t:$(n)"/>
 	        <operator id="SnapperRateMixer.t:$(n)" spec="snap.operators.RateMixer" scaleFactors="0.25" weight="1" tree="@Tree.t:$(n)" coalescenceRate="@snapperTheta.t:$(n)"/>
+        	<operator id='SnapperMutationMover.s:$(n)' spec='snap.operators.MutationMover' window="0.1" weight="1" u='@snapperU.s:$(n)' v='@snapperV.s:$(n)'/>
 
 
 
@@ -265,6 +285,7 @@
             <connect srcID="SnapperNodeBudger.c:$(n)"         targetID="mcmc" inputName="operator" if="inlikelihood(Tree.t:$(n)) and Tree.t:$(n)/estimate=true">Budge nodes of tree of partition t:$(n)</connect>
             <connect srcID="SnapperGammaMover.c:$(n)"         targetID="mcmc" inputName="operator" if="inlikelihood(Tree.t:$(n)) and Tree.t:$(n)/estimate=true">Move gammas of partition t:$(n)</connect>
             <connect srcID="SnapperRateMixer.c:$(n)"          targetID="mcmc" inputName="operator" if="inlikelihood(Tree.t:$(n)) and Tree.t:$(n)/estimate=true">Mix rates of partition t:$(n)</connect>
+            <connect srcID="SnapperMutationMover.s:$(n)"      targetID="mcmc" inputName="operator" if="inlikelihood(snapperU.s:$(n)) and snapperU.s:$(n)/estimate=true">Move mutations of partition t:$(n)</connect>
 
             <connect srcID="StrictClockRateScaler.c:$(n)"     targetID="mcmc" inputName="operator" if="inlikelihood(clockRate.c:$(n)) and clockRate.c:$(n)/estimate=true">Scale clock rate of partition c:$(n)</connect>
             <connect srcID="YuleBirthRateScaler.t:$(n)"       targetID="mcmc" inputName="operator" if="inposterior(birthRate.t:$(n)) and birthRate.t:$(n)/estimate=true">Scales birth rate of Yule prior for partition t:$(n)</connect>
@@ -308,7 +329,7 @@
         <subtemplate id="RandomTree" class="beast.evolution.tree.RandomTree" mainid="RandomTree.t:$(n)">
 <![CDATA[
             <tree spec="beast.evolution.tree.RandomTree" id="RandomTree.t:$(n)" estimate="false" initial="@Tree.t:$(n)">
-                <taxa idref="data"/>
+                <taxa idref="snapper.$(n)"/>
                 <populationModel id="ConstantPopulation0.t:$(n)" spec="ConstantPopulation">
             		<popSize id="randomPopSize.t:$(n)" spec="parameter.RealParameter" value="1"/>
 	            </populationModel>
@@ -320,14 +341,14 @@
 
         <subtemplate id="ClusterTree" class="beast.util.ClusterTree" mainid="ClusterTree.t:$(n)">
 <![CDATA[
-        <tree spec="beast.util.ClusterTree" id="ClusterTree.t:$(n)" initial="@Tree.t:$(n)" clusterType="upgma" estimate="false" taxa="@$(n)"/>
+        <tree spec="beast.util.ClusterTree" id="ClusterTree.t:$(n)" initial="@Tree.t:$(n)" clusterType="upgma" estimate="false" taxa="@snapper.$(n)"/>
 ]]>
         </subtemplate>
 
 <!-- Newick tree -->
         <subtemplate id="NewickTree" class="beast.util.TreeParser" mainid="NewickTree.t:$(n)">
 <![CDATA[
-        <tree_ spec="beast.util.TreeParser" id="NewickTree.t:$(n)" initial="@Tree.t:$(n)" estimate="false" taxa="@$(n)" newick=""/>
+        <tree_ spec="beast.util.TreeParser" id="NewickTree.t:$(n)" initial="@Tree.t:$(n)" estimate="false" taxa="@snapper.$(n)" newick=""/>
 ]]>
         </subtemplate>
 
