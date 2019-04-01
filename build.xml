@@ -53,7 +53,7 @@
         description="Clean and Build all run-time stuff">
 	</target>
 
-	<!-- clean previous build, compile Java source code, and Junit test, and make the snap.jar -->
+	<!-- clean previous build, compile Java source code, and Junit test, and make the snapper.jar -->
 	<target name="test" depends="clean,compile-all,junit,dist_all_snapper"
         description="Clean and Build all run-time stuff">
 	</target>
@@ -227,15 +227,15 @@
 			<fileset file="version.xml"/>
 		</copy>
 		<copy todir="${Add_on_dir}/lib">
-			<fileset dir="${dist}" includes="snap.addon.jar" />
+			<fileset dir="${dist}" includes="snapper.addon.jar" />
 		</copy>
 		<copy todir="${Add_on_dir}">
-			<fileset dir="${dist}" includes="snap.src.jar" />
+			<fileset dir="${dist}" includes="snapper.src.jar" />
 		</copy>
-<!--
 		<copy todir="${Add_on_dir}/templates">
 			<fileset file="templates/snapper.xml" />
 		</copy>
+<!--		
         <copy file="doc/snapper.pdf" tofile="${Add_on_dir}/doc/snapper.pdf" />
 -->        
         <copy todir="${Add_on_dir}/examples" >

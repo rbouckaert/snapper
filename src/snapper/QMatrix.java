@@ -210,6 +210,12 @@ public class QMatrix  extends AbstractMatrix {
     }
 
     public void setQ(double u, double v, double theta) {
+//    	u and v are ignored
+//    	By ignoring u and v, we're saying forward and backwards mutation is equal to one another.
+//    	Computationally we're able to exploit the tridiagonal matrix if the forward:backward ratio = 1,
+//    	if we want the forward:backward ratio to vary then we'll just have to add an additional slower routine to
+//    	solve the denser matrices. 
+
     	if (Q.length != N * N) {
     		throw new IllegalArgumentException("Exepected matrix of site " + N + "x" + N);
     	}
