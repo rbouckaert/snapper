@@ -111,7 +111,9 @@
             snapper.SnapperTreeLikelihood.useTipLikelihoods,
             snapper.SnapperTreeLikelihood.implementation,
             snapper.SnapperTreeLikelihood.proportions,
-            snapper.SnapperTreeLikelihood.threads
+            snapper.SnapperTreeLikelihood.threads,
+            snapper.SnapSubstitutionModel.mutationRateU,
+            snapper.SnapSubstitutionModel.mutationRateV
             "
         buttonLabelMap="beast.app.beauti.BeautiInitDlg.&gt;&gt; details=Edit parameters"
     >

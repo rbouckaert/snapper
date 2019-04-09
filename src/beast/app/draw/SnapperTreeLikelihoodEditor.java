@@ -31,7 +31,7 @@ public class SnapperTreeLikelihoodEditor extends ListInputEditor {
     
     SnapSubstitutionModel substModel;
     Data data;
-    JButton muButton;
+    //JButton muButton;
     
     @Override
     public void init(Input<?> input, BEASTInterface plugin, int itemNr, ExpandOption bExpand, boolean bAddButtons) {
@@ -52,10 +52,10 @@ public class SnapperTreeLikelihoodEditor extends ListInputEditor {
             	substModel = (SnapSubstitutionModel) ((SiteModel.Base) plugin2.siteModelInput.get()).substModelInput.get();
             	doc.getInputEditorFactory().addInputs(m_listBox, substModel, this, null, doc);
             	doc.getInputEditorFactory().addInputs(m_listBox, plugin2, this, null, doc);
-            	muButton = new JButton("Calc mutation rates");
-            	muButton.setToolTipText("Calcaulate mutation rates based on data in the alignment");
-            	muButton.addActionListener(e -> setUpMutationRates());
-            	add(muButton);
+            	//muButton = new JButton("Calc mutation rates");
+            	//muButton.setToolTipText("Calcaulate mutation rates based on data in the alignment");
+            	//muButton.addActionListener(e -> setUpMutationRates());
+            	//add(muButton);
             }
         }
 		add(m_listBox);
