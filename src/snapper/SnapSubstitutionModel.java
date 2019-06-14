@@ -13,6 +13,7 @@ public class SnapSubstitutionModel extends SubstitutionModel.Base {
 	public Input<RealParameter> m_pU = new Input<RealParameter>("mutationRateU", "Instantaneous rate of mutating from the 0 allele to the 1 alelle");
 	public Input<RealParameter> m_pV = new Input<RealParameter>("mutationRateV", "Instantaneous rate of mutating from the 1 allele to the 0 alelle");
 	public Input<RealParameter> thetaInput = new Input<RealParameter>("theta", "population size parameter with one value for each node in the tree");
+	public Input<RealParameter> coalesentRateInput = new Input<RealParameter>("coalescentRate", "coalescent rate parameter with one value for each node in the tree", Validate.XOR, thetaInput);
 	
 	public SnapSubstitutionModel() {
 		frequenciesInput.setRule(Validate.OPTIONAL);

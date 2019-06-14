@@ -199,29 +199,55 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
     	
     	TreeInterface tree = treeInput.get();
     	m_substitutionmodel = ((SnapSubstitutionModel)m_siteModel.substModelInput.get());
-    	Input<RealParameter> thetaInput = m_substitutionmodel.thetaInput;
-		
-		Double [] values = new Double[tree.getNodeCount()];
-		String sTheta = "";
-		if (m_bInitFromTree.get() == true) {
-			tree.getMetaData(tree.getRoot(), values, m_pPattern.get());
-			for (Double d : values) {
-				sTheta += d + " ";
+    	if (m_substitutionmodel.thetaInput.get() != null) {
+    		// parameterised as thetas
+	    	Input<RealParameter> thetaInput = m_substitutionmodel.thetaInput;
+			
+			Double [] values = new Double[tree.getNodeCount()];
+			String sTheta = "";
+			if (m_bInitFromTree.get() == true) {
+				tree.getMetaData(tree.getRoot(), values, m_pPattern.get());
+				for (Double d : values) {
+					sTheta += d + " ";
+				}
+			} else {
+		    	List<Double> sValues = thetaInput.get().valuesInput.get();
+		        for (int i = 0; i < values.length; i++) {
+		            values[i] = new Double(sValues.get(i % sValues.size()));
+		            sTheta += values[i] + " ";
+		        }
+				tree.setMetaData(tree.getRoot(), values, m_pPattern.get());
 			}
-		} else {
-	    	List<Double> sValues = thetaInput.get().valuesInput.get();
-	        for (int i = 0; i < values.length; i++) {
-	            values[i] = new Double(sValues.get(i % sValues.size()));
-	            sTheta += values[i] + " ";
-	        }
-			tree.setMetaData(tree.getRoot(), values, m_pPattern.get());
-		}
-		RealParameter pTheta = thetaInput.get();
-		RealParameter theta = new RealParameter();
-		theta.initByName("value", sTheta, "upper", pTheta.getUpper(), "lower", pTheta.getLower(), "dimension", values.length);
-		theta.setID(pTheta.getID());
-		thetaInput.get().assignFrom(theta);
-	
+			RealParameter pTheta = thetaInput.get();
+			RealParameter theta = new RealParameter();
+			theta.initByName("value", sTheta, "upper", pTheta.getUpper(), "lower", pTheta.getLower(), "dimension", values.length);
+			theta.setID(pTheta.getID());
+			thetaInput.get().assignFrom(theta);
+    	} else {
+    		// parameterised as coalescentRates
+	    	Input<RealParameter> coalesecntRateInput = m_substitutionmodel.coalesentRateInput;
+			
+			Double [] values = new Double[tree.getNodeCount()];
+			String sRates = "";
+			if (m_bInitFromTree.get() == true) {
+				tree.getMetaData(tree.getRoot(), values, m_pPattern.get());
+				for (Double d : values) {
+					sRates += 2.0/d + " ";
+				}
+			} else {
+		    	List<Double> sValues = coalesecntRateInput.get().valuesInput.get();
+		        for (int i = 0; i < values.length; i++) {
+		            values[i] = new Double(sValues.get(i % sValues.size()));
+		            sRates += values[i] + " ";
+		        }
+				tree.setMetaData(tree.getRoot(), values, m_pPattern.get());
+			}
+			RealParameter pCoalescentRate = coalesecntRateInput.get();
+			RealParameter coalescentRate = new RealParameter();
+			coalescentRate.initByName("value", sRates, "upper", pCoalescentRate.getUpper(), "lower", pCoalescentRate.getLower(), "dimension", values.length);
+			coalescentRate.setID(pCoalescentRate.getID());
+			coalesecntRateInput.get().assignFrom(coalescentRate);
+    	}
     	
     	m_data2 = (Data) dataInput.get();
     	Integer [] nSampleSizes = m_data2.getStateCounts().toArray(new Integer[0]);
@@ -667,12 +693,13 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
 
         // First update the transition probability matrix(ices) for this branch
         if (!node.isRoot() && (update != Tree.IS_CLEAN || branchTime != m_branchLengths[nodeIndex] ||
-        		m_substitutionmodel.thetaInput.get().isDirty(nodeIndex))) {
+        		(m_substitutionmodel.thetaInput.get() != null && m_substitutionmodel.thetaInput.get().isDirty(nodeIndex)) || 
+        		(m_substitutionmodel.coalesentRateInput.get() != null && m_substitutionmodel.coalesentRateInput.get().isDirty(nodeIndex)) )) {
         		//m_substitutionmodel.thetaInput.get().getStoredValue(nodeIndex) != m_substitutionmodel.thetaInput.get().getValue(nodeIndex)
             m_branchLengths[nodeIndex] = branchTime;
             final Node parent = node.getParent();
             m_core.setNodeMatrixForUpdate(nodeIndex);
-    		Double[] theta = m_substitutionmodel.thetaInput.get().getValues();
+    		Double[] theta = getThetas();
     		double u = m_substitutionmodel.m_pU.get().getValue();
     		double v = m_substitutionmodel.m_pV.get().getValue();
 			double[] fCategoryRates = m_siteModel.getCategoryRates(null);
@@ -734,7 +761,20 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
         return update;
     } // traverse
 
-    ChebyshevPolynomial freqs = null;
+    private Double[] getThetas() {
+		Double [] thetas;
+		if (m_substitutionmodel.thetaInput.get() != null) {
+			thetas = m_substitutionmodel.thetaInput.get().getValues();
+		} else {
+			thetas = m_substitutionmodel.coalesentRateInput.get().getValues();
+			for (int i = 0; i < thetas.length; i++) {
+				thetas[i] = 2.0/thetas[i];
+			}
+		}
+		return thetas;
+	}
+
+	ChebyshevPolynomial freqs = null;
     
 	// returns root allele frequencies
 	private double[] getFrequencies() {
@@ -747,7 +787,7 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
 			} else {
 	    		double u = m_substitutionmodel.m_pU.get().getValue();
 	    		double v = m_substitutionmodel.m_pV.get().getValue();
-	    		Double [] thetas = m_substitutionmodel.thetaInput.get().getValues();
+	    		Double [] thetas = getThetas();
 	    		double theta = thetas[thetas.length - 1]; // theta for the root	    				
 
 	    		BetaDistribution distr;
@@ -873,7 +913,7 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
     		  throw new IllegalArgumentException("N must be 9, 17 or 33");
     	  }
               freqs = new ChebyshevPolynomial(N);
-              Double [] thetas = m_substitutionmodel.thetaInput.get().getValues();
+	    	  Double [] thetas = getThetas();
               double theta = thetas[thetas.length - 1]; // theta for the root  
               //double theta = 1;
               for (int j = 1; j < N; j++) {
