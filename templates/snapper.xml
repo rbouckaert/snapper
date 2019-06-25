@@ -113,7 +113,8 @@
             snapper.SnapperTreeLikelihood.proportions,
             snapper.SnapperTreeLikelihood.threads,
             snapper.SnapSubstitutionModel.mutationRateU,
-            snapper.SnapSubstitutionModel.mutationRateV
+            snapper.SnapSubstitutionModel.mutationRateV,
+            snapper.SnapSubstitutionModel.theta
             "
         buttonLabelMap="beast.app.beauti.BeautiInitDlg.&gt;&gt; details=Edit parameters"
     >
@@ -184,18 +185,18 @@
             <rawdata idref='$(n)'/>
         </data>
 
-			<parameter name="stateNode" id="snapperTheta.t:$(n)" lower="1e-10" upper="10" spec="parameter.RealParameter">0.008</parameter>
+			<parameter name="stateNode" id="snapperCoalescentRate.t:$(n)" lower="1e-10" upper="10" spec="parameter.RealParameter">0.008</parameter>
           	<parameter name="stateNode" id="snapperU.s:$(n)" value="1.0" lower="0.0" spec="parameter.RealParameter" estimate="false"/>
           	<parameter name="stateNode" id="snapperV.s:$(n)" value="1.0" lower="0.0" spec="parameter.RealParameter" estimate="false"/>
 
-            <distribution spec="snapper.SnapperTreeLikelihood" id="snapperTreeLikelihood.$(n)" initFromTree="false" pattern="theta" >
+            <distribution spec="snapper.SnapperTreeLikelihood" id="snapperTreeLikelihood.$(n)" initFromTree="false" pattern="coalescentRate" >
                 <data idref="snapper.$(n)"/>
                 <tree idref="Tree.t:$(n)"/>
                 <siteModel spec="sitemodel.SiteModel" id="SnapperSiteModel.s:$(n)">
                     <substModel spec="snapper.SnapSubstitutionModel" id="SnapperSubstModel.s:$(n)">
                         <mutationRateU idref="snapperU.s:$(n)"/>
                         <mutationRateV idref="snapperV.s:$(n)"/>
-            	        <theta idref="snapperTheta.t:$(n)"/>
+            	        <coalescentRate idref="snapperCoalescentRate.t:$(n)"/>
                     </substModel>
                 </siteModel>
                 <branchRateModel spec="StrictClockModel" id="StrictClock.c:$(n)">
@@ -206,7 +207,7 @@
 	        <prior id="ClockPrior.c:$(n)" x="@clockRate.c:$(n)"><distr spec="beast.math.distributions.Uniform" upper="Infinity"/></prior>
 	        <prior id="SnapperMutationRateUPrior.s:$(n)" x="@snapperU.s:$(n)"><distr spec="Gamma" alpha="1000" beta="0.001"/></prior>
 	        <prior id="SnapperMutationRateVPrior.s:$(n)" x="@snapperV.s:$(n)"><distr spec="Gamma" alpha="1000" beta="0.001"/></prior>
-	        <prior id="SnapperThetaPrior.s:$(n)" x="@snapperTheta.t:$(n)"><distr spec="Gamma" alpha="1000" beta="0.001"/></prior>
+	        <prior id="SnapperCoalescentRatePrior.s:$(n)" x="@snapperCoalescentRate.t:$(n)"><distr spec="Gamma" alpha="1000" beta="0.001"/></prior>
 
             <!-- tree and its properties -->
             <taxonset id="TaxonSet.$(n)" spec="beast.evolution.alignment.TaxonSet" alignment="@snapper.$(n)" />
@@ -227,6 +228,8 @@
 
             <plugin id="TreeHeight.t:$(n)" spec="beast.evolution.tree.TreeHeightLogger" tree="@Tree.t:$(n)"/>
 
+	        <log id='ThetaLogger' spec='snap.ThetaLogger' coalescenceRate='@snapperCoalescentRate.t:$(n)'/>
+
             <logger id="treelog.t:$(n)" spec="beast.core.Logger" logEvery="1000" fileName="$(tree).trees" mode="tree">
 	            <log id="TreeWithMetaDataLogger.t:$(n)" spec="beast.evolution.tree.TreeWithMetaDataLogger" tree="@Tree.t:$(n)">
 	            </log>
@@ -244,8 +247,8 @@
 
 	        <operator id="SnapperNodeSwapper.t:$(n)" spec="snap.operators.NodeSwapper" weight="0.5" tree="@Tree.t:$(n)"/>
     	    <operator id="SnapperNodeBudger.t:$(n)" spec="snap.operators.NodeBudger" weight="5" size="0.5" tree="@Tree.t:$(n)"/>
-        	<operator id="SnapperGammaMover.t:$(n)" spec="snap.operators.GammaMover" scale="0.75" weight="1" coalescenceRate="@snapperTheta.t:$(n)"/>
-	        <operator id="SnapperRateMixer.t:$(n)" spec="snap.operators.RateMixer" scaleFactors="0.25" weight="1" tree="@Tree.t:$(n)" coalescenceRate="@snapperTheta.t:$(n)"/>
+        	<operator id="SnapperGammaMover.t:$(n)" spec="snap.operators.GammaMover" scale="0.75" weight="1" coalescenceRate="@snapperCoalescentRate.t:$(n)"/>
+	        <operator id="SnapperRateMixer.t:$(n)" spec="snap.operators.RateMixer" scaleFactors="0.25" weight="1" tree="@Tree.t:$(n)" coalescenceRate="@snapperCoalescentRate.t:$(n)"/>
         	<operator id='SnapperMutationMover.s:$(n)' spec='snap.operators.MutationMover' window="0.1" weight="1" u='@snapperU.s:$(n)' v='@snapperV.s:$(n)'/>
 
 
@@ -274,12 +277,12 @@
 
             <connect srcID="SnapperMutationRateUPrior.s:$(n)" targetID="prior" inputName="distribution" if="inlikelihood(snapperU.s:$(n)) and snapperU.s:$(n)/estimate=true"/>
             <connect srcID="SnapperMutationRateVPrior.s:$(n)" targetID="prior" inputName="distribution" if="inlikelihood(snapperV.s:$(n)) and snapperV.s:$(n)/estimate=true"/>
-            <connect srcID="SnapperThetaPrior.t:$(n)"         targetID="prior" inputName="distribution" if="inlikelihood(snapperTheta.t:$(n)) and snapperTheta.t:$(n)/estimate=true"/>
+            <connect srcID="SnapperCoalescentRatePrior.t:$(n)" targetID="prior" inputName="distribution" if="inlikelihood(snapperCoalescentRate.t:$(n)) and snapperCoalescentRate.t:$(n)/estimate=true"/>
 
             <connect srcID="Tree.t:$(n)"                      targetID="state" inputName="stateNode" if="inposterior(Tree.t:$(n)) and Tree.t:$(n)/estimate=true"/>
             <connect srcID="snapperU.s:$(n)"       			  targetID="state" inputName="stateNode" if="inlikelihood(snapperU.s:$(n)) and snapperU.s:$(n)/estimate=true"/>
             <connect srcID="snapperV.s:$(n)"                  targetID="state" inputName="stateNode" if="inlikelihood(snapperV.s:$(n)) and snapperV.s:$(n)/estimate=true"/>
-            <connect srcID="snapperTheta.t:$(n)"              targetID="state" inputName="stateNode" if="inlikelihood(snapperTheta.t:$(n)) and snapperTheta.t:$(n)/estimate=true"/>
+            <connect srcID="snapperCoalescentRate.t:$(n)"     targetID="state" inputName="stateNode" if="inlikelihood(snapperCoalescentRate.t:$(n)) and snapperCoalescentRate.t:$(n)/estimate=true"/>
             <connect srcID="clockRate.c:$(n)"                 targetID="state" inputName="stateNode" if="inlikelihood(clockRate.c:$(n)) and clockRate.c:$(n)/estimate=true"/>
             <connect srcID="birthRate.t:$(n)"                 targetID="state" inputName="stateNode" if="inposterior(YuleModel.t:$(n)) and inposterior(Tree.t:$(n)) and birthRate.t:$(n)/estimate=true"/>
 
@@ -310,10 +313,11 @@
             <connect srcID="TreeHeight.t:$(n)"                targetID="tracelog" inputName="log" if="inposterior(Tree.t:$(n))  and Tree.t:$(n)/estimate=true"/>
             <connect srcID="snapperU.s:$(n)"                  targetID="tracelog" inputName="log" if="inposterior(snapperU.s:$(n)) and snapperU.s:$(n)/estimate=true"/>
             <connect srcID="snapperV.s:$(n)"                  targetID="tracelog" inputName="log" if="inlikelihood(snapperV.s:$(n)) and snapperV.s:$(n)/estimate=true"/>
-            <connect srcID="snapperTheta.t:$(n)"              targetID="tracelog" inputName="log" if="inlikelihood(snapperTheta.t:$(n)) and snapperTheta.t:$(n)/estimate=true"/>
+            <connect srcID="snapperCoalescentRate.t:$(n)"     targetID="tracelog" inputName="log" if="inlikelihood(snapperCoalescentRate.t:$(n)) and snapperCoalescentRate.t:$(n)/estimate=true"/>
             <connect srcID="clockRate.c:$(n)"                 targetID="tracelog" inputName="log" if="inlikelihood(clockRate.c:$(n)) and clockRate.c:$(n)/estimate=true"/>
             <connect srcID="YuleModel.t:$(n)"                 targetID="tracelog" inputName="log" if="inposterior(YuleModel.t:$(n)) and inposterior(Tree.t:$(n)) and Tree.t:$(n)/estimate=true"/>
             <connect srcID="birthRate.t:$(n)"                 targetID="tracelog" inputName="log" if="inposterior(YuleModel.t:$(n)) and birthRate.t:$(n)/estimate=true"/>
+            <connect srcID='ThetaLogger'                      targetID='tracelog' inputName='log' if="inlikelihood(snapperCoalescentRate.t:$(n)) and snapperCoalescentRate.t:$(n)/estimate=true"/>
 
             <connect srcID="YuleBirthRatePrior.t:$(n)"        targetID="prior" inputName="distribution" if="inposterior(YuleModel.t:$(n)) and inposterior(Tree.t:$(n)) and birthRate.t:$(n)/estimate=true">Prior on Yule birth rate for partition s:$(n)</connect>
 
