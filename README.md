@@ -22,3 +22,13 @@
 
 Marnus Stoltz, Boris Bauemer, Remco Bouckaert, Colin Fox, Gordon Hiscott, David Bryant.
 Bayesian inference of species trees using diffusion models, under review, 2019.
+
+
+## Questions about snapper
+
+BEAST user list: [https://groups.google.com/forum/#!forum/beast-users](https://groups.google.com/forum/#!forum/beast-users)
+
+Marnus Stoltz: [stoltzstep@gmail.com](stoltzstep@gmail.com)
+
+David Bryant: [david.bryant@otago.ac.nz](david.bryant@otago.ac.nz)
+
