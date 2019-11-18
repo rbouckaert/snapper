@@ -21,7 +21,7 @@
 ## Citing snapper
 
 Marnus Stoltz, Boris Bauemer, Remco Bouckaert, Colin Fox, Gordon Hiscott, David Bryant.
-Bayesian inference of species trees using diffusion models, under review, 2019.
+Bayesian inference of species trees using diffusion models, arXiv preprint [arXiv:1909.07276](https://arxiv.org/abs/1909.07276), 2019.
 
 
 ## Questions about snapper
