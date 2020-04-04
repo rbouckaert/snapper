@@ -79,13 +79,14 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
 
 
 	public Input<Boolean> m_usenNonPolymorphic = new Input<Boolean>("non-polymorphic", 
-			"Check box only if constant sites have been left in the data and are to be included in the likelihood calculation. " +
-			"Leave unchecked if all but the variable sites have been removed.",
+			"Check box if there was no pre-filtering of sites to remove all constant sites. " +
+			"Leave unchecked if constant sites had been removed or systematically not selected (e.g. SNP data). The likelihoods will be adjusted according.",
 			//"Whether to use non-polymorphic data in the sequences. " +
 			//"If true, constant-sites in the data will be used as part of the likelihood calculation. " +
 			//"If false (the default) constant sites will be removed from the sequence data and a normalization factor is " +
 			//"calculated for the likelihood.", 
 			true);
+	public Input<Integer> m_numUnfilteredSitesInput = new Input<Integer>("number of sites which were not filtered to remove constant sites",  "Number of sites not pre-filtered.  (default =0). This setting ignored unless non-polymorphic set to TRUE", 0);
 	public Input<IntegerParameter> ascSiteCountInput = new Input<IntegerParameter>("ascSiteCount", "Counts for number of ascertained sites");
 	public Input<IntegerParameter> totalSiteCountInput = new Input<IntegerParameter>("totalSiteCount","Number of sites including those removed by ascertainment");
 	
@@ -125,6 +126,7 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
 	
 	/** some variable for shadowing inputs **/
 	boolean m_bUsenNonPolymorphic;
+	int 	m_numUnfilteredSites;
 	boolean m_bMutationOnlyAtRoot;
 	boolean m_bHasDominantMarkers;
 //	double [] fSiteProbs;
@@ -192,6 +194,7 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
     	}
 
     	m_bUsenNonPolymorphic = m_usenNonPolymorphic.get();
+    	m_numUnfilteredSites = m_numUnfilteredSitesInput.get();
     	m_bMutationOnlyAtRoot = mutationOnlyAtRoot.get();
     	m_bHasDominantMarkers = hasDominantMarkers.get();
     	
@@ -571,7 +574,7 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
 							  (double)ascSiteCount.getValue(1) * Math.log(m_fP1);
 					logP += ascLogP;
 				} else {
-					logP -= (double) m_data2.getSiteCount() * Math.log(1.0 - m_fP0 - m_fP1);
+					logP -= (double) (m_data2.getSiteCount() - m_numUnfilteredSites) * Math.log(1.0 - m_fP0 - m_fP1); //Correct likelihoods for those sites which were pre-filtered (removing constant sites)
 				}
 			}				
 			
