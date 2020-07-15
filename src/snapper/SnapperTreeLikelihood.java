@@ -48,6 +48,7 @@ import org.apache.commons.math3.special.Beta;
 import beast.app.BeastMCMC;
 import beast.app.beauti.Beauti;
 import beast.core.BEASTInterface;
+import beast.core.Citation;
 import beast.core.Description;
 import beast.core.Input;
 import beast.core.State;
@@ -68,7 +69,7 @@ import snap.NodeData;
 
 
 @Description("Implements a tree Likelihood Function for Single Site Sorted-sequences on a tree.") 
-
+@Citation(value="M Stolz, B Baumer, R Bouckaert, C Fox, G Hiscott, D Bryant, Bayesian Inference of Species Trees using Diffusion Models, Systematic Biology, 2020",year=2020,DOI="10.1093/sysbio/syaa051")
 public class SnapperTreeLikelihood extends TreeLikelihood {
 //	public Input<Data> m_pData = new Input<Data>("data", "set of alignments");
 //	public Input<Tree> m_pTree = new Input<Tree>("tree", "tree with phylogenetic relations");

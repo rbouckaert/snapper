@@ -1,8 +1,8 @@
 <!-- Build snapper. -->
 <project basedir="." default="build_all_snapper" name="BUILD_snapper">
 	<description>
-	    Build snapper. 
-            Also used by Hudson snapper project. 
+	    Build snapper.
+            Also used by Hudson snapper project.
 	    JUnit test is available for this build.
 	    $Id: build_snapper.xml $
 	</description>
@@ -21,7 +21,7 @@
         <property name="libSNAPP" location="../SNAPP/lib" />
         <property name="SNAPPclasspath" location="../SNAPP/build" />
         <property name="SNAPPbuild" location="../SNAPP/build" />
-        
+
 	<property name="report"  value="${build}/junitreport"/>
 	<property name="main_class_snapper" value="beast.app.beastapp.BeastMain"/>
 
@@ -68,13 +68,14 @@
 		<mkdir dir="${build}" />
 
 		<!-- Compile the java code from ${src} into ${build} /bin -->
-		<javac srcdir="${src}" destdir="${build}" classpathref="classpath" 
+		<javac srcdir="${src}" destdir="${build}" classpathref="classpath"
 		       fork="true" includeantruntime='false'
 			   source="1.8"
-		       target="1.8"			
+		       target="1.8"
 		       memoryinitialsize="256m"
 		       memorymaximumsize="256m">
 			<include name="snapper/**/**" />
+			<include name="snap/**/**" />
 			<include name="beast/**/**" />
 			<!-- compile JUnit test classes -->
 			<include name="test/snapper/**" />
@@ -115,6 +116,7 @@
 			<zipgroupfileset dir="${libSNAPP}" includes="mtj.jar"/>
 			<fileset dir="${build}">
 				<include name="snapper/**/*.class" />
+				<include name="snap/**/*.class" />
 				<include name="beast/**/*.class" />
 				<include name="**/*.properties" />
 			</fileset>
@@ -128,6 +130,7 @@
 			</manifest>
 			<fileset dir="${build}">
 				<include name="snapper/**/*.class" />
+				<include name="snap/**/*.class" />
 				<include name="snapper/**/*.png" />
 				<include name="beast/**/*.class" />
 				<include name="**/*.properties" />
@@ -136,6 +139,7 @@
 		<jar jarfile="${dist}/snapper.src.jar">
 			<fileset dir="${src}">
 				<include name="snapper/**/*.java" />
+				<include name="snap/**/*.class" />
 				<include name="**/*.properties" />
 				<include name="snapper/**/*.png" />
 				<include name="snapper/**/*.xsl" />
@@ -148,7 +152,7 @@
 		<java jar="${dist}/snapper.jar" fork="true" />
 	</target>
 
-	
+
 	<!-- JUnit test -->
 	<target name="junit">
 		<mkdir dir="${report}" />
@@ -162,13 +166,13 @@
 
 			<batchtest fork="yes" todir="${report}">
 				<fileset dir="${src}">
-                    <include name="test/**/*Test.java"/>                                         
+                    <include name="test/**/*Test.java"/>
 				</fileset>
 			</batchtest>
 		</junit>
 		<echo message="JUnit test finished." />
 	</target>
-    
+
     <target name="junitreport">
 		<junitreport todir="${report}">
 			<fileset dir="${report}" includes="*.xml"/>
@@ -176,8 +180,8 @@
 		</junitreport>
 		<echo message="JUnit test report finished." />
 	</target>
-	
-	
+
+
     <target name="doc">
         <exec executable="pdflatex" dir="${basedir}/doc">
                 <arg value="snapper.tex" />
@@ -188,10 +192,10 @@
         <copy file="doc/snapper.pdf" tofile="release/common/doc/snapper.pdf" />
     </target>
 
-	
-	
+
+
 	<!-- Release -->
-	<property name="version" value="0.0.1" />
+	<property name="version" value="1.0.0" />
 	<property name="release_dir" value="release" />
 	<property name="copyright" value="snapper development team 2011-2018"/>
 
@@ -211,7 +215,7 @@
 	<property name="Windows_package_dir" value="${Windows_dir}/${snapper_name}" />
 
 
-	<target name="addon" 
+	<target name="addon"
 	        depends="build_jar_all_snapper_NoJUnitTest"
 	        description="release BEAST 2 add-on version of snapper">
 
@@ -235,9 +239,9 @@
 		<copy todir="${Add_on_dir}/templates">
 			<fileset file="templates/snapper.xml" />
 		</copy>
-<!--		
+<!--
         <copy file="doc/snapper.pdf" tofile="${Add_on_dir}/doc/snapper.pdf" />
--->        
+-->
         <copy todir="${Add_on_dir}/examples" >
 			<fileset dir="examples" includes="*.xml" />
 			<fileset dir="examples" includes="*.json" />
