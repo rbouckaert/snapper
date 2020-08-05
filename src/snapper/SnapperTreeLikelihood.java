@@ -685,7 +685,7 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
 	
 	
     /* Assumes there IS a branch rate model as opposed to traverse() */
-    int traverse(final Node node) {
+    protected int traverse(final Node node) {
 
         int update = (node.isDirty() | hasDirt);
         update = Tree.IS_FILTHY;
