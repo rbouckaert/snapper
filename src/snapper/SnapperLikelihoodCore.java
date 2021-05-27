@@ -100,7 +100,7 @@ public class SnapperLikelihoodCore extends BeerLikelihoodCore {
 		// e.printStackTrace();
 		// }
 		// System.arraycopy(b, 1, a, 0, N);
-
+		//test
 	}
 
 	@Override
