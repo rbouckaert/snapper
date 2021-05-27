@@ -101,6 +101,7 @@ public class SnapperLikelihoodCore extends BeerLikelihoodCore {
 		// }
 		// System.arraycopy(b, 1, a, 0, N);
 		//test
+		//another test
 	}
 
 	@Override
