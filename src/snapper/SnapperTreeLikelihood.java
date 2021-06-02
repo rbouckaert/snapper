@@ -288,6 +288,7 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
     		
         	calcPatternPoints(dataInput.get().getSiteCount());
         	for (int i = 0; i < threadCount; i++) {
+				
         		Alignment rawdata = dataInput.get();
         		String filterSpec = (patternPoints[i] +1) + "-" + (patternPoints[i + 1]);
         		if (rawdata.isAscertained) {
@@ -303,20 +304,23 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
         		likelihood.setID(getID() + i);
         		likelihood.getOutputs().add(this);
         		likelihoodsInput.get().add(likelihood);
-
-        		snap.FilteredAlignment filter = new snap.FilteredAlignment();
+				
+        		FilteredAlignment filter = new FilteredAlignment();
         		if (i == 0 && dataInput.get() instanceof FilteredAlignment && ((FilteredAlignment)dataInput.get()).constantSiteWeightsInput.get() != null) {
-        			filter.initByName("data", dataInput.get()/*, "userDataType", m_data.get().getDataType()*/, 
+        			
+					filter.initByName("data", dataInput.get()/*, "userDataType", m_data.get().getDataType()*/, 
         							"filter", filterSpec, 
         							"constantSiteWeights", ((FilteredAlignment)dataInput.get()).constantSiteWeightsInput.get()
         							);
         		} else {
+					
         			filter.initByName("data", dataInput.get()/*, "userDataType", m_data.get().getDataType()*/, 
         							"filter", filterSpec,
         							"userDataType", dataInput.get().getDataType()
         							);
         		}
-        		likelihood.initByName("data", filter, 
+				
+        		likelihood.initByName("data", dataInput.get(), 
         				"tree", treeInput.get(), 
         				"siteModel", duplicate((BEASTInterface) siteModelInput.get(), i), 
         				"branchRateModel", duplicate(branchRateModelInput.get(), i), 

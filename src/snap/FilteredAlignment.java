@@ -52,23 +52,26 @@ public class FilteredAlignment extends Data {
 
     @Override
     public void initAndValidate() {
+		
         parseFilterSpec();
         calcFilter();
         Alignment data = alignmentInput.get();
+		//System.out.println("HERE 1");
         m_dataType = data.getDataType();
+		//System.out.println("HERE 2");
         // see if this filter changes data type
         if (userDataTypeInput.get() != null) {
             m_dataType = userDataTypeInput.get();
             convertDataType = true;
         }
-
+		//System.out.println("HERE 3");
         if (constantSiteWeightsInput.get() != null) {
         	if (constantSiteWeightsInput.get().getDimension() != m_dataType.getStateCount()) {
         		throw new IllegalArgumentException("constantSiteWeights should be of the same dimension as the datatype " +
         				"(" + constantSiteWeightsInput.get().getDimension() + "!="+ m_dataType.getStateCount() +")");
         	}
     	}
-        
+        //System.out.println("HERE 1");
         taxaNames = data.getTaxaNames();
         stateCounts = data.getStateCounts();
         if (convertDataType && m_dataType.getStateCount() > 0) {
@@ -76,7 +79,7 @@ public class FilteredAlignment extends Data {
                 stateCounts.set(i, m_dataType.getStateCount());
         	}
         }
-
+		//System.out.println("HERE 2");
         if (alignmentInput.get().siteWeightsInput.get() != null) {
     		String str = alignmentInput.get().siteWeightsInput.get().trim();
     		String [] strs = str.split(",");
@@ -85,9 +88,10 @@ public class FilteredAlignment extends Data {
     			siteWeights[i] = Integer.parseInt(strs[i].trim());
     		}    		
         }
-
+		System.out.println("HERE 3");
         calcPatterns();
         //setupAscertainment();
+		//System.out.println("HERE 4");
     }
 
     private void parseFilterSpec() {
@@ -198,7 +202,7 @@ public class FilteredAlignment extends Data {
         counts = null;
    		counts = getCounts();
 		//sortByTaxonName(seqs);
-		
+
         for (Sequence seq : alignmentInput.get().sequenceInput.get()) {
         	if (seq instanceof SNPSequence) {
         		// it can vary over sites
@@ -223,9 +227,12 @@ public class FilteredAlignment extends Data {
 		int nTaxa = counts.size();
 		int nZeroSitesCount = 0;
 		int nAllSitesCount = 0;
+		
 		for (int i = 0; i < counts.get(0).size(); i++) {
 			// TODO: isConstant should return ALL_REDS ALL_GREEN or MIXED
+		
 			if (isConstant(i)) {
+				
 				if (counts.get(0).get(i) == 0) {
 					nZeroSitesCount++;
 				} else {
@@ -244,7 +251,7 @@ public class FilteredAlignment extends Data {
 				i--;
 			}
 		}
-
+		System.out.println("HERE 3");
 		// remove sites that have no data in some branches
 		int removed = 0;
 		int weightRemoved = 0;
