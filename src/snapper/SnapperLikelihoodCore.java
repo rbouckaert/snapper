@@ -127,26 +127,51 @@ public class SnapperLikelihoodCore extends BeerLikelihoodCore {
 	 * @param n:
 	 *            total number of lineages
 	 */
-	public void setLeafPolyFactors(int nodeIndex, int patternIndex, int r, int n) {
+	public void setLeafPolyFactors(int nodeIndex, int patternIndex, int r, int n, int [] n_max) {
+		
+
 		if (this.states[nodeIndex] == null) {
 			// set nodeStates to some non-null value, so m_core knows that it is
 			// a leaf
 			this.states[nodeIndex] = new int[nrOfPatterns];
-			this.stateMap[nodeIndex] = new int[n + 1][];
+			this.stateMap[nodeIndex] = new int[n_max[nodeIndex] + 1][];
 		}
+		//System.out.print(r);
+		//System.out.print(n);
+		//System.out.print(stateMap[nodeIndex].length);
+		//System.out.println();
+
+		
+		//if (stateMap[nodeIndex].length <= n){
+		//	r = stateMap[nodeIndex].length - 1;
+		//	n = stateMap[nodeIndex].length - 1; 	
+		//}
+		//System.out.println("HERE 2");
 		this.states[nodeIndex][patternIndex] = r;
-		int[] map = stateMap[nodeIndex][r];
+		
+		//System.out.print(r);
+		//System.out.print(n);
+		//System.out.println();
+		//System.out.print(stateMap[nodeIndex].length);
+		
+
+		
+
+	int[] map = stateMap[nodeIndex][r];
 		if (map == null) {
 			stateMap[nodeIndex][r] = new int[1];
 			stateMap[nodeIndex][r][0] = patternIndex;
 		} else {
+		
 			int[] newmap = new int[map.length + 1];
 			System.arraycopy(map, 0, newmap, 0, map.length);
 			newmap[map.length] = patternIndex;
 			stateMap[nodeIndex][r] = newmap;
 		}
+		//System.out.println("HERE 4");
 		chebPoly[0][nodeIndex][patternIndex].init(r, n);
 		chebPoly[1][nodeIndex][patternIndex].init(r, n);
+	
 	}
 
 	public void clearCache(int nNodeNrMax, int nRedsMax) {

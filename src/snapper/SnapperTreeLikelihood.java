@@ -381,15 +381,34 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
 
 		// set up Chebyshef functions for leaf observations
 		// not particularly efficient, but we only do this once
-		double [] f = new double[N];
-    	for (int i = 0; i < numPatterns; i++) {
+		
+		int [] n_max = new int[m_data2.getPattern(0).length];
+
+		for (int i = 0; i < numPatterns; i++) {
+			    
             int [] thisSite = m_data2.getPattern(i);
             int [] lineageCounts = m_data2.getPatternLineagCounts(i);
             
             for (int j = 0; j < thisSite.length; j++) {
             	int r = thisSite[j];
             	int n = lineageCounts[j];
-            	m_core.setLeafPolyFactors(j, i, r, n);
+				if(n > n_max[j]){
+					n_max[j] = n;
+				}
+            	
+            }
+    	}
+		
+		double [] f = new double[N];
+    	for (int i = 0; i < numPatterns; i++) {
+		//	System.out.println(i);
+            int [] thisSite = m_data2.getPattern(i);
+            int [] lineageCounts = m_data2.getPatternLineagCounts(i);
+            
+            for (int j = 0; j < thisSite.length; j++) {
+            	int r = thisSite[j];
+            	int n = lineageCounts[j];
+            	m_core.setLeafPolyFactors(j, i, r, n, n_max);
             }
     	}
     }
@@ -596,7 +615,13 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
 //	    			useCache,
 //	    			m_bUsenNonPolymorphic,
 //	    			dprint /*= false*/);
+			if(Double.isNaN(logP)){
+				logP = -10e100;
+				//logP = 0;
+			}
+			//System.out.println(logP);
 			return logP;
+
     	} catch (Exception e) {
 			e.printStackTrace();
 			return 0;
