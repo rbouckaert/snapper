@@ -549,7 +549,7 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
 	    	for (double f : logPByThread) {
 	    		logP += f;
 	    	}
-			System.out.println(logP);
+			//System.out.println(logP);
 	    	return logP;
 		}
 
@@ -631,7 +631,7 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
 				logP = -10e100;
 				//logP = 0;
 			}
-			System.out.println(logP);
+			//System.out.println(logP);
 			return logP;
 
     	} catch (Exception e) {
