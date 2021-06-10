@@ -1,16 +1,16 @@
-<itsabeastystatewerein version='2.0' sample='49'>
-<statenode id='tree'>(5:1.3458131759546395E-9,(4:1.2234665235951266E-9,(3:1.1011198712356141E-9,((9:1.7433611163486383E-10,8:1.7433611163486383E-10)16:8.044371072412376E-10,((0:1.223466523595127E-10,1:1.223466523595127E-10)13:5.728941988029325E-10,(6:6.418968061935782E-10,(7:6.117332617975635E-10,((10:2.446933047190254E-10,(11:1.708908280213124E-11,12:1.708908280213124E-11)14:2.2760422191689416E-10)15:2.446933047190254E-10,2:4.893866094380508E-10)17:1.223466523595127E-10)18:3.016354439601464E-11)19:5.334404496886706E-11)20:2.835323677136562E-10)21:1.223466523595127E-10)22:1.223466523595125E-10)23:1.223466523595129E-10)24:0.0</statenode>
-<statenode id='lambda'>lambda[1 1] (0.0,Infinity): 2.7932330443356377 </statenode>
-<statenode id='coalescenceRate'>coalescenceRate[25 1] (0.0,Infinity): 4.2723360779201265 4.2723360779201265 4.2723360779201265 4.2723360779201265 4.2723360779201265 4.2723360779201265 4.2723360779201265 4.2723360779201265 4.2723360779201265 4.2723360779201265 4.2723360779201265 4.2723360779201265 4.2723360779201265 4.2723360779201265 4.2723360779201265 4.2723360779201265 4.2723360779201265 4.2723360779201265 4.2723360779201265 4.2723360779201265 4.2723360779201265 4.2723360779201265 4.2723360779201265 4.2723360779201265 4.2723360779201265 </statenode>
-<statenode id='clockRate'>clockRate[1 1] (0.0,Infinity): 0.004884714871296113 </statenode>
+<itsabeastystatewerein version='2.0' sample='50000'>
+<statenode id='tree'>(0:6.91754902628243,(1:0.27154654119375304,2:0.27154654119375304)3:6.646002485088677)4:0.0</statenode>
+<statenode id='lambda'>lambda[1 1] (0.0,Infinity): 0.19474231610647597 </statenode>
+<statenode id='coalescenceRate'>coalescenceRate[5 1] (0.0,Infinity): 40.66928608532692 40.66928608532692 40.66928608532692 40.66928608532692 40.66928608532692 </statenode>
+<statenode id='clockRate'>clockRate[1 1] (0.0,Infinity): 3.8053656220022335E15 </statenode>
 </itsabeastystatewerein>
 <!--
 {"operators":[
-{"id":"treeNodeSwapper","p":"NaN","accept":6,"reject":1,"acceptFC":0,"rejectFC":0,"rejectIv":1,"rejectOp":1},
-{"id":"treeNodeBudger","p":0.75,"accept":6,"reject":0,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
-{"id":"treeScaler","p":0.75,"accept":4,"reject":7,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
-{"id":"thetaScaler","p":0.75,"accept":6,"reject":5,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
-{"id":"lamdaScaler","p":0.75,"accept":3,"reject":3,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0},
-{"id":"clockScaler","p":0.75,"accept":8,"reject":1,"acceptFC":0,"rejectFC":0,"rejectIv":0,"rejectOp":0}
+{"id":"treeNodeSwapper","p":"NaN","accept":49,"reject":8362,"acceptFC":0,"rejectFC":6379,"rejectIv":4656,"rejectOp":4656},
+{"id":"treeNodeBudger","p":0.5615704006133051,"accept":1418,"reject":7036,"acceptFC":981,"rejectFC":5409,"rejectIv":0,"rejectOp":0},
+{"id":"treeScaler","p":0.6448760500249938,"accept":2485,"reject":5754,"acceptFC":1642,"rejectFC":4590,"rejectIv":0,"rejectOp":0},
+{"id":"thetaScaler","p":0.5691275587309322,"accept":2480,"reject":5847,"acceptFC":1585,"rejectFC":4772,"rejectIv":0,"rejectOp":0},
+{"id":"lamdaScaler","p":0.21489159155544144,"accept":3970,"reject":4266,"acceptFC":2288,"rejectFC":3958,"rejectIv":0,"rejectOp":0},
+{"id":"clockScaler","p":0.20055715674618238,"accept":4029,"reject":4305,"acceptFC":2331,"rejectFC":4033,"rejectIv":0,"rejectOp":0}
 ]}
 -->

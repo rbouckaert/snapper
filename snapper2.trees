@@ -1,0 +1,37 @@
+#NEXUS
+
+Begin taxa;
+	Dimensions ntax=13;
+		Taxlabels
+			astbur
+			altfas
+			telvit
+			neobri
+			neochi
+			neocra
+			neogra
+			neohel
+			neomar
+			neooli
+			neopul
+			neosav
+			neowal
+			;
+End;
+Begin trees;
+	Translate
+		   1 astbur,
+		   2 altfas,
+		   3 telvit,
+		   4 neobri,
+		   5 neochi,
+		   6 neocra,
+		   7 neogra,
+		   8 neohel,
+		   9 neomar,
+		  10 neooli,
+		  11 neopul,
+		  12 neosav,
+		  13 neowal
+;
+tree STATE_0 = ((1[&theta=0.02]:1.0E-10,2[&theta=0.02]:1.0E-10)[&theta=0.02]:1.0091931880731812E-9,(3[&theta=0.02]:9.999999999999999E-10,(4[&theta=0.02]:8.999999999999999E-10,(5[&theta=0.02]:7.999999999999999E-10,(6[&theta=0.02]:7.0E-10,(7[&theta=0.02]:6.0E-10,(8[&theta=0.02]:5.0E-10,(9[&theta=0.02]:4.0E-10,(10[&theta=0.02]:3.0E-10,(11[&theta=0.02]:2.0E-10,(12[&theta=0.02]:1.0E-10,13[&theta=0.02]:1.0E-10)[&theta=0.02]:1.0E-10)[&theta=0.02]:9.999999999999999E-11)[&theta=0.02]:1.0000000000000002E-10)[&theta=0.02]:1.0000000000000002E-10)[&theta=0.02]:9.999999999999996E-11)[&theta=0.02]:9.999999999999996E-11)[&theta=0.02]:9.999999999999996E-11)[&theta=0.02]:9.999999999999996E-11)[&theta=0.02]:9.999999999999996E-11)[&theta=0.02]:1.0919318807318146E-10)[&theta=0.02]:0.0;
