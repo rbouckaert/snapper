@@ -332,10 +332,10 @@ public class FilteredAlignment extends Data {
 		nPatterns = 0;
 		int iSite = 0;
 		// instantiate patterns
-		System.out.println("nrOfLineages");
-		System.out.println(nrOfLineages);
-		System.out.println("filter 1");
-		System.out.println(Arrays.toString(filter));
+		//System.out.println("nrOfLineages");
+		//System.out.println(nrOfLineages);
+		//System.out.println("filter 1");
+		//System.out.println(Arrays.toString(filter));
 		for (int i = 0; i < nSites; i++) {
 			if (weights[i]>0) {
 				patternWeight[nPatterns] = weights[i];
@@ -409,16 +409,16 @@ public class FilteredAlignment extends Data {
 			m_nPatternLineageCounts[nPatterns + 1][i] = lineageCount;
 		}
 
-		for (int i = 0; i < nTaxa; i++) {
+		//for (int i = 0; i < nTaxa; i++) {
 			//			for (int j = 0; j < nPatterns + 2; j++) {
 			//				System.out.print(m_nPatterns[j][i]);
 			//			}
 			//			System.out.println();
-						for (int j = 0; j < nPatterns + 2; j++) {
-							System.out.print(m_nPatternLineageCounts[j][i]);
-						}
-						System.out.println();
-					}
+		//				for (int j = 0; j < nPatterns + 2; j++) {
+		//					System.out.print(m_nPatternLineageCounts[j][i]);
+		//				}
+		//				System.out.println();
+		//			}
 
         int totalWeight = 0;
         for (int weight : patternWeight) {

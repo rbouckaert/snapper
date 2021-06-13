@@ -428,15 +428,15 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
 		
 		double [] f = new double[N];
     	for (int i = 0; i < numPatterns; i++) {
-		System.out.println("Num pattern " + i);
+		//System.out.println("Num pattern " + i);
 			
             int [] thisSite = m_data2.getPattern(i);
             int [] lineageCounts = m_data2.getPatternLineagCounts(i);
-			System.out.println("Next pattern");
+			//System.out.println("Next pattern");
             for (int j = 0; j < thisSite.length; j++) {
             	int r = thisSite[j];
             	int n = lineageCounts[j];
-				System.out.println(r + " " + n);
+				//System.out.println(r + " " + n);
             	m_core.setLeafPolyFactors(j, i, r, n, n_max);
             }
     	}
@@ -618,7 +618,7 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
 					break;
 				}
 				logP += (double)freq * siteL;
-				System.out.println(Arrays.toString(m_data2.getPattern(id)) + " " + id + " " + (siteL) + " "+ (freq));
+			//	System.out.println(Arrays.toString(m_data2.getPattern(id)) + " " + id + " " + (siteL) + " "+ (freq));
 			}
 			// correction for constant sites. If we are sampling the numbers of constant sites 
 			// (stored in ascSiteCount) then we include these probabilities. Otherwise we 

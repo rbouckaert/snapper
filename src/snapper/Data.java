@@ -473,16 +473,16 @@ public class Data extends beast.evolution.alignment.Alignment {
 			m_nPatternLineageCounts[nPatterns][i]     = lineageCount;
 			m_nPatternLineageCounts[nPatterns + 1][i] = lineageCount;
 		}
-		for (int i = 0; i < nTaxa; i++) {
+		//for (int i = 0; i < nTaxa; i++) {
 		//	for (int j = 0; j < nPatterns + 2; j++) {
 		//		System.out.print(m_nPatterns[j][i]);
 		//	}
 		//	System.out.println();
-			for (int j = 0; j < nPatterns + 2; j++) {
-				System.out.print(m_nPatternLineageCounts[j][i]);
-			}
-			System.out.println();
-		}	
+		//	for (int j = 0; j < nPatterns + 2; j++) {
+		//		System.out.print(m_nPatternLineageCounts[j][i]);
+		//	}
+		//	System.out.println();
+		//}	
 
         int totalWeight = 0;
         for (int weight : patternWeight) {

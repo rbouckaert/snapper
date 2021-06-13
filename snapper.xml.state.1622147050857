@@ -1,6 +1,0 @@
-<itsabeastystatewerein version='2.0' sample='1550'>
-<statenode id='tree'>((0:1.0E-10,1:1.0E-10)4:1.0E-10,(2:1.0E-10,3:1.0E-10)5:1.0E-10)6:0.0</statenode>
-<statenode id='lambda'>lambda[1 1] (0.0,Infinity): 2.0 </statenode>
-<statenode id='coalescenceRate'>coalescenceRate[7 1] (0.0,Infinity): 10.0 10.0 10.0 10.0 10.0 10.0 10.0 </statenode>
-<statenode id='clockRate'>clockRate[1 1] (0.0,Infinity): 0.01 </statenode>
-</itsabeastystatewerein>
