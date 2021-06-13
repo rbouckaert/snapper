@@ -1,4 +1,4 @@
-<package name='snapper' version='1.0.0'>
+<package name='snapper' version='1.0.1'>
 	<depends on='beast2' atleast='2.6.0'/>
 	<depends on='SNAPP' atleast='1.5.1'/>
 </package>

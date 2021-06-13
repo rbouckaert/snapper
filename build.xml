@@ -195,7 +195,7 @@
 
 
 	<!-- Release -->
-	<property name="version" value="1.0.0" />
+	<property name="version" value="1.0.1" />
 	<property name="release_dir" value="release" />
 	<property name="copyright" value="snapper development team 2011-2018"/>
 
