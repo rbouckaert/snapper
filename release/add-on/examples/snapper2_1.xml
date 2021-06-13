@@ -48,7 +48,7 @@ The SNP data matrix, converted to binary format from file .
     <!-- State -->
     <state id="state" storeEvery="50">
         <stateNode id="tree" spec="beast.util.TreeParser" IsLabelledNewick="true" nodetype="snap.NodeData" newick="((altfas:2.6520367123213346,((((((neobri:0.5240051105707518,(neooli:0.3610385760756361,neopul:0.3610385760756361):0.16296653449511578):0.06084458117051339,neohel:0.5848496917412653):0.11293049810600309,((neocra:0.5011109162246027,neomar:0.5011109162246028):0.09226605826642365,neogra:0.5933769744910264):0.10440321535624186):0.14067115586556878,neosav:0.8384513457128372):0.28515609256191665,telvit:1.1236074382747534):0.060210462250667174,(neochi:0.06552780931213173,neowal:0.06552780931213173):1.1182900912132892):1.4682188117959136):4.311456556721317,astbur:6.963493269042651);">
-            <taxa id="data" spec="snap.Data" dataType="integerdata">
+            <taxa id="data" spec="snapper.Data" dataType="integerdata">
                 <rawdata idref="snps"/>
                 <taxonset id="astbur" spec="TaxonSet">
                     <taxon id="IZA1" spec="Taxon"/>

@@ -74,6 +74,7 @@ public class SnapperLikelihoodCore extends BeerLikelihoodCore {
 
 		states = new int[nodeCount][];
 		stateMap = new int[nodeCount][][];
+		stateMap_1 = new int[nodeCount][][][];
 	}
 
 	void exponentiate(double time, double[] matrix, double[] a) {
@@ -116,6 +117,7 @@ public class SnapperLikelihoodCore extends BeerLikelihoodCore {
 	 * stateMap[nodeIndex][leaf state value][pattern]
 	 **/
 	int[][][] stateMap;
+	int[][][][] stateMap_1;
 
 	/**
 	 * @param nodeIndex:
@@ -133,8 +135,12 @@ public class SnapperLikelihoodCore extends BeerLikelihoodCore {
 		if (this.states[nodeIndex] == null) {
 			// set nodeStates to some non-null value, so m_core knows that it is
 			// a leaf
+
 			this.states[nodeIndex] = new int[nrOfPatterns];
-			this.stateMap[nodeIndex] = new int[n_max[nodeIndex] + 1][];
+			this.stateMap[nodeIndex] = new int[20][];
+		
+			this.stateMap_1[nodeIndex] = new int[20][20][];
+
 		}
 		//System.out.print(r);
 		//System.out.print(n);
@@ -146,7 +152,7 @@ public class SnapperLikelihoodCore extends BeerLikelihoodCore {
 		//	r = stateMap[nodeIndex].length - 1;
 		//	n = stateMap[nodeIndex].length - 1; 	
 		//}
-		//System.out.println("HERE 2");
+		
 		this.states[nodeIndex][patternIndex] = r;
 		
 		//System.out.print(r);
@@ -161,6 +167,7 @@ public class SnapperLikelihoodCore extends BeerLikelihoodCore {
 		if (map == null) {
 			stateMap[nodeIndex][r] = new int[1];
 			stateMap[nodeIndex][r][0] = patternIndex;
+			//System.out.println(patternIndex);
 		} else {
 		
 			int[] newmap = new int[map.length + 1];
@@ -168,14 +175,34 @@ public class SnapperLikelihoodCore extends BeerLikelihoodCore {
 			newmap[map.length] = patternIndex;
 			stateMap[nodeIndex][r] = newmap;
 		}
+		//System.out.println("HERE 2");
+		int[] map_1 = stateMap_1[nodeIndex][r][n];
+		if (map_1 == null) {
+			//System.out.println("HERE 2");
+			stateMap_1[nodeIndex][r][n] = new int[1];
+			stateMap_1[nodeIndex][r][n][0] = patternIndex;
+			//System.out.println(patternIndex);
+		} else {
+			//System.out.println("HERE 2");
+			int[] newmap_1 = new int[map_1.length + 1];
+			System.arraycopy(map_1, 0, newmap_1, 0, map_1.length);
+			newmap_1[map_1.length] = patternIndex;
+			stateMap_1[nodeIndex][r][n] = newmap_1;
+		}
+
+
 		//System.out.println("HERE 4");
+		//System.out.println("r" +" "+ "n");
+		//System.out.println(r +" "+ n);
+		//System.out.println("nodeIndex PatternIndex" );
+		//System.out.println(nodeIndex + " " + patternIndex);
 		chebPoly[0][nodeIndex][patternIndex].init(r, n);
 		chebPoly[1][nodeIndex][patternIndex].init(r, n);
 	
 	}
 
 	public void clearCache(int nNodeNrMax, int nRedsMax) {
-		// m_cache = new FCacheT(nNodeNrMax, nRedsMax + 1);
+		//m_cache = new FCacheT(nNodeNrMax, nRedsMax + 1);
 	}
 
 	public void calculatePartials(int nodeIndex1, int nodeIndex2, int nodeIndex3) {
@@ -204,12 +231,13 @@ public class SnapperLikelihoodCore extends BeerLikelihoodCore {
 						chebPoly[currentPartialsIndex[nodeIndex3]][nodeIndex3]);
 			}
 		}
-		if (debug) {
-			System.out.println(nodeIndex1 + " x " + nodeIndex2 + " => " + nodeIndex3);
-			System.out.println(Arrays.toString(chebPoly[currentPartialsIndex[nodeIndex1]][nodeIndex1][0].f));
-			System.out.println(Arrays.toString(chebPoly[currentPartialsIndex[nodeIndex2]][nodeIndex2][0].f));
-			System.out.println(Arrays.toString(chebPoly[currentPartialsIndex[nodeIndex3]][nodeIndex3][0].f));
-		}
+		//if (debug) {
+		//	System.out.println(nodeIndex1 + " x " + nodeIndex2 + " => " + nodeIndex3);
+		//	System.out.println(Arrays.toString(chebPoly[currentPartialsIndex[nodeIndex1]][nodeIndex1][0].f));
+		//	System.out.println(Arrays.toString(chebPoly[currentPartialsIndex[nodeIndex2]][nodeIndex2][0].f));
+		//	System.out.println(Arrays.toString(chebPoly[currentPartialsIndex[nodeIndex3]][nodeIndex3][0].f));
+		//}
+		//System.out.println("NEXT");
 
 		if (useScaling) {
 			scalePartials(nodeIndex3);
@@ -226,9 +254,15 @@ public class SnapperLikelihoodCore extends BeerLikelihoodCore {
 			System.arraycopy(matrices1, w, Q1, 0, matrixSize);
 			System.arraycopy(matrices2, w, Q2, 0, matrixSize);
 
-			setupCache(stateMap[nodeIndex1], Q1, chebPoly[0][nodeIndex1], time[nodeIndex1][l], v1cache, v1);
-			setupCache(stateMap[nodeIndex2], Q2, chebPoly[0][nodeIndex2], time[nodeIndex2][l], v2cache, v2);
+			setupCache_1(stateMap_1[nodeIndex1], Q1, chebPoly[0][nodeIndex1], time[nodeIndex1][l], v1cache, v1);
+			setupCache_1(stateMap_1[nodeIndex2], Q2, chebPoly[0][nodeIndex2], time[nodeIndex2][l], v2cache, v2);
+			//System.println(""nodeIndex1);
+			//setupCache(stateMap[nodeIndex1], Q1, chebPoly[0][nodeIndex1], time[nodeIndex1][l], v1cache, v1);
+			//System.println(nodeIndex2);
+			//setupCache(stateMap[nodeIndex2], Q2, chebPoly[0][nodeIndex2], time[nodeIndex2][l], v2cache, v2);
 
+			//System.out.println("v1");
+			//System.out.println(Arrays.toString(v1));
 			for (int k = 0; k < nrOfPatterns; k++) {
 				System.arraycopy(v1cache, k * N, v1, 0, N);
 				System.arraycopy(v2cache, k * N, v2, 0, N);
@@ -264,14 +298,37 @@ public class SnapperLikelihoodCore extends BeerLikelihoodCore {
 	private void setupCache(int[][] map, double[] Q, ChebyshevPolynomial[] chebPoly0, double time, double[] vcache,
 			double[] v) {
 		for (int[] map0 : map) {
+			//System.out.println(Arrays.toString(map0));
 			if (map0 != null) {
+				
 				int k = map0[0];
+				//System.out.println(k);
 				System.arraycopy(chebPoly0[k].a, 0, v, 0, N);
 				exponentiate(time, Q, v);
 				for (int j : map0) {
 					System.arraycopy(v, 0, vcache, j * N, N);
 				}
 			}
+		}
+	}
+
+	private void setupCache_1(int[][][] map, double[] Q, ChebyshevPolynomial[] chebPoly0, double time, double[] vcache,
+			double[] v) {
+		
+	for (int[][] map1 : map) {		
+		for (int[] map0 : map1) {
+			
+			if (map0 != null) {
+				
+				int k = map0[0];
+				//System.out.println(k);
+				System.arraycopy(chebPoly0[k].a, 0, v, 0, N);
+				exponentiate(time, Q, v);
+				for (int j : map0) {
+					System.arraycopy(v, 0, vcache, j * N, N);
+				}
+			}
+		}
 		}
 	}
 
@@ -286,7 +343,8 @@ public class SnapperLikelihoodCore extends BeerLikelihoodCore {
 			System.arraycopy(matrices1, w, Q1, 0, matrixSize);
 			System.arraycopy(matrices2, w, Q2, 0, matrixSize);
 
-			setupCache(stateMap[nodeIndex1], Q1, chebPoly[0][nodeIndex1], time[nodeIndex1][l], v1cache, v1);
+			//setupCache(stateMap[nodeIndex1], Q1, chebPoly[0][nodeIndex1], time[nodeIndex1][l], v1cache, v1);
+			setupCache_1(stateMap_1[nodeIndex1], Q1, chebPoly[0][nodeIndex1], time[nodeIndex1][l], v1cache, v1);
 
 			for (int k = 0; k < nrOfPatterns; k++) {
 
@@ -530,6 +588,7 @@ public class SnapperLikelihoodCore extends BeerLikelihoodCore {
 				for (int i = 0; i < nrOfStates; i++) {
 
 					outPartials[u] += f[i] * proportions[l];
+					
 					u++;
 				}
 			}
@@ -563,7 +622,7 @@ public class SnapperLikelihoodCore extends BeerLikelihoodCore {
 			for (int i = 0; i < nrOfStates; i += 2) {
 				sum += c.a[i] / (1.0 - i * i);
 			}
-
+			
 			outLogLikelihoods[k] = Math.log(sum) + getLogScalingFactor(k);
 		}
 	}
@@ -592,8 +651,8 @@ public class SnapperLikelihoodCore extends BeerLikelihoodCore {
 				// System.out.println(i);
 				sum += c.a[i] * frequencies[i];
 			}
-			// System.out.println("sum");
-			// System.out.println(sum);
+			//System.out.println("sum");
+			//System.out.println(sum);
 			outLogLikelihoods[k] = Math.log(sum) + getLogScalingFactor(k);
 		}
 	}

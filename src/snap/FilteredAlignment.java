@@ -13,7 +13,7 @@ import beast.core.util.Log;
 import beast.evolution.alignment.Alignment;
 import beast.evolution.alignment.Sequence;
 import beast.evolution.datatype.DataType;
-import snap.Data;
+import snapper.Data;
 import snap.SNPSequence;
 
 
@@ -41,7 +41,8 @@ public class FilteredAlignment extends Data {
      * list of indices filtered from input alignment *
      */
     int[] filter;
-    
+	int loop_counter;
+    ArrayList<List<Integer>> nrOfLineages_2;
     boolean convertDataType = false;
 
     public FilteredAlignment() {
@@ -54,6 +55,8 @@ public class FilteredAlignment extends Data {
     public void initAndValidate() {
         parseFilterSpec();
         calcFilter();
+		//System.out.println("filter");
+		//System.out.println(filter);
         Alignment data = alignmentInput.get();
         m_dataType = data.getDataType();
         // see if this filter changes data type
@@ -71,6 +74,8 @@ public class FilteredAlignment extends Data {
         
         taxaNames = data.getTaxaNames();
         stateCounts = data.getStateCounts();
+		//System.out.println("stateCounts");
+		//System.out.println(stateCounts);
         if (convertDataType && m_dataType.getStateCount() > 0) {
         	for (int i = 0; i < stateCounts.size(); i++) {
                 stateCounts.set(i, m_dataType.getStateCount());
@@ -86,11 +91,8 @@ public class FilteredAlignment extends Data {
     		}    		
         }
 
-		
-        
-        //calcPatterns_2();
-		calcPatterns();
-		//setupAscertainment();
+        calcPatterns();
+        //setupAscertainment();
     }
 
     private void parseFilterSpec() {
@@ -194,27 +196,34 @@ public class FilteredAlignment extends Data {
     }
 
 
+
+
+
+   
     @Override
-    protected void calcPatterns() {
-		// determine # lineages for each site for each taxon
+    public void calcPatterns() {
+        // determine # lineages for each site for each taxon
 		nrOfLineages = new ArrayList<List<Integer>>();
+		nrOfLineages_2 = new ArrayList<List<Integer>>();
         counts = null;
    		counts = getCounts();
 		//sortByTaxonName(seqs);
 		
-		//System.out.println(sequenceInput.get() );
-
         for (Sequence seq : alignmentInput.get().sequenceInput.get()) {
-			
         	if (seq instanceof SNPSequence) {
         		// it can vary over sites
-        		try {
+				try {
+					
+					//System.out.println("whatever!!!");
+					//System.out.println(((SNPSequence) seq).getLineageCounts(m_dataType) );
         			nrOfLineages.add(((SNPSequence) seq).getLineageCounts(m_dataType));
+					nrOfLineages_2.add(((SNPSequence) seq).getLineageCounts(m_dataType));
         		} catch (Exception e) {
 					e.printStackTrace();
 				}
         	} else {
         		// it is constant over all sites 
+				
         		List<Integer> statecounts = new ArrayList<Integer>();
         		int lineageCount = stateCounts.get(nrOfLineages.size()) - 1;
         		int nSites = counts.get(0).size();
@@ -222,14 +231,21 @@ public class FilteredAlignment extends Data {
         			statecounts.add(lineageCount);
         		}
         		nrOfLineages.add(statecounts);
+				nrOfLineages_2.add(statecounts);
         	}
         }
-		
+
+
+
+		//System.out.println("nrOfLineages_2");
+		//System.out.println(nrOfLineages_2);
 		// remove constant sites
 		int nTaxa = counts.size();
 		int nZeroSitesCount = 0;
 		int nAllSitesCount = 0;
+	
 		for (int i = 0; i < counts.get(0).size(); i++) {
+
 			// TODO: isConstant should return ALL_REDS ALL_GREEN or MIXED
 			if (isConstant(i)) {
 				if (counts.get(0).get(i) == 0) {
@@ -239,7 +255,7 @@ public class FilteredAlignment extends Data {
 				}
 				for (int j = 0; j < nTaxa; j++) {
 					counts.get(j).remove(i);
-					nrOfLineages.get(j).remove(i);
+					nrOfLineages.get(j).remove(filter[i]);
 				}
 				if (siteWeights != null) {
 					int [] tmp = new int[siteWeights.length-1];
@@ -248,9 +264,13 @@ public class FilteredAlignment extends Data {
 					siteWeights = tmp;
 				}
 				i--;
+				
 			}
+			
 		}
 
+		
+		
 		// remove sites that have no data in some branches
 		int removed = 0;
 		int weightRemoved = 0;
@@ -301,7 +321,8 @@ public class FilteredAlignment extends Data {
 			if (weights[i]>0) {
 				nPatterns++;
 			}
-		}		
+		}
+
 		patternWeight = new int[nPatterns+2];
 		sitePatterns = new int[nPatterns+2][nTaxa];
 		m_nPatternLineageCounts = new int[nPatterns+2][nTaxa];
@@ -311,12 +332,18 @@ public class FilteredAlignment extends Data {
 		nPatterns = 0;
 		int iSite = 0;
 		// instantiate patterns
+		System.out.println("nrOfLineages");
+		System.out.println(nrOfLineages);
+		System.out.println("filter 1");
+		System.out.println(Arrays.toString(filter));
 		for (int i = 0; i < nSites; i++) {
 			if (weights[i]>0) {
 				patternWeight[nPatterns] = weights[i];
 				for (int j = 0; j < nTaxa; j++) {
 					sitePatterns[nPatterns][j] = counts.get(j).get(i);
-					m_nPatternLineageCounts[nPatterns][j] = nrOfLineages.get(j).get(i);
+					//System.out.println(filter[i]);
+					//System.out.println( nrOfLineages.get(j).get(filter[i]));
+					m_nPatternLineageCounts[nPatterns][j] = nrOfLineages.get(j).get(filter[i]);
 				}
 				for (int k = 0; k < weights[i]; k++) {
 					patternIndex[iSite++] = nPatterns;
@@ -324,6 +351,9 @@ public class FilteredAlignment extends Data {
 				nPatterns++;
 			}
 		}
+
+		
+
         
         Arrays.fill(patternIndex, -1);
         for (int i = 0; i < nSites; i++) {
@@ -365,210 +395,95 @@ public class FilteredAlignment extends Data {
 		}
 		
 		
+		
+
 		// add dummy patterns
 //		TODO: set up weights for dummy patterns
 		patternWeight[nPatterns] = nZeroSitesCount;
 		patternWeight[nPatterns+1] =nAllSitesCount;
 		for (int i = 0; i < nTaxa; i++) {
+
 			int lineageCount = stateCounts.get(i) - 1;
 			sitePatterns[nPatterns + 1][i]             = lineageCount;
 			m_nPatternLineageCounts[nPatterns][i]     = lineageCount;
 			m_nPatternLineageCounts[nPatterns + 1][i] = lineageCount;
 		}
-//		for (int i = 0; i < nTaxa; i++) {
-//			for (int j = 0; j < nPatterns + 2; j++) {
-//				System.out.print(m_nPatterns[j][i]);
-//			}
-//			System.out.println();
-//			for (int j = 0; j < nPatterns + 2; j++) {
-//				System.out.print(m_nPatternLineageCounts[j][i]);
-//			}
-//			System.out.println();
-//		}
+
+		for (int i = 0; i < nTaxa; i++) {
+			//			for (int j = 0; j < nPatterns + 2; j++) {
+			//				System.out.print(m_nPatterns[j][i]);
+			//			}
+			//			System.out.println();
+						for (int j = 0; j < nPatterns + 2; j++) {
+							System.out.print(m_nPatternLineageCounts[j][i]);
+						}
+						System.out.println();
+					}
 
         int totalWeight = 0;
         for (int weight : patternWeight) {
         	totalWeight += weight;
         }
-       
+        
         System.out.println(getNrTaxa() + " taxa");
         System.out.println(getSiteCount() + " sites" + (totalWeight == getSiteCount() ? "" : " with weight " + totalWeight));
         System.out.println(getPatternCount() + " patterns");
     }
 
-    protected void calcPatterns_2() {
-        int nrOfTaxa = counts.size();
-        int nrOfSites = filter.length;
-        
-        DataType baseType = alignmentInput.get().getDataType();
-        
-        
-        
-        // convert data to transposed int array
-        int[][] data = new int[nrOfSites][nrOfTaxa];
-        for (int i = 0; i < nrOfTaxa; i++) {
-            List<Integer> sites = counts.get(i);
-            for (int j = 0; j < nrOfSites; j++) {
-                data[j][i] = sites.get(filter[j]);
-                if (convertDataType) {
-                	try {
-                		String code = baseType.getCharacter(data[j][i]);
-						data[j][i] = m_dataType.stringToEncoding(code).get(0);
-                	} catch (Exception e) {
-                		e.printStackTrace();
-                	}
-                }
-            }
-        }
-        
-        // add constant sites, if specified
-        if (constantSiteWeightsInput.get() != null) {
-        	int dim = constantSiteWeightsInput.get().getDimension();
-        	// add constant patterns
-        	int [][] data2 = new int[nrOfSites + dim][];
-            System.arraycopy(data, 0, data2, 0, nrOfSites);
-        	for (int i = 0; i < dim; i++) {
-        		data2[nrOfSites + i] = new int[nrOfTaxa];
-        		for (int j = 0; j < nrOfTaxa; j++) {
-        			data2[nrOfSites+ i][j] = i;
-				}
-        	}
-        	data = data2;
-        	nrOfSites += dim; 
-        }
-        
-        // sort data
-        SiteComparator comparator = new SiteComparator();
-        Arrays.sort(data, comparator);
+	/** test whether two columns (e.g. sites) contain equal values **/
+	@Override
+	protected boolean isEqual(int iSite1, int iSite2) {
+		for (int i = 0; i < counts.size(); i++) {
+			if (counts.get(i).get(iSite1)
+					!= counts.get(i).get(iSite2)) {
+				return false;
+			}
+			if (nrOfLineages.get(i).get(filter[iSite1])
+					!= nrOfLineages.get(i).get(filter[iSite2])) {
+				return false;
+			}
+		}
+		return true;
+	} // isEqual
 
-        // count patterns in sorted data
-        int[] weights = new int[nrOfSites];
-        int nrOfPatterns = 1;
-        if (nrOfSites > 0) {
-	        weights[0] = 1;
-	        for (int i = 1; i < nrOfSites; i++) {
-	            if (comparator.compare(data[i - 1], data[i]) != 0) {
-	                nrOfPatterns++;
-	                data[nrOfPatterns - 1] = data[i];
-	            }
-	            weights[nrOfPatterns - 1]++;
-	        }
-        } else {
-            nrOfPatterns = 0;
-        }
-        
-        // addjust weight of invariant sites, if stripInvariantSitesInput i sspecified
-        if (stripInvariantSitesInput.get()) {
-            // don't add patterns that are invariant, e.g. all gaps
-            Log.info.print("Stripping invariant sites");
-            int removedSites = 0;
-            
-        	for (int i = 0; i < nrOfPatterns; i++) {
-        		boolean isContant = true;
-        		for (int j = 1; j < nrOfTaxa; j++) {
-        			if (data[i][j] != data[i][0]) {
-        				isContant = false;
-        				break;
-        			}
-        		}
-        		// if this is a constant site, and it is not an ambiguous site
-        		if (isContant) {
-        			Log.warning.print(" <" + data[i][0] + "> ");
-                   	removedSites += weights[i]; 
-            		weights[i] = 0;
-        		}
-        	}
-        	Log.warning.println(" removed " + removedSites + " sites ");
-        }
-        
-        // addjust weight of constant sites, if specified
-        if (constantSiteWeightsInput.get() != null) {
-        	Integer [] constantWeights = constantSiteWeightsInput.get().getValues(); 
-        	for (int i = 0; i < nrOfPatterns; i++) {
-        		boolean isContant = true;
-        		for (int j = 1; j < nrOfTaxa; j++) {
-        			if (data[i][j] != data[i][0]) {
-        				isContant = false;
-        				break;
-        			}
-        		}
-        		// if this is a constant site, and it is not an ambiguous site
-        		if (isContant && data[i][0] >= 0 && data[i][0] < constantWeights.length) {
-        			// take weights in data in account as well
-        			// by adding constant patterns, we added a weight of 1, which now gets corrected
-        			// but if filtered by stripping constant sites, that weight is already set to zero
-            		weights[i] = (stripInvariantSitesInput.get() ? 0 : weights[i] - 1) + constantWeights[data[i][0]];
-        		}
-        	}
-        	
-        	// need to decrease siteCount for mapping sites to patterns in m_nPatternIndex
-        	nrOfSites -= constantWeights.length; 
-        }        
-        
-        // reserve memory for patterns
-        patternWeight = new int[nrOfPatterns];
-        sitePatterns = new int[nrOfPatterns][nrOfTaxa];
-        for (int i = 0; i < nrOfPatterns; i++) {
-            patternWeight[i] = weights[i];
-            sitePatterns[i] = data[i];
-        }
-
-        // find patterns for the sites
-        patternIndex = new int[nrOfSites];
-        for (int i = 0; i < nrOfSites; i++) {
-            int[] sites = new int[nrOfTaxa];
-            for (int j = 0; j < nrOfTaxa; j++) {
-                sites[j] = counts.get(j).get(filter[i]);
-                if (convertDataType) {
-                	try {
-                		sites[j] = m_dataType.stringToEncoding(baseType.getCharacter(sites[j])).get(0);
-                	} catch (Exception e) {
-                		e.printStackTrace();
-                	}
-                }
-            }
-            patternIndex[i] = Arrays.binarySearch(sitePatterns, sites, comparator);
-        }
-
-        if (siteWeights != null) {
-        	// TODO: fill in weights with siteweights.
-        	throw new RuntimeException("Cannot handle site weights in FilteredAlignment. Remove \"weights\" from data input.");
-        }
-
-        // determine maximum state count
-        // Usually, the state count is equal for all sites,
-        // though for SnAP analysis, this is typically not the case.
-        maxStateCount = 0;
-        for (int stateCount1 : stateCounts) {
-            maxStateCount = Math.max(maxStateCount, stateCount1);
-        }
-        if (convertDataType) {
-        	maxStateCount = Math.max(maxStateCount, m_dataType.getStateCount());
-        }
-        // report some statistics
-        //for (int i = 0; i < m_sTaxaNames.size(); i++) {
-        //    System.err.println(m_sTaxaNames.get(i) + ": " + m_counts.get(i).size() + " " + m_nStateCounts.get(i));
-        //}
-        Log.info.println("Filter " + filterInput.get());
-        Log.info.println(getTaxonCount() + " taxa");
-        if (constantSiteWeightsInput.get() != null) {
-        	Integer [] constantWeights = constantSiteWeightsInput.get().getValues();
-        	int sum = 0; 
-        	for (int i : constantWeights) { 
-        		sum += i;
-        	}
-        	Log.info.println(getSiteCount() + " sites + " + sum + " constant sites");
-        } else {
-        	Log.info.println(getSiteCount() + " sites");
-        }
-        Log.info.println(getPatternCount() + " patterns");
-        
-        // counts are not valid any more -- better set to null in case
-        // someone gets bitten by this.
-        this.counts = null;
+	@Override
+	public int[] getPatternLineagCounts(int id) {
+        return m_nPatternLineageCounts[id];
     }
     /** return indices of the sites that the filter uses **/
     public int [] indices() {
     	return filter.clone();
     }
+	
+	boolean isConstant(int iSite) {
+		//System.out.println("iSite " + iSite);
+		//System.out.println("nrOfLineages");
+		//System.out.println(nrOfLineages);
+		//System.out.println("nrOfLineages_2");
+		//System.out.println(nrOfLineages_2);
+		//System.out.println("from " + from[0]);
+		int nTaxa = counts.size();
+		boolean bAllZero = true;
+		boolean bAllMax = true;
+		for (int i = 0; i < nTaxa; i++) {
+			int iValue = counts.get(i).get(iSite);
+			if (iValue > 0) {
+				bAllZero = false;
+				if (bAllMax == false) {
+					return false;
+				}
+			}
+//			if (iValue < m_nStateCounts.get(i)) {
+			//System.out.println("from");
+			
+			
+			if (iValue < nrOfLineages.get(i).get(iSite+from[0])) {
+				bAllMax = false;
+				if (bAllZero == false) {
+					return false;
+				}
+			}
+		}
+		return true;
+	} // isConstant
 }
