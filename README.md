@@ -1,4 +1,4 @@
-# snapper
+# SNAPPER
 
 [BEAST 2](http://beast2.org) based package for SNP analyses -- difussion based [SNAPP](https://github.com/BEAST2-Dev/SNAPP).
 
