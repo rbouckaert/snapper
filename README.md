@@ -8,7 +8,7 @@
 * Install snapper package through the [package manager](http://www.beast2.org/managing-packages/) (this automatically installs the SNAPP package as well)
 
 ## Tutorial
-[https://github.com/ForBioPhylogenomics/tutorials/tree/main/divergence_time_estimation_with_snp_data](Divergence-time estimation with SNAPPER presented by Michael Matschiner)
+[Divergence-time estimation with SNAPPER presented by Michael Matschiner](https://github.com/ForBioPhylogenomics/tutorials/tree/main/divergence_time_estimation_with_snp_data)
 
 ## Citing snapper
 
