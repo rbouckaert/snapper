@@ -7,6 +7,9 @@
 * Install BEAST 2 (available from [http://beast2.org](http://beast2.org)).
 * Install snapper package through the [package manager](http://www.beast2.org/managing-packages/) (this automatically installs the SNAPP package as well)
 
+## Tutorial
+https://github.com/ForBioPhylogenomics/tutorials/tree/main/divergence_time_estimation_with_snp_data]
+
 ## Using snapper
 
 * Start BEAUti, and select the snapper template  (meny `File/Templates/snapper`)
