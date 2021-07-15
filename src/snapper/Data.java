@@ -52,7 +52,10 @@ import snap.SNPSequence;
  "are removed + 2 patterns are added at the end representing these "+
  "constant sites, but with zero weight. The likelihood calculator "+
  "deals with these different sites.")
-public class Data extends beast.evolution.alignment.Alignment {
+//use snap.Data instead
+@Deprecated
+public class Data extends snap.Data {
+// extends beast.evolution.alignment.Alignment {
 	public Input<beast.evolution.alignment.Alignment> m_rawData = new Input<beast.evolution.alignment.Alignment>("rawdata","raw binary sequences");
 	public Input<List<TaxonSet>> m_taxonsets = new Input<List<TaxonSet>>("taxonset","set of taxons that group a number of SNP sequences into a single sequence", 
 			new ArrayList<TaxonSet>());

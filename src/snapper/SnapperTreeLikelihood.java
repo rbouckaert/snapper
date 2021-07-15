@@ -64,6 +64,7 @@ import beast.evolution.substitutionmodel.SubstitutionModel;
 import beast.evolution.tree.Node;
 import beast.evolution.tree.Tree;
 import beast.evolution.tree.TreeInterface;
+import snap.Data;
 import snap.NodeData;
 import snap.FilteredAlignment;
 

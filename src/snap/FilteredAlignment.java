@@ -9,11 +9,9 @@ import beast.core.Description;
 import beast.core.Input;
 import beast.core.Input.Validate;
 import beast.core.parameter.IntegerParameter;
-import beast.core.util.Log;
 import beast.evolution.alignment.Alignment;
 import beast.evolution.alignment.Sequence;
-import beast.evolution.datatype.DataType;
-import snapper.Data;
+import snap.Data;
 import snap.SNPSequence;
 
 

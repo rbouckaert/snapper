@@ -189,7 +189,7 @@
           	<parameter name="stateNode" id="snapperU.s:$(n)" value="1.0" lower="0.0" spec="parameter.RealParameter" estimate="false"/>
           	<parameter name="stateNode" id="snapperV.s:$(n)" value="1.0" lower="0.0" spec="parameter.RealParameter" estimate="false"/>
 
-            <distribution spec="snapper.SnapperTreeLikelihood" id="snapperTreeLikelihood.$(n)" initFromTree="false" pattern="coalescentRate" >
+            <distribution spec="snapper.SnapperTreeLikelihood" id="snapperTreeLikelihood.$(n)" initFromTree="false" pattern="coalescentRate" useLogLikelihoodCorrection="true" >
                 <data idref="snapper.$(n)"/>
                 <tree idref="Tree.t:$(n)"/>
                 <siteModel spec="sitemodel.SiteModel" id="SnapperSiteModel.s:$(n)">
@@ -207,7 +207,12 @@
 	        <prior id="ClockPrior.c:$(n)" x="@clockRate.c:$(n)"><distr spec="beast.math.distributions.Uniform" upper="Infinity"/></prior>
 	        <prior id="SnapperMutationRateUPrior.s:$(n)" x="@snapperU.s:$(n)"><distr spec="Gamma" alpha="1000" beta="0.001"/></prior>
 	        <prior id="SnapperMutationRateVPrior.s:$(n)" x="@snapperV.s:$(n)"><distr spec="Gamma" alpha="1000" beta="0.001"/></prior>
-	        <prior id="SnapperCoalescentRatePrior.s:$(n)" x="@snapperCoalescentRate.t:$(n)"><distr spec="Gamma" alpha="1000" beta="0.001"/></prior>
+	        <prior id="SnapperCoalescentRatePrior.t:$(n)" x="@snapperCoalescentRate.t:$(n)">
+                <distr spec="Gamma"> 
+                    <alpha value="100" estimate="false" spec="parameter.RealParameter"/>
+                    <beta value="0.01" estimate="false" spec="parameter.RealParameter"/>
+                </distr>
+            </prior>
 
             <!-- tree and its properties -->
             <taxonset id="TaxonSet.$(n)" spec="beast.evolution.alignment.TaxonSet" alignment="@snapper.$(n)" />
@@ -226,11 +231,11 @@
                 <parameter name="birthDiffRate" id="birthRate.t:$(n)" value="1.0" estimate="true"/>
             </plugin>
 
-            <plugin id="TreeHeight.t:$(n)" spec="beast.evolution.tree.TreeHeightLogger" tree="@Tree.t:$(n)"/>
+            <plugin id="TreeHeight.t:$(n)" spec="beast.evolution.tree.TreeStatLogger" tree="@Tree.t:$(n)"/>
 
 	        <log id='ThetaLogger' spec='snap.ThetaLogger' coalescenceRate='@snapperCoalescentRate.t:$(n)'/>
 
-            <logger id="treelog.t:$(n)" spec="beast.core.Logger" logEvery="1000" fileName="$(tree).trees" mode="tree">
+            <logger id="treelog.t:$(n)" spec="beast.core.Logger" logEvery="1000" fileName="$(filebase).trees" mode="tree">
 	            <log id="TreeWithMetaDataLogger.t:$(n)" spec="beast.evolution.tree.TreeWithMetaDataLogger" tree="@Tree.t:$(n)">
 	            </log>
             </logger>
@@ -286,10 +291,10 @@
             <connect srcID="clockRate.c:$(n)"                 targetID="state" inputName="stateNode" if="inlikelihood(clockRate.c:$(n)) and clockRate.c:$(n)/estimate=true"/>
             <connect srcID="birthRate.t:$(n)"                 targetID="state" inputName="stateNode" if="inposterior(YuleModel.t:$(n)) and inposterior(Tree.t:$(n)) and birthRate.t:$(n)/estimate=true"/>
 
-            <connect srcID="SnapperNodeSwapper.c:$(n)"        targetID="mcmc" inputName="operator" if="inlikelihood(Tree.t:$(n)) and Tree.t:$(n)/estimate=true">Swap nodes of tree of partition t:$(n)</connect>
-            <connect srcID="SnapperNodeBudger.c:$(n)"         targetID="mcmc" inputName="operator" if="inlikelihood(Tree.t:$(n)) and Tree.t:$(n)/estimate=true">Budge nodes of tree of partition t:$(n)</connect>
-            <connect srcID="SnapperGammaMover.c:$(n)"         targetID="mcmc" inputName="operator" if="inlikelihood(Tree.t:$(n)) and Tree.t:$(n)/estimate=true">Move gammas of partition t:$(n)</connect>
-            <connect srcID="SnapperRateMixer.c:$(n)"          targetID="mcmc" inputName="operator" if="inlikelihood(Tree.t:$(n)) and Tree.t:$(n)/estimate=true">Mix rates of partition t:$(n)</connect>
+            <connect srcID="SnapperNodeSwapper.t:$(n)"        targetID="mcmc" inputName="operator" if="inlikelihood(Tree.t:$(n)) and Tree.t:$(n)/estimate=true">Swap nodes of tree of partition t:$(n)</connect>
+            <connect srcID="SnapperNodeBudger.t:$(n)"         targetID="mcmc" inputName="operator" if="inlikelihood(Tree.t:$(n)) and Tree.t:$(n)/estimate=true">Budge nodes of tree of partition t:$(n)</connect>
+            <connect srcID="SnapperGammaMover.t:$(n)"         targetID="mcmc" inputName="operator" if="inlikelihood(Tree.t:$(n)) and Tree.t:$(n)/estimate=true">Move gammas of partition t:$(n)</connect>
+            <connect srcID="SnapperRateMixer.t:$(n)"          targetID="mcmc" inputName="operator" if="inlikelihood(Tree.t:$(n)) and Tree.t:$(n)/estimate=true">Mix rates of partition t:$(n)</connect>
             <connect srcID="SnapperMutationMover.s:$(n)"      targetID="mcmc" inputName="operator" if="inlikelihood(snapperU.s:$(n)) and snapperU.s:$(n)/estimate=true">Move mutations of partition t:$(n)</connect>
 
             <connect srcID="StrictClockRateScaler.c:$(n)"     targetID="mcmc" inputName="operator" if="inlikelihood(clockRate.c:$(n)) and clockRate.c:$(n)/estimate=true">Scale clock rate of partition c:$(n)</connect>
@@ -384,7 +389,7 @@
             </distribution>
         </distribution>
 
-        <logger id="tracelog" logEvery="1000" fileName="beast.log" sort="smart" sanitiseHeaders="true">
+        <logger id="tracelog" logEvery="1000" fileName="$(filebase).log" sort="smart" sanitiseHeaders="true">
 	        <model idref="posterior"/>
             <log idref="posterior"/>
             <log idref="likelihood"/>
