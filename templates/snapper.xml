@@ -91,6 +91,9 @@
             beast.evolution.operators.ScaleOperator.indicator,
 	        beast.core.Operator.weight,
             beast.core.Logger.model,
+            beast.core.Logger.mode,
+            beast.core.Logger.sort,            
+            beast.core.Logger.sanitiseHeaders,
             beast.evolution.tree.coalescent.BayesianSkyline.treeIntervals,
             beast.evolution.tree.coalescent.BayesianSkyline.groupSizes,
             beast.evolution.tree.coalescent.BayesianSkyline.popSizes,
@@ -185,7 +188,7 @@
             <rawdata idref='$(n)'/>
         </data>
 
-			<parameter name="stateNode" id="snapperCoalescentRate.t:$(n)" lower="1e-10" upper="10" spec="parameter.RealParameter">0.008</parameter>
+			<parameter name="stateNode" id="snapperCoalescentRate.t:$(n)" lower="1e-10" upper="10" spec="parameter.RealParameter">1.0</parameter>
           	<parameter name="stateNode" id="snapperU.s:$(n)" value="1.0" lower="0.0" spec="parameter.RealParameter" estimate="false"/>
           	<parameter name="stateNode" id="snapperV.s:$(n)" value="1.0" lower="0.0" spec="parameter.RealParameter" estimate="false"/>
 
@@ -205,8 +208,8 @@
             </distribution>
 
 	        <prior id="ClockPrior.c:$(n)" x="@clockRate.c:$(n)"><distr spec="beast.math.distributions.Uniform" upper="Infinity"/></prior>
-	        <prior id="SnapperMutationRateUPrior.s:$(n)" x="@snapperU.s:$(n)"><distr spec="Gamma" alpha="1000" beta="0.001"/></prior>
-	        <prior id="SnapperMutationRateVPrior.s:$(n)" x="@snapperV.s:$(n)"><distr spec="Gamma" alpha="1000" beta="0.001"/></prior>
+	        <prior id="SnapperMutationRateUPrior.s:$(n)" x="@snapperU.s:$(n)"><distr spec="Gamma" alpha="100" beta="0.01"/></prior>
+	        <prior id="SnapperMutationRateVPrior.s:$(n)" x="@snapperV.s:$(n)"><distr spec="Gamma" alpha="100" beta="0.01"/></prior>
 	        <prior id="SnapperCoalescentRatePrior.t:$(n)" x="@snapperCoalescentRate.t:$(n)">
                 <distr spec="Gamma"> 
                     <alpha value="100" estimate="false" spec="parameter.RealParameter"/>
