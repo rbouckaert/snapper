@@ -290,14 +290,16 @@
             <connect srcID="Tree.t:$(n)"                      targetID="state" inputName="stateNode" if="inposterior(Tree.t:$(n)) and Tree.t:$(n)/estimate=true"/>
             <connect srcID="snapperU.s:$(n)"       			  targetID="state" inputName="stateNode" if="inlikelihood(snapperU.s:$(n)) and snapperU.s:$(n)/estimate=true"/>
             <connect srcID="snapperV.s:$(n)"                  targetID="state" inputName="stateNode" if="inlikelihood(snapperV.s:$(n)) and snapperV.s:$(n)/estimate=true"/>
-            <connect srcID="snapperCoalescentRate.t:$(n)"     targetID="state" inputName="stateNode" if="inlikelihood(snapperCoalescentRate.t:$(n)) and snapperCoalescentRate.t:$(n)/estimate=true"/>
+            <connect srcID="snapperCoalescentRate.t:$(n)"     targetID="state" inputName="stateNode" if="inposterior(snapperCoalescentRate.t:$(n)) and snapperCoalescentRate.t:$(n)/estimate=true"/>
             <connect srcID="clockRate.c:$(n)"                 targetID="state" inputName="stateNode" if="inlikelihood(clockRate.c:$(n)) and clockRate.c:$(n)/estimate=true"/>
             <connect srcID="birthRate.t:$(n)"                 targetID="state" inputName="stateNode" if="inposterior(YuleModel.t:$(n)) and inposterior(Tree.t:$(n)) and birthRate.t:$(n)/estimate=true"/>
 
-            <connect srcID="SnapperNodeSwapper.t:$(n)"        targetID="mcmc" inputName="operator" if="inlikelihood(Tree.t:$(n)) and Tree.t:$(n)/estimate=true">Swap nodes of tree of partition t:$(n)</connect>
-            <connect srcID="SnapperNodeBudger.t:$(n)"         targetID="mcmc" inputName="operator" if="inlikelihood(Tree.t:$(n)) and Tree.t:$(n)/estimate=true">Budge nodes of tree of partition t:$(n)</connect>
-            <connect srcID="SnapperGammaMover.t:$(n)"         targetID="mcmc" inputName="operator" if="inlikelihood(Tree.t:$(n)) and Tree.t:$(n)/estimate=true">Move gammas of partition t:$(n)</connect>
-            <connect srcID="SnapperRateMixer.t:$(n)"          targetID="mcmc" inputName="operator" if="inlikelihood(Tree.t:$(n)) and Tree.t:$(n)/estimate=true">Mix rates of partition t:$(n)</connect>
+<!--
+            <connect srcID="SnapperNodeSwapper.t:$(n)"        targetID="mcmc" inputName="operator" if="inposterior(Tree.t:$(n)) and Tree.t:$(n)/estimate=true">Swap nodes of tree of partition t:$(n)</connect>
+            <connect srcID="SnapperNodeBudger.t:$(n)"         targetID="mcmc" inputName="operator" if="inposterior(Tree.t:$(n)) and Tree.t:$(n)/estimate=true">Budge nodes of tree of partition t:$(n)</connect>
+-->
+            <connect srcID="SnapperGammaMover.t:$(n)"         targetID="mcmc" inputName="operator" if="inposterior(Tree.t:$(n)) and Tree.t:$(n)/estimate=true and inposterior(snapperCoalescentRate.t:$(n)) and snapperCoalescentRate.t:$(n)/estimate=true">Move gammas of partition t:$(n)</connect>
+            <connect srcID="SnapperRateMixer.t:$(n)"          targetID="mcmc" inputName="operator" if="inposterior(Tree.t:$(n)) and Tree.t:$(n)/estimate=true and inposterior(snapperCoalescentRate.t:$(n)) and snapperCoalescentRate.t:$(n)/estimate=true">Mix rates of partition t:$(n)</connect>
             <connect srcID="SnapperMutationMover.s:$(n)"      targetID="mcmc" inputName="operator" if="inlikelihood(snapperU.s:$(n)) and snapperU.s:$(n)/estimate=true">Move mutations of partition t:$(n)</connect>
 
             <connect srcID="StrictClockRateScaler.c:$(n)"     targetID="mcmc" inputName="operator" if="inlikelihood(clockRate.c:$(n)) and clockRate.c:$(n)/estimate=true">Scale clock rate of partition c:$(n)</connect>

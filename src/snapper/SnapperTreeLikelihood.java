@@ -70,7 +70,7 @@ import snap.FilteredAlignment;
 
 
 @Description("Implements a tree Likelihood Function for Single Site Sorted-sequences on a tree.") 
-@Citation(value="M Stolz, B Baumer, R Bouckaert, C Fox, G Hiscott, D Bryant, Bayesian Inference of Species Trees using Diffusion Models, Systematic Biology, 2020",year=2020,DOI="10.1093/sysbio/syaa051")
+@Citation(value="M Stolz, B Baumer, R Bouckaert, C Fox, G Hiscott, D Bryant, Bayesian Inference of Species Trees using Diffusion Models, Systematic Biology, 2021",year=2021,DOI="10.1093/sysbio/syaa051")
 public class SnapperTreeLikelihood extends TreeLikelihood {
 //	public Input<Data_temp> m_pData = new Input<Data_temp>("data", "set of alignments");
 //	public Input<Tree> m_pTree = new Input<Tree>("tree", "tree with phylogenetic relations");
@@ -97,7 +97,7 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
 	public Input<Boolean> showPatternLikelihoodsAndQuit = new Input<Boolean>("showPatternLikelihoodsAndQuit", "print out likelihoods for all patterns for the starting state, then quit", false);
 	public Input<Boolean> useLogLikelihoodCorrection = new Input<Boolean>("useLogLikelihoodCorrection", "use correction of log likelihood for the purpose of calculating " +
 			"Bayes factors for different species assignments. There is (almost) no computational cost involved for the MCMC chain, but the log likelihood " +
-			"might be reported as positive number with this correction since the likelihood is not a proper likelihood any more.", false);
+			"might be reported as positive number with this correction since the likelihood is not a proper likelihood any more.", true);
 	
 
 	public Input<Boolean> useBetaRootPriorInput = new Input<Boolean>("useBetaRootPrior", "instead of using a uniform prior for allele frequencies at the root, "
@@ -370,6 +370,10 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
 		// statistics for the species tree parameters. However when testing species assignments this is no longer the case.
 		// To address this we multiply the likelihood computed from allele counts by the probability of observing
 		// the given sequences given those allele counts (and the species assignments).
+    	
+    	// verified by DJB on 27/7/2021 that this term is correct and required when
+    	// estimating marginal likelihoods with different species assignments (as 
+    	// for species delimitation using the BFD or BFD* method).
 		m_fLogLikelihoodCorrection = 0;
 		if (useLogLikelihoodCorrection.get()) {
 			// RRB: note that increasing the number of constant sites
