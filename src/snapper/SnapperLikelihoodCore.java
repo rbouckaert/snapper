@@ -132,14 +132,14 @@ public class SnapperLikelihoodCore extends BeerLikelihoodCore {
 	public void setLeafPolyFactors(int nodeIndex, int patternIndex, int r, int n, int [] n_max) {
 		
 
-		if (this.states[nodeIndex] == null) {
+		if (this.states[nodeIndex] == null || this.stateMap[nodeIndex].length < n+1) {
 			// set nodeStates to some non-null value, so m_core knows that it is
 			// a leaf
 
 			this.states[nodeIndex] = new int[nrOfPatterns];
-			this.stateMap[nodeIndex] = new int[20][];
-		
-			this.stateMap_1[nodeIndex] = new int[20][20][];
+
+			this.stateMap[nodeIndex] = new int[n+1][];
+			this.stateMap_1[nodeIndex] = new int[n+1][nrOfPatterns][];
 
 		}
 		//System.out.print(r);

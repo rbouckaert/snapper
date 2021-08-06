@@ -195,9 +195,9 @@
 
 
 	<!-- Release -->
-	<property name="version" value="1.0.1" />
+	<property name="version" value="1.0.2" />
 	<property name="release_dir" value="release" />
-	<property name="copyright" value="snapper development team 2011-2018"/>
+	<property name="copyright" value="snapper development team 2011-2021"/>
 
 	<property name="snapper_name" value="snapper" />
 	<property name="BEAUti_name" value="BEAUti" />

@@ -115,6 +115,7 @@
             snapper.SnapperTreeLikelihood.implementation,
             snapper.SnapperTreeLikelihood.proportions,
             snapper.SnapperTreeLikelihood.threads,
+            snapper.SnapperTreeLikelihood.rootFrequencies,
             snapper.SnapSubstitutionModel.mutationRateU,
             snapper.SnapSubstitutionModel.mutationRateV,
             snapper.SnapSubstitutionModel.theta
