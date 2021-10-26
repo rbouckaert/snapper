@@ -120,7 +120,7 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
 	}
 	
 	/** shadow variable of m_pData input */
-	Data m_data2;
+	protected Data m_data2;
 	Data m_data3;
 
 	/** SampleSizes = #lineages per taxon **/
@@ -146,7 +146,7 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
 	
 	// Correction so that the returned value is a likelihood instead
 	// of a sufficient statistic for the likelihood
-	double m_fLogLikelihoodCorrection = 0;
+	protected double m_fLogLikelihoodCorrection = 0;
 	
 	// Sampled parameter equal to the number of sites which have been removed from the data during ascertainment
 	IntegerParameter ascSiteCount;
