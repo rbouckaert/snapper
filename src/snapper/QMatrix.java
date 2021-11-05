@@ -226,7 +226,7 @@ public class QMatrix  extends AbstractMatrix {
 //			 /* b= */ new double[]{0, 1, -1, 0});
 
     	// scaled so branch lengths are in units of expected number of substitutions per site
-		setQ(/* a= */ new double[]{1/2, -1, 0, 0},
+		setQ(/* a= */ new double[]{1.0/2.0, -1, 0, 0},
 				 /* b= */ new double[]{0, theta, -theta, 0});
     }
     
