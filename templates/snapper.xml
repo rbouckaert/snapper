@@ -118,16 +118,17 @@
             snapper.SnapperTreeLikelihood.rootFrequencies,
             snapper.SnapSubstitutionModel.mutationRateU,
             snapper.SnapSubstitutionModel.mutationRateV,
-            snapper.SnapSubstitutionModel.theta
+            snapper.SnapSubstitutionModel.theta,
+            snapper.SnapperTreeLikelihood.showPatternLikelihoodsAndQuit
             "
         buttonLabelMap="beast.app.beauti.BeautiInitDlg.&gt;&gt; details=Edit parameters"
     >
         <!--disableMenus="Mode"-->
 
-        <panel spec="BeautiPanelConfig" panelname="Partitions" tiptext="Data Partitions"
+        <panel spec="BeautiPanelConfig" panelname="Taxon Sets" tiptext="Taxon Sets"
             path='distribution/distribution[id="likelihood"]/distribution/data'
             hasPartitions="none" icon="2220.png.x" forceExpansion="FALSE"
-            type="beast.evolution.alignment.Alignment"
+            type="snapper.Data"
         />
 		<mergepoint id="aux-partitions-panels"/>
 
@@ -185,7 +186,7 @@
         <partitiontemplate id="SnapperPartitionTemplate" spec="BeautiSubTemplate" class="snapper.SnapperTreeLikelihood" mainid="mcmc">
 <![CDATA[
 
-        <data spec='snap.Data' id='snapper.$(n)' dataType='integerdata'>
+        <data spec='snapper.Data' id='snapper.$(n)' dataType='integerdata'>
             <rawdata idref='$(n)'/>
         </data>
 
@@ -209,12 +210,12 @@
             </distribution>
 
 	        <prior id="ClockPrior.c:$(n)" x="@clockRate.c:$(n)"><distr spec="beast.math.distributions.Uniform" upper="Infinity"/></prior>
-	        <prior id="SnapperMutationRateUPrior.s:$(n)" x="@snapperU.s:$(n)"><distr spec="Gamma" alpha="100" beta="0.01"/></prior>
-	        <prior id="SnapperMutationRateVPrior.s:$(n)" x="@snapperV.s:$(n)"><distr spec="Gamma" alpha="100" beta="0.01"/></prior>
+	        <prior id="SnapperMutationRateUPrior.s:$(n)" x="@snapperU.s:$(n)"><distr spec="Gamma" beta="100" alpha="0.01"/></prior>
+	        <prior id="SnapperMutationRateVPrior.s:$(n)" x="@snapperV.s:$(n)"><distr spec="Gamma" beta="100" alpha="0.01"/></prior>
 	        <prior id="SnapperCoalescentRatePrior.t:$(n)" x="@snapperCoalescentRate.t:$(n)">
                 <distr spec="Gamma"> 
-                    <alpha value="100" estimate="false" spec="parameter.RealParameter"/>
-                    <beta value="0.01" estimate="false" spec="parameter.RealParameter"/>
+                    <alpha value="0.01" estimate="false" spec="parameter.RealParameter"/>
+                    <beta value="100.1" estimate="false" spec="parameter.RealParameter"/>
                 </distr>
             </prior>
 

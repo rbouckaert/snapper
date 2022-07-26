@@ -34,6 +34,7 @@ import java.util.regex.Pattern;
 import beast.core.Description;
 import beast.core.Input;
 import beast.core.Input.Validate;
+import beast.evolution.alignment.Alignment;
 import beast.evolution.alignment.Sequence;
 import beast.evolution.alignment.Taxon;
 import beast.evolution.alignment.TaxonSet;
@@ -52,9 +53,7 @@ import snap.SNPSequence;
  "are removed + 2 patterns are added at the end representing these "+
  "constant sites, but with zero weight. The likelihood calculator "+
  "deals with these different sites.")
-//use snap.Data instead
-@Deprecated
-public class Data extends snap.Data {
+public class Data extends Alignment {
 // extends beast.evolution.alignment.Alignment {
 	public Input<beast.evolution.alignment.Alignment> m_rawData = new Input<beast.evolution.alignment.Alignment>("rawdata","raw binary sequences");
 	public Input<List<TaxonSet>> m_taxonsets = new Input<List<TaxonSet>>("taxonset","set of taxons that group a number of SNP sequences into a single sequence", 
@@ -175,10 +174,10 @@ public class Data extends snap.Data {
 
         if (threadCount<=1){
 			calcPatterns();
-			//if (m_rawData.get() != null) {
-			//	sequenceInput.get().clear();
-			//	siteWeightsInput.setValue(oldSiteWeights, this);
-			//}
+			if (m_rawData.get() != null) {
+				sequenceInput.get().clear();
+				siteWeightsInput.setValue(oldSiteWeights, this);
+			}
 			
 		}
 		

@@ -31,6 +31,7 @@ package snapper;
 
 
 import java.io.PrintStream;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -64,7 +65,6 @@ import beast.evolution.substitutionmodel.SubstitutionModel;
 import beast.evolution.tree.Node;
 import beast.evolution.tree.Tree;
 import beast.evolution.tree.TreeInterface;
-import snap.Data;
 import snap.NodeData;
 import snap.FilteredAlignment;
 
@@ -120,8 +120,7 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
 	}
 	
 	/** shadow variable of m_pData input */
-	protected Data m_data2;
-	Data m_data3;
+	protected Alignment m_data2;
 
 	/** SampleSizes = #lineages per taxon **/
 	int [] m_nSampleSizes;
@@ -258,10 +257,7 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
     	}
     //	System.out.println(dataInput.get().getDataType());
     	
-		m_data2 = (Data) dataInput.get();
-		//System.out.println("---");
-		//m_data3 = (Datatemp) dataInput.get();
-		//System.out.println("yes here");
+		m_data2 = dataInput.get();
     	
 		Integer [] nSampleSizes = m_data2.getStateCounts().toArray(new Integer[0]);
     	m_nSampleSizes = new int[nSampleSizes.length];
@@ -335,14 +331,14 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
 					filter.initByName("data", dataInput.get()/*, "userDataType", m_data.get().getDataType()*/, 
         							"filter", filterSpec, 
         							"constantSiteWeights", ((FilteredAlignment)dataInput.get()).constantSiteWeightsInput.get(),
-									"taxonset"			, m_data2.m_taxonsets.get()
+									"taxonset"			, m_data2.taxonSetInput.get()
         							);
         		} else {
 					
         			filter.initByName("data", dataInput.get()/*, "userDataType", m_data.get().getDataType()*/, 
         							"filter", filterSpec,
         							"userDataType", dataInput.get().getDataType(),
-									"taxonset"	  ,	m_data2.m_taxonsets.get()
+									"taxonset"	  ,	m_data2.taxonSetInput.get()
         							);
         		}
 				//System.out.println("HERE 3");
@@ -384,7 +380,7 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
 			// DJB: This is true, but only until we start looking at non-constant sites being ascertained.
 	    	for (int i = 0; i < numPatterns; i++) {
 	            int [] thisSite = m_data2.getPattern(i);  //count of red alleles for this site
-	            int [] lineageCounts = m_data2.getPatternLineagCounts(i); //count of total lineages for this site
+	            int [] lineageCounts = getPatternLineagCounts(m_data2, i); //count of total lineages for this site
 	            for (int j = 0; j < thisSite.length; j++) {
 	            	m_fLogLikelihoodCorrection -= logBinom(thisSite[j], lineageCounts[j]) * m_data2.getPatternWeight(i);
 	            }
@@ -418,7 +414,7 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
 		for (int i = 0; i < numPatterns; i++) {
 			
             int [] thisSite = m_data2.getPattern(i);
-            int [] lineageCounts = m_data2.getPatternLineagCounts(i);
+            int [] lineageCounts = getPatternLineagCounts(m_data2, i);
             //System.out.println("HERE 6");
             for (int j = 0; j < thisSite.length; j++) {
             	int r = thisSite[j];
@@ -433,21 +429,31 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
 		
 		double [] f = new double[N];
     	for (int i = 0; i < numPatterns; i++) {
-		//System.out.println("Num pattern " + i);
+		// System.out.println("Num pattern " + i);
 			
             int [] thisSite = m_data2.getPattern(i);
-            int [] lineageCounts = m_data2.getPatternLineagCounts(i);
-			//System.out.println("Next pattern");
+            int [] lineageCounts = getPatternLineagCounts(m_data2, i);
+			// System.out.println("Next pattern");
             for (int j = 0; j < thisSite.length; j++) {
             	int r = thisSite[j];
             	int n = lineageCounts[j];
-				//System.out.println(r + " " + n);
+				// System.out.println(r + " " + n + " " + Arrays.toString(n_max));
             	m_core.setLeafPolyFactors(j, i, r, n, n_max);
             }
     	}
     }
 
-    private double logBinom(int k, int n) {
+    private int[] getPatternLineagCounts(Alignment data2, int i) {
+		if (data2 instanceof snapper.Data) {
+			return ((snapper.Data)data2).getPatternLineagCounts(i);
+		}
+		if (data2 instanceof snap.Data) {
+			return ((snap.Data)data2).getPatternLineagCounts(i);
+		}
+		throw new IllegalArgumentException("Expected snapper.Data or snap.Data, not " + data2.getClass().getName());
+	}
+
+	private double logBinom(int k, int n) {
     	double f = 0;
     	for (int i = k + 1; i <= n; i++) {
     		f += Math.log(i) - Math.log(n - i + 1);
@@ -491,9 +497,9 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
     	}
     	BEASTInterface copy;
 		try {
-			copy = src.getClass().newInstance();
+			copy = src.getClass().getDeclaredConstructor().newInstance();
         	copy.setID(src.getID() + "_" + i);
-		} catch (InstantiationException | IllegalAccessException e) {
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
 			e.printStackTrace();
 			throw new RuntimeException("Programmer error: every object in the model should have a default constructor that is publicly accessible: " + src.getClass().getName());
 		}
@@ -788,7 +794,7 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
             	final double jointBranchRate = m_siteModel.getRateForCategory(i, node) * branchRate;
             	time[i] = jointBranchRate * branchTime;// * scaledTheta / 2;
             	Q.setQ(u, v, scaledTheta);
-                //System.out.println(node.getNr() + " " + Arrays.toString(m_fProbabilities));
+                // System.out.println(node.getNr() + " " + Arrays.toString(Q.Q));
                 m_core.setNodeMatrix(nodeIndex, i, Q.Q);
             }
             update |= Tree.IS_DIRTY;

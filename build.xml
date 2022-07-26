@@ -12,8 +12,8 @@
 	<property name="build" location="../snapper/build" />
 	<!--property name="lib" location="../snapper/lib" /-->
 	<property name="dist" location="../snapper/dist" />
-        <property name="beast2path" location="../beast2" />
-        <property name="beast2build" location="../beast2/build" />
+        <property name="beast2path" location="../beast2.6" />
+        <property name="beast2build" location="${beast2path}/build" />
         <property name="libBeast2" location="${beast2path}/lib" />
         <property name="srcBeast2" location="${beast2path}/src" />
         <property name="beast2classpath" location="${beast2path}/build" />
@@ -195,9 +195,9 @@
 
 
 	<!-- Release -->
-	<property name="version" value="1.0.2" />
+	<property name="version" value="1.0.3" />
 	<property name="release_dir" value="release" />
-	<property name="copyright" value="snapper development team 2011-2021"/>
+	<property name="copyright" value="snapper development team 2011-2022"/>
 
 	<property name="snapper_name" value="snapper" />
 	<property name="BEAUti_name" value="BEAUti" />
