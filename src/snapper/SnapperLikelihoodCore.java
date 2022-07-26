@@ -131,6 +131,7 @@ public class SnapperLikelihoodCore extends BeerLikelihoodCore {
 	 */
 	public void setLeafPolyFactors(int nodeIndex, int patternIndex, int r, int n, int [] n_max) {
 		
+		if (n < 0) {n = 0;}
 
 		if (this.states[nodeIndex] == null || this.stateMap[nodeIndex].length < n+1) {
 			// set nodeStates to some non-null value, so m_core knows that it is
@@ -163,7 +164,7 @@ public class SnapperLikelihoodCore extends BeerLikelihoodCore {
 
 		
 
-	int[] map = stateMap[nodeIndex][r];
+		int[] map = stateMap[nodeIndex][r];
 		if (map == null) {
 			stateMap[nodeIndex][r] = new int[1];
 			stateMap[nodeIndex][r][0] = patternIndex;
@@ -271,6 +272,8 @@ public class SnapperLikelihoodCore extends BeerLikelihoodCore {
 					f[i] = Math.max(v1[i] * v2[i], 0);
 				}
 				if (debug)
+					//System.out.println(Arrays.toString(v1));
+					//System.out.println(Arrays.toString(v2));
 					System.out.println("=" + Arrays.toString(f));
 			}
 			/*
@@ -649,10 +652,19 @@ public class SnapperLikelihoodCore extends BeerLikelihoodCore {
 			for (int i = 1; i < nrOfStates; i += 1) {
 				// System.out.println(frequencies[i]);
 				// System.out.println(i);
+				// sum += Math.max(0, c.a[i] * frequencies[i]);
 				sum += c.a[i] * frequencies[i];
 			}
 			//System.out.println("sum");
 			//System.out.println(sum);
+			if (sum <= 0) {
+				// sum should be > 0, but due to numerical issues can be <= 0
+				if (sum <= -0.1) {
+					// should never get here since this indicates very bad numerical behaviour
+					System.out.println("sum: " + sum);
+				}
+				sum = 1e-200;
+			}
 			outLogLikelihoods[k] = Math.log(sum) + getLogScalingFactor(k);
 		}
 	}
