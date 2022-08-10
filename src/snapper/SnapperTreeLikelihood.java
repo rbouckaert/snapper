@@ -46,27 +46,27 @@ import org.apache.commons.math.distribution.BetaDistributionImpl;
 import org.apache.commons.math3.special.Gamma;
 import org.apache.commons.math3.special.Beta;
 
-import beast.app.BeastMCMC;
-import beast.app.beauti.Beauti;
-import beast.core.BEASTInterface;
-import beast.core.Citation;
-import beast.core.Description;
-import beast.core.Input;
-import beast.core.State;
-import beast.core.Input.Validate;
-import beast.core.parameter.IntegerParameter;
-import beast.core.parameter.RealParameter;
-import beast.evolution.alignment.Alignment;
+import beastfx.app.beast.BeastMCMC;
+import beastfx.app.beauti.Beauti;
+import beast.base.core.BEASTInterface;
+import beast.base.core.Citation;
+import beast.base.core.Description;
+import beast.base.core.Input;
+import beast.base.inference.State;
+import beast.base.core.Input.Validate;
+import beast.base.core.ProgramStatus;
+import beast.base.inference.parameter.IntegerParameter;
+import beast.base.inference.parameter.RealParameter;
+import beast.base.evolution.alignment.Alignment;
 
-import beast.evolution.branchratemodel.StrictClockModel;
-import beast.evolution.likelihood.TreeLikelihood;
-import beast.evolution.sitemodel.SiteModel;
-import beast.evolution.substitutionmodel.SubstitutionModel;
-import beast.evolution.tree.Node;
-import beast.evolution.tree.Tree;
-import beast.evolution.tree.TreeInterface;
+import beast.base.evolution.branchratemodel.StrictClockModel;
+import beast.base.evolution.likelihood.TreeLikelihood;
+import beast.base.evolution.sitemodel.SiteModel;
+import beast.base.evolution.substitutionmodel.SubstitutionModel;
+import beast.base.evolution.tree.Node;
+import beast.base.evolution.tree.Tree;
+import beast.base.evolution.tree.TreeInterface;
 import snap.NodeData;
-import snap.FilteredAlignment;
 
 
 @Description("Implements a tree Likelihood Function for Single Site Sorted-sequences on a tree.") 
@@ -167,10 +167,10 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
 	@Override
 	public void initAndValidate() {
 		
-		threadCount = BeastMCMC.m_nThreads;
+		threadCount = ProgramStatus.m_nThreads;
 
 		if (maxNrOfThreadsInput.get() > 0) {
-			threadCount = Math.min(maxNrOfThreadsInput.get(), BeastMCMC.m_nThreads);
+			threadCount = Math.min(maxNrOfThreadsInput.get(), ProgramStatus.m_nThreads);
 		}
         String instanceCount = System.getProperty("beast.instance.count");
         if (instanceCount != null && instanceCount.length() > 0) {

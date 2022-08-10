@@ -1,23 +1,22 @@
-package snap;
+package snapper;
 
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import beast.core.Description;
-import beast.core.Input;
-import beast.core.Input.Validate;
-import beast.core.parameter.IntegerParameter;
-import beast.evolution.alignment.Alignment;
-import beast.evolution.alignment.Sequence;
-import snap.Data;
+import beast.base.core.Description;
+import beast.base.core.Input;
+import beast.base.core.Input.Validate;
+import beast.base.inference.parameter.IntegerParameter;
 import snap.SNPSequence;
+import beast.base.evolution.alignment.Alignment;
+import beast.base.evolution.alignment.Sequence;
 
 
 
 @Description("Alignment based on a filter operation on another alignment")
-public class FilteredAlignment extends Data {
+public class FilteredAlignment extends snapper.Data {
     final public Input<String> filterInput = new Input<>("filter", "specifies which of the sites in the input alignment should be selected " +
             "First site is 1." +
             "Filter specs are comma separated, either a singleton, a range [from]-[to] or iteration [from]:[to]:[step]; " +

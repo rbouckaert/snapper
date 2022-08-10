@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<beast namespace="beast.core:beast.evolution.alignment:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.likelihood" version="2.0">
+<beast namespace="beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.evolution.alignment:beast.base.evolution.tree.coalescent:beast.pkgmgmt:beast.base.core:beast.base.inference.util:beast.evolution.nuc:beast.base.evolution.operator:beast.base.inference.operator:beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel:beast.base.evolution.likelihood" version="2.0">
 
 <!-- Data -->
 <!--
@@ -34,20 +34,24 @@ The SNP data matrix, converted to binary format from file .
     <sequence id="seq_KFD4" taxon="KFD4" totalcount="3" value="2000210012-000-0200-20112-02-002--0200002102120022210020020--00202022100022000022122022022-0100002-02200-22220000-2202022200--220-020222222220-0222200-022-002002020100020-2022020-0--0-000022-02200202202-2--2202220020-0202200220002011022--20200--202-20-2-222200-0222020202220022-22--22120-020222102-20-2120220-200-1-200022220-202201222--20-00221-0-0202220-002022-00--2212220202202000020200000-02-202-020--002-1-0-22022000002-0-2-00-0220---222200-20-0-22-0--020-1-0000200200202202200202022220222-200000222000220-2-022212000-20-2-2-2000200020-2-220-2--2000-2-202202200002--2022022-202022-0001220022-011222022220002220021022200200--02022-022---220220000200200222-000220200-222000222-200-002-2220220002202200002022010220-0002020-200020222-00-2000202122222-2220000201-0022-2--222-00220-002-0-2120222002-20-0200210200-220-22200000-220222222020000-200002220--2220002222001220220-020020202200-2-0000000022001-122--0-2--0-2000002222-221--022000-01200000-020200200--2022-2122202-02222200-0020022020020-0---0-2-2"/>
 </data>
 
-<!-- Maps -->
-<map name="Uniform" >beast.math.distributions.Uniform</map>
-<map name="Exponential" >beast.math.distributions.Exponential</map>
-<map name="LogNormal" >beast.math.distributions.LogNormalDistributionModel</map>
-<map name="Normal" >beast.math.distributions.Normal</map>
-<map name="Gamma" >beast.math.distributions.Gamma</map>
-<map name="OneOnX" >beast.math.distributions.OneOnX</map>
-<map name="prior" >beast.math.distributions.Prior</map>
 
-<run id="mcmc" spec="MCMC" chainLength="1000" storeEvery="50">
+<!-- Maps -->
+<map name="Uniform" >beast.base.inference.distribution.Uniform</map>
+<map name="Exponential" >beast.base.inference.distribution.Exponential</map>
+<map name="LogNormal" >beast.base.inference.distribution.LogNormalDistributionModel</map>
+<map name="Normal" >beast.base.inference.distribution.Normal</map>
+<map name="Gamma" >beast.base.inference.distribution.Gamma</map>
+<map name="OneOnX" >beast.base.inference.distribution.OneOnX</map>
+<map name="prior" >beast.base.inference.distribution.Prior</map>
+
+<run id="mcmc" spec="MCMC" chainLength="5000" storeEvery="50">
 
     <!-- State -->
     <state id="state" storeEvery="50">
-        <stateNode id="tree" spec="beast.util.TreeParser" IsLabelledNewick="true" nodetype="snap.NodeData" newick="((altfas:2.6520367123213346,((((((neobri:0.5240051105707518,(neooli:0.3610385760756361,neopul:0.3610385760756361):0.16296653449511578):0.06084458117051339,neohel:0.5848496917412653):0.11293049810600309,((neocra:0.5011109162246027,neomar:0.5011109162246028):0.09226605826642365,neogra:0.5933769744910264):0.10440321535624186):0.14067115586556878,neosav:0.8384513457128372):0.28515609256191665,telvit:1.1236074382747534):0.060210462250667174,(neochi:0.06552780931213173,neowal:0.06552780931213173):1.1182900912132892):1.4682188117959136):4.311456556721317,astbur:6.963493269042651);">
+    <!--
+        <stateNode id="tree" spec="beast.base.evolution.tree.TreeParser" IsLabelledNewick="true" nodetype="snap.NodeData" newick="((altfas:2.6520367123213346,((((((neobri:0.5240051105707518,(neooli:0.3610385760756361,neopul:0.3610385760756361):0.16296653449511578):0.06084458117051339,neohel:0.5848496917412653):0.11293049810600309,((neocra:0.5011109162246027,neomar:0.5011109162246028):0.09226605826642365,neogra:0.5933769744910264):0.10440321535624186):0.14067115586556878,neosav:0.8384513457128372):0.28515609256191665,telvit:1.1236074382747534):0.060210462250667174,(neochi:0.06552780931213173,neowal:0.06552780931213173):1.1182900912132892):1.4682188117959136):4.311456556721317,astbur:6.963493269042651);">
+        -->
+		<stateNode spec='beast.base.evolution.tree.ClusterTree' id='tree' clusterType='upgma' nodetype="snap.NodeData" clock.rate="1">
             <taxa id="data" spec="snapper.Data" dataType="integerdata">
                 <rawdata idref="snps"/>
                 <taxonset id="astbur" spec="TaxonSet">
@@ -62,6 +66,7 @@ The SNP data matrix, converted to binary format from file .
                     <taxon id="JBD5" spec="Taxon"/>
                     <taxon id="JBD6" spec="Taxon"/>
                 </taxonset>
+                <!--
                 <taxonset id="neobri" spec="TaxonSet">
                     <taxon id="JUH9" spec="Taxon"/>
                     <taxon id="JUI1" spec="Taxon"/>
@@ -102,6 +107,7 @@ The SNP data matrix, converted to binary format from file .
                     <taxon id="KFD2" spec="Taxon"/>
                     <taxon id="KFD4" spec="Taxon"/>
                 </taxonset>
+                -->
             </taxa>
         </stateNode>
         <!-- Parameter starting values -->
@@ -111,15 +117,16 @@ The SNP data matrix, converted to binary format from file .
     </state>
 
     <!-- Posterior -->
-    <distribution id="posterior" spec="util.CompoundDistribution">
-        <distribution id="prior" spec="util.CompoundDistribution">
+    <distribution id="posterior" spec="beast.base.inference.CompoundDistribution">
+        <distribution id="prior" spec="beast.base.inference.CompoundDistribution">
 
             <!-- Divergence age priors -->
-            <distribution id="Clade0001" spec="beast.math.distributions.MRCAPrior" useOriginate="false" monophyletic="true"  tree="@tree">
+            <distribution id="Clade0001" spec="beast.base.evolution.tree.MRCAPrior" useOriginate="false" monophyletic="true"  tree="@tree">
                 <taxonset id="Constraint0001" spec="TaxonSet">
                     <taxon idref="astbur"/>
                     <taxon idref="altfas"/>
                     <taxon idref="telvit"/>
+                    <!--
                     <taxon idref="neobri"/>
                     <taxon idref="neochi"/>
                     <taxon idref="neocra"/>
@@ -130,6 +137,7 @@ The SNP data matrix, converted to binary format from file .
                     <taxon idref="neopul"/>
                     <taxon idref="neosav"/>
                     <taxon idref="neowal"/>
+                    -->
                 </taxonset>
                 <LogNormal meanInRealSpace="true" name="distr" offset="0">
                     <parameter estimate="false" lower="0.0" name="M">7.02</parameter>
@@ -193,7 +201,7 @@ The SNP data matrix, converted to binary format from file .
                 <parameter estimate="false" lower="0.0" name="beta">1.0</parameter>
             </distribution>
         </distribution>
-        <distribution id="likelihood" spec="util.CompoundDistribution">
+        <distribution id="likelihood" spec="beast.base.inference.CompoundDistribution">
             <distribution spec="snapper.SnapperTreeLikelihood" id="SnapperTreeLikelihood" data="@data" initFromTree="false" pattern="theta" useBetaRootPrior="true" tree="@tree">
                 <siteModel spec="SiteModel">
                     <substModel spec="snapper.SnapSubstitutionModel">
@@ -216,7 +224,7 @@ The SNP data matrix, converted to binary format from file .
                 analyses and that branch rate variation among closely related species is negligible.
                 The use of a relaxed clock is not supported in SNAPPER.
                 -->
-                <branchRateModel spec="beast.evolution.branchratemodel.StrictClockModel" clock.rate="@clockRate"/>
+                <branchRateModel spec="beast.base.evolution.branchratemodel.StrictClockModel" clock.rate="@clockRate"/>
             </distribution>
         </distribution>
     </distribution>
@@ -251,7 +259,7 @@ The SNP data matrix, converted to binary format from file .
         <log idref="likelihood"/>
         <log idref="prior"/>
         <log idref="lambda"/>
-        <log id="treeHeightLogger" spec="beast.evolution.tree.TreeHeightLogger" tree="@tree"/>
+        <log id="treeHeightLogger" spec="beast.base.evolution.tree.TreeHeightLogger" tree="@tree"/>
         <log idref="clockRate"/>
     </logger>
     <logger logEvery="50">
@@ -263,7 +271,7 @@ The SNP data matrix, converted to binary format from file .
         <log idref="clockRate"/>
     </logger>
     <logger fileName="snapper2.trees" logEvery="50" mode="tree">
-        <log spec="beast.evolution.tree.TreeWithMetaDataLogger" tree="@tree">
+        <log spec="beast.base.evolution.TreeWithMetaDataLogger" tree="@tree">
             <metadata id="theta" spec="snap.RateToTheta" coalescenceRate="@coalescenceRate"/>
         </log>
     </logger>

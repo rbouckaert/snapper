@@ -27,9 +27,9 @@ package snapper;
 
 import java.util.Arrays;
 
-import beast.evolution.alignment.Alignment;
-import beast.evolution.likelihood.BeerLikelihoodCore;
-import beast.evolution.tree.Node;
+import beast.base.evolution.alignment.Alignment;
+import beast.base.evolution.likelihood.BeerLikelihoodCore;
+import beast.base.evolution.tree.Node;
 
 public class SnapperLikelihoodCore extends BeerLikelihoodCore {
 	boolean m_bReuseCache = false;

@@ -1,19 +1,17 @@
-package beast.app.draw;
+package snapper.inputeditor;
 
 
 import java.util.List;
 
-import javax.swing.Box;
-import javax.swing.JButton;
-
-import beast.app.beauti.BeautiDoc;
-import beast.app.draw.InputEditor;
-import beast.app.draw.ListInputEditor;
-import beast.app.draw.ParameterInputEditor;
-import beast.core.BEASTInterface;
-import beast.core.Input;
-import beast.core.parameter.RealParameter;
-import beast.evolution.sitemodel.SiteModel;
+import beastfx.app.inputeditor.BeautiDoc;
+import beastfx.app.inputeditor.InputEditor;
+import beastfx.app.inputeditor.ListInputEditor;
+import beastfx.app.inputeditor.ParameterInputEditor;
+import beastfx.app.util.FXUtils;
+import beast.base.core.BEASTInterface;
+import beast.base.core.Input;
+import beast.base.inference.parameter.RealParameter;
+import beast.base.evolution.sitemodel.SiteModel;
 import snap.Data;
 import snapper.SnapSubstitutionModel;
 import snapper.SnapperTreeLikelihood;
@@ -22,8 +20,6 @@ public class SnapperTreeLikelihoodEditor extends ListInputEditor {
     public SnapperTreeLikelihoodEditor(BeautiDoc doc) {
 		super(doc);
 	}
-
-	private static final long serialVersionUID = 1L;
 
     public Class<?> baseType() {
         return SnapperTreeLikelihood.class;
@@ -41,7 +37,7 @@ public class SnapperTreeLikelihoodEditor extends ListInputEditor {
         m_beastObject = plugin;
 		this.itemNr = itemNr;
 
-        m_listBox = Box.createVerticalBox();
+        m_listBox = FXUtils.newVBox();
         // list of inputs 
         for (Object o : (List<?>) input.get()) {
             if (o instanceof SnapperTreeLikelihood) {
@@ -58,7 +54,7 @@ public class SnapperTreeLikelihoodEditor extends ListInputEditor {
             	//add(muButton);
             }
         }
-		add(m_listBox);
+		getChildren().add(m_listBox);
         updateState();
     }
     

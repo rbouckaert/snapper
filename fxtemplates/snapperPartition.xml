@@ -1,14 +1,14 @@
 <beast version="2.0"
-       namespace="beast.app.beauti:beast.core:beast.evolution.branchratemodel:beast.evolution.speciation:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.likelihood:beast.evolution:beast.math.distributions"
+       namespace="beast.app.beauti:beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.evolution.branchratemodel:beast.base.evolution.speciation:beast.base.evolution.tree.coalescent:beast.pkgmgmt:beast.base.core:beast.base.inference.util:beast.evolution.nuc:beast.base.evolution.operator:beast.base.inference.operator:beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel:beast.base.evolution.likelihood:beast.evolution:beast.base.inference.distribution"
 	templateinfo="template for standard phylogenetic analysis,&lt;br> supporting tip-date analysis and calibrations">
 
 
-<map name="connect">beast.app.beauti.BeautiConnector</map>
-<map name="subtemplate">beast.app.beauti.BeautiSubTemplate</map>
+<map name="connect">beastfx.app.inputeditor.BeautiConnector</map>
+<map name="subtemplate">beastfx.app.inputeditor.BeautiSubTemplate</map>
 
 	<mergewith point="aux-partitions-panels">
         <alignmentProvider id="Add snapper partition" spec="BeautiAlignmentProvider" template="@snapper_PartitionTemplate"/>
-        <subtemplate id="snapper_PartitionTemplate" spec="BeautiSubTemplate" class="beast.evolution.likelihood.TreeLikelihood" mainid="$(n)"
+        <subtemplate id="snapper_PartitionTemplate" spec="BeautiSubTemplate" class="beast.base.evolution.likelihood.TreeLikelihood" mainid="$(n)"
                     suppressInputs="snapper.SnapSubstitutionModel.theta,
                     snapper.SnapSubstitutionModel.frequencies,
                     snap.likelihood.SNAPSiteModel.proportionInvariant
@@ -45,7 +45,7 @@
                 </branchRateModel>
             </distribution>
 
-	        <prior id="ClockPrior.c:$(n)" x="@clockRate.c:$(n)"><distr spec="beast.math.distributions.Uniform" upper="Infinity"/></prior>
+	        <prior id="ClockPrior.c:$(n)" x="@clockRate.c:$(n)"><distr spec="beast.base.inference.distribution.Uniform" upper="Infinity"/></prior>
 	        <prior id="snapper_MutationRateUPrior.s:$(n)" x="@snapper_U.s:$(n)"><distr spec="Gamma" alpha="1000" beta="0.001"/></prior>
 	        <prior id="snapper_MutationRateVPrior.s:$(n)" x="@snapper_V.s:$(n)"><distr spec="Gamma" alpha="1000" beta="0.001"/></prior>
 	        <prior id="snapper_CoalescentRatePrior.t:$(n)" x="@snapper_CoalescentRate.t:$(n)">
@@ -61,11 +61,11 @@
 	        </prior>
 
             <!-- tree and its properties -->
-            <taxonset id="TaxonSet.$(n)" spec="beast.evolution.alignment.TaxonSet" alignment="@snapper_.$(n)" />
-            <plugin spec="beast.evolution.tree.Tree" id="Tree.t:$(n)" taxonset="@TaxonSet.$(n)" nodetype="snap.NodeData"/>
+            <taxonset id="TaxonSet.$(n)" spec="beast.base.evolution.alignment.TaxonSet" alignment="@snapper_.$(n)" />
+            <plugin spec="beast.base.evolution.tree.Tree" id="Tree.t:$(n)" taxonset="@TaxonSet.$(n)" nodetype="snap.NodeData"/>
 
-            <!--plugin spec="beast.evolution.tree.RandomTree" id="RandomTree.t:$(n)" estimate="false" trait="@datetrait.$(n)" initial="@Tree.t:$(n)"-->
-            <plugin spec="beast.evolution.tree.RandomTree" id="RandomTree.t:$(n)" estimate="false" initial="@Tree.t:$(n)">
+            <!--plugin spec="beast.base.evolution.tree.coalescent.RandomTree" id="RandomTree.t:$(n)" estimate="false" trait="@datetrait.$(n)" initial="@Tree.t:$(n)"-->
+            <plugin spec="beast.base.evolution.tree.coalescent.RandomTree" id="RandomTree.t:$(n)" estimate="false" initial="@Tree.t:$(n)">
                 <taxa idref="snapper_.$(n)"/>
                 <populationModel id="ConstantPopulation0.t:$(n)" spec="ConstantPopulation">
             		<popSize id="randomPopSize.t:$(n)" spec="parameter.RealParameter" value="1"/>
@@ -77,12 +77,12 @@
                 <parameter name="birthDiffRate" id="birthRate.t:$(n)" value="1.0" estimate="true"/>
             </plugin>
 
-            <plugin id="TreeHeight.t:$(n)" spec="beast.evolution.tree.TreeHeightLogger" tree="@Tree.t:$(n)"/>
+            <plugin id="TreeHeight.t:$(n)" spec="beast.base.evolution.tree.TreeHeightLogger" tree="@Tree.t:$(n)"/>
 
 	        <log id="ThetaLogger" spec="snap.ThetaLogger" coalescenceRate="@snapper_CoalescentRate.t:$(n)"/>
 
-            <logger id="treelog.t:$(n)" spec="beast.core.Logger" logEvery="1000" fileName="$(tree).trees" mode="tree">
-	            <log id="TreeWithMetaDataLogger.t:$(n)" spec="beast.evolution.tree.TreeWithMetaDataLogger" tree="@Tree.t:$(n)">
+            <logger id="treelog.t:$(n)" spec="beast.base.inference.Logger" logEvery="1000" fileName="$(tree).trees" mode="tree">
+	            <log id="TreeWithMetaDataLogger.t:$(n)" spec="beast.base.evolution.tree.TreeWithMetaDataLogger" tree="@Tree.t:$(n)">
 	            </log>
             </logger>
 
@@ -107,8 +107,8 @@
   		    <operator id="snapper_CoalescentRateScaler.t:$(n)" spec="ScaleOperator" scaleFactor="0.75" weight="0.1" parameter="@snapper_CoalescentRate.t:$(n)"/>
   		    <operator id="snapper_MeanCoalescentRateScaler.t:$(n)" spec="ScaleOperator" scaleFactor="0.75" weight="3" parameter="@snapper_MeanCoalescentRate.t:$(n)"/>
 
-            <prior id="YuleBirthRatePrior.t:$(n)" x="@birthRate.t:$(n)"><distr spec="beast.math.distributions.Uniform" lower="0" upper="Infinity"/></prior>
-            <prior id='GammaShapePrior.s:$(n)' x='@gammaShape.s:$(n)'><distr spec="beast.math.distributions.Exponential"><mean spec="parameter.RealParameter" estimate="false" value="1.0"/></distr></prior>
+            <prior id="YuleBirthRatePrior.t:$(n)" x="@birthRate.t:$(n)"><distr spec="beast.base.inference.distribution.Uniform" lower="0" upper="Infinity"/></prior>
+            <prior id='GammaShapePrior.s:$(n)' x='@gammaShape.s:$(n)'><distr spec="beast.base.inference.distribution.Exponential"><mean spec="parameter.RealParameter" estimate="false" value="1.0"/></distr></prior>
   		    <operator id="YuleBirthRateScaler.t:$(n)" spec="ScaleOperator" scaleFactor="0.75" weight="3" parameter="@birthRate.t:$(n)"/>
 			<operator id="StrictClockRateScaler.c:$(n)" spec="ScaleOperator" scaleFactor="0.75" weight="3" parameter="@clockRate.c:$(n)"/>
 			<!-- need updown operator for clockRate?!? Also in SubstModel.xml -->
@@ -120,7 +120,7 @@
 ]]>
             <connect srcID="snapper_TreeLikelihood.$(n)"            targetID="likelihood" inputName="distribution" if="isInitializing"/>
             <connect srcID="YuleModel.t:$(n)"               targetID="prior" inputName="distribution" if="isInitializing"/>
-			<connect method="beast.app.beauti.SiteModelInputEditor.customConnector"/>
+			<connect method="beastfx.app.inputeditor.SiteModelInputEditor.customConnector"/>
 
             <connect srcID="treelog.t:$(n)"                 targetID="mcmc" inputName="logger" if="inposterior(Tree.t:$(n)) and Tree.t:$(n)/estimate=true"/>
             <connect srcID="RandomTree.t:$(n)"                targetID="mcmc" inputName="init"   if="isInitializing"/>

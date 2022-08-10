@@ -1,13 +1,13 @@
 package snapper;
 
-import beast.core.Input;
-import beast.core.Input.Validate;
-import beast.core.parameter.RealParameter;
-import beast.core.util.Log;
-import beast.evolution.datatype.DataType;
-import beast.evolution.substitutionmodel.EigenDecomposition;
-import beast.evolution.substitutionmodel.SubstitutionModel;
-import beast.evolution.tree.Node;
+import beast.base.core.Input;
+import beast.base.core.Input.Validate;
+import beast.base.inference.parameter.RealParameter;
+import beast.base.core.Log;
+import beast.base.evolution.datatype.DataType;
+import beast.base.evolution.substitutionmodel.EigenDecomposition;
+import beast.base.evolution.substitutionmodel.SubstitutionModel;
+import beast.base.evolution.tree.Node;
 
 public class SnapSubstitutionModel extends SubstitutionModel.Base {
 	public Input<RealParameter> m_pU = new Input<RealParameter>("mutationRateU", "Instantaneous rate of mutating from the 0 allele to the 1 alelle");
