@@ -1,5 +1,5 @@
 <beast version="2.0"
-       namespace="beast.app.beauti:beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.evolution.branchratemodel:beast.base.evolution.speciation:beast.base.evolution.tree.coalescent:beast.pkgmgmt:beast.base.core:beast.base.inference.util:beast.evolution.nuc:beast.base.evolution.operator:beast.base.inference.operator:beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel:beast.base.evolution.likelihood:beast.evolution:beast.base.inference.distribution"
+       namespace="beastfx.app.beauti:beastfx.app.inputeditor:beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.evolution.branchratemodel:beast.base.evolution.speciation:beast.base.evolution.tree.coalescent:beast.pkgmgmt:beast.base.core:beast.base.inference.util:beast.evolution.nuc:beast.base.evolution.operator:beast.base.inference.operator:beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel:beast.base.evolution.likelihood:beast.evolution:beast.base.inference.distribution"
 	templateinfo="template for standard phylogenetic analysis,&lt;br> supporting tip-date analysis and calibrations">
 
 <map name="connect" reserved="true">beastfx.app.inputeditor.BeautiConnector</map>
@@ -121,7 +121,7 @@
             snapper.SnapSubstitutionModel.theta,
             snapper.SnapperTreeLikelihood.showPatternLikelihoodsAndQuit
             "
-        buttonLabelMap="beast.app.beauti.BeautiInitDlg.&gt;&gt; details=Edit parameters"
+        buttonLabelMap="beastfx.app.beauti.BeautiInitDlg.&gt;&gt; details=Edit parameters"
     >
         <!--disableMenus="Mode"-->
 
@@ -197,7 +197,7 @@
             <distribution spec="snapper.SnapperTreeLikelihood" id="snapperTreeLikelihood.$(n)" initFromTree="false" pattern="coalescentRate" useLogLikelihoodCorrection="true" >
                 <data idref="snapper.$(n)"/>
                 <tree idref="Tree.t:$(n)"/>
-                <siteModel spec="sitemodel.SiteModel" id="SnapperSiteModel.s:$(n)">
+                <siteModel spec="beast.base.evolution.sitemodel.SiteModel" id="SnapperSiteModel.s:$(n)">
                     <substModel spec="snapper.SnapSubstitutionModel" id="SnapperSubstModel.s:$(n)">
                         <mutationRateU idref="snapperU.s:$(n)"/>
                         <mutationRateV idref="snapperV.s:$(n)"/>
@@ -241,7 +241,7 @@
 	        <log id='ThetaLogger' spec='snap.ThetaLogger' coalescenceRate='@snapperCoalescentRate.t:$(n)'/>
 
             <logger id="treelog.t:$(n)" spec="beast.base.inference.Logger" logEvery="1000" fileName="$(filebase).trees" mode="tree">
-	            <log id="TreeWithMetaDataLogger.t:$(n)" spec="beast.base.evolution.tree.TreeWithMetaDataLogger" tree="@Tree.t:$(n)">
+	            <log id="TreeWithMetaDataLogger.t:$(n)" spec="beast.base.evolution.TreeWithMetaDataLogger" tree="@Tree.t:$(n)">
 	            </log>
             </logger>
 
@@ -279,7 +279,7 @@
 
             <connect srcID="treelog.t:$(n)"                 targetID="mcmc" inputName="logger" if="inposterior(Tree.t:$(n)) and Tree.t:$(n)/estimate=true"/>
             <connect srcID="RandomTree.t:$(n)"                targetID="mcmc" inputName="init"   if="isInitializing"/>
-			<connect method="beast.app.beauti.StateNodeInitialiserListInputEditor.customConnector"/>
+			<connect method="beastfx.app.beauti.StateNodeInitialiserListInputEditor.customConnector"/>
 
             <connect srcID="ClockPrior.c:$(n)"                targetID="prior" inputName="distribution" if="inlikelihood(clockRate.c:$(n)) and clockRate.c:$(n)/estimate=true"/>
 <!-- when FixMeanMutationRatesOperator, the prior is uniform due to the operator -->

@@ -1,5 +1,5 @@
 <beast version="2.0"
-       namespace="beast.app.beauti:beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.evolution.branchratemodel:beast.base.evolution.speciation:beast.base.evolution.tree.coalescent:beast.pkgmgmt:beast.base.core:beast.base.inference.util:beast.evolution.nuc:beast.base.evolution.operator:beast.base.inference.operator:beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel:beast.base.evolution.likelihood:beast.evolution:beast.base.inference.distribution"
+       namespace="beastfx.app.beauti:beastfx.app.inputeditor:beast.pkgmgmt:beast.base.core:beast.base.inference:beast.base.evolution.branchratemodel:beast.base.evolution.speciation:beast.base.evolution.tree.coalescent:beast.pkgmgmt:beast.base.core:beast.base.inference.util:beast.evolution.nuc:beast.base.evolution.operator:beast.base.inference.operator:beast.base.evolution.sitemodel:beast.base.evolution.substitutionmodel:beast.base.evolution.likelihood:beast.evolution:beast.base.inference.distribution"
 	templateinfo="template for standard phylogenetic analysis,&lt;br> supporting tip-date analysis and calibrations">
 
 
@@ -30,7 +30,7 @@
                 <tree idref="Tree.t:$(n)"/>
                 <siteModel spec="snap.likelihood.SNAPSiteModel" id="snapper_SiteModel.s:$(n)" gammaCategoryCount='0'>
 <!--
-                <siteModel spec="sitemodel.SiteModel" id="snapper_SiteModel.s:$(n)" gammaCategoryCount='0'>
+                <siteModel spec="beast.base.evolution.sitemodel.SiteModel" id="snapper_SiteModel.s:$(n)" gammaCategoryCount='0'>
 -->                
                 	<mutationRate spec='parameter.RealParameter' id='mutationRate.s:$(n)' value='1.0' estimate='false'/>
 					<shape  spec='parameter.RealParameter' id='gammaShape.s:$(n)' value='1.0' estimate='false'/>
@@ -77,12 +77,12 @@
                 <parameter name="birthDiffRate" id="birthRate.t:$(n)" value="1.0" estimate="true"/>
             </plugin>
 
-            <plugin id="TreeHeight.t:$(n)" spec="beast.base.evolution.tree.TreeHeightLogger" tree="@Tree.t:$(n)"/>
+            <plugin id="TreeHeight.t:$(n)" spec="beast.base.evolution.tree.TreeStatLogger" tree="@Tree.t:$(n)"/>
 
 	        <log id="ThetaLogger" spec="snap.ThetaLogger" coalescenceRate="@snapper_CoalescentRate.t:$(n)"/>
 
             <logger id="treelog.t:$(n)" spec="beast.base.inference.Logger" logEvery="1000" fileName="$(tree).trees" mode="tree">
-	            <log id="TreeWithMetaDataLogger.t:$(n)" spec="beast.base.evolution.tree.TreeWithMetaDataLogger" tree="@Tree.t:$(n)">
+	            <log id="TreeWithMetaDataLogger.t:$(n)" spec="beast.base.evolution.TreeWithMetaDataLogger" tree="@Tree.t:$(n)">
 	            </log>
             </logger>
 
@@ -124,7 +124,7 @@
 
             <connect srcID="treelog.t:$(n)"                 targetID="mcmc" inputName="logger" if="inposterior(Tree.t:$(n)) and Tree.t:$(n)/estimate=true"/>
             <connect srcID="RandomTree.t:$(n)"                targetID="mcmc" inputName="init"   if="isInitializing"/>
-			<connect method="beast.app.beauti.StateNodeInitialiserListInputEditor.customConnector"/>
+			<connect method="beastfx.app.beauti.StateNodeInitialiserListInputEditor.customConnector"/>
 
             <connect srcID="ClockPrior.c:$(n)"                targetID="prior" inputName="distribution" if="inlikelihood(clockRate.c:$(n)) and clockRate.c:$(n)/estimate=true"/>
 <!-- when FixMeanMutationRatesOperator, the prior is uniform due to the operator -->
