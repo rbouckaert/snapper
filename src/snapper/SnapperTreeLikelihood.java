@@ -33,7 +33,6 @@ package snapper;
 import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Callable;
@@ -46,7 +45,6 @@ import org.apache.commons.math.distribution.BetaDistributionImpl;
 import org.apache.commons.math3.special.Gamma;
 import org.apache.commons.math3.special.Beta;
 
-import beastfx.app.beast.BeastMCMC;
 import beastfx.app.beauti.Beauti;
 import beast.base.core.BEASTInterface;
 import beast.base.core.Citation;
@@ -220,7 +218,7 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
 			} else {
 		    	List<Double> sValues = thetaInput.get().valuesInput.get();
 		        for (int i = 0; i < values.length; i++) {
-		            values[i] = new Double(sValues.get(i % sValues.size()));
+		            values[i] = sValues.get(i % sValues.size());
 		            sTheta += values[i] + " ";
 		        }
 				tree.setMetaData(tree.getRoot(), values, m_pPattern.get());
@@ -244,7 +242,7 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
 			} else {
 		    	List<Double> sValues = coalesecntRateInput.get().valuesInput.get();
 		        for (int i = 0; i < values.length; i++) {
-		            values[i] = new Double(sValues.get(i % sValues.size()));
+		            values[i] = sValues.get(i % sValues.size());
 		            sRates += values[i] + " ";
 		        }
 				tree.setMetaData(tree.getRoot(), values, m_pPattern.get());
@@ -610,7 +608,7 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
 					fCategoryRates[i] *= branchRate;
 				}
 			}
-			
+// System.err.println();			
 			traverse(root);
 			
 			// amalgamate site probabilities over patterns
@@ -794,6 +792,7 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
             	final double jointBranchRate = m_siteModel.getRateForCategory(i, node) * branchRate;
             	time[i] = jointBranchRate * branchTime;// * scaledTheta / 2;
             	Q.setQ(u, v, scaledTheta);
+            	// System.err.println(node.getNr() + " " + time[i]);
                 // System.out.println(node.getNr() + " " + Arrays.toString(Q.Q));
                 m_core.setNodeMatrix(nodeIndex, i, Q.Q);
             }

@@ -133,16 +133,27 @@ public class SnapperLikelihoodCore extends BeerLikelihoodCore {
 		
 		if (n < 0) {n = 0;}
 
-		if (this.states[nodeIndex] == null || this.stateMap[nodeIndex].length < n+1) {
+		if (this.states[nodeIndex] == null) {
 			// set nodeStates to some non-null value, so m_core knows that it is
 			// a leaf
 
 			this.states[nodeIndex] = new int[nrOfPatterns];
 
-			this.stateMap[nodeIndex] = new int[n+1][];
-			this.stateMap_1[nodeIndex] = new int[n+1][nrOfPatterns][];
+			this.stateMap[nodeIndex] = new int[n_max[nodeIndex]+1][];
+			this.stateMap_1[nodeIndex] = new int[n_max[nodeIndex]+1][nrOfPatterns][];
 
 		}
+//		if (this.stateMap[nodeIndex].length < n+1) {
+//			// set nodeStates to some non-null value, so m_core knows that it is
+//			// a leaf
+//
+//			this.states[nodeIndex] = new int[nrOfPatterns];
+//
+//			this.stateMap[nodeIndex] = new int[n+1][];
+//			this.stateMap_1[nodeIndex] = new int[n+1][nrOfPatterns][];
+//
+//		}
+		
 		//System.out.print(r);
 		//System.out.print(n);
 		//System.out.print(stateMap[nodeIndex].length);
@@ -254,7 +265,7 @@ public class SnapperLikelihoodCore extends BeerLikelihoodCore {
 			int w = l * matrixSize;
 			System.arraycopy(matrices1, w, Q1, 0, matrixSize);
 			System.arraycopy(matrices2, w, Q2, 0, matrixSize);
-
+			
 			setupCache_1(stateMap_1[nodeIndex1], Q1, chebPoly[0][nodeIndex1], time[nodeIndex1][l], v1cache, v1);
 			setupCache_1(stateMap_1[nodeIndex2], Q2, chebPoly[0][nodeIndex2], time[nodeIndex2][l], v2cache, v2);
 			//System.println(""nodeIndex1);
