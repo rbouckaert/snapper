@@ -27,6 +27,7 @@ package snapper;
 
 import java.util.Arrays;
 
+import beast.base.core.Log;
 import beast.base.evolution.alignment.Alignment;
 import beast.base.evolution.likelihood.BeerLikelihoodCore;
 import beast.base.evolution.tree.Node;
@@ -641,6 +642,8 @@ public class SnapperLikelihoodCore extends BeerLikelihoodCore {
 		}
 	}
 
+	
+	boolean firstNegativeSum = false;
 	public void calculateLogLikelihoods_1(double[] partials, double[] frequencies, double[] outLogLikelihoods) {
 		int v = 0;
 		for (int k = 0; k < nrOfPatterns; k++) {
@@ -672,7 +675,14 @@ public class SnapperLikelihoodCore extends BeerLikelihoodCore {
 				// sum should be > 0, but due to numerical issues can be <= 0
 				if (sum <= -0.1) {
 					// should never get here since this indicates very bad numerical behaviour
-					System.out.println("sum: " + sum);
+					if (!firstNegativeSum) {
+						Log.warning("numerical issue encountered with negative sum that should be possitive:");
+					}
+					Log.warning("sum: " + sum);
+					if (!firstNegativeSum) {
+						firstNegativeSum = true;
+						Log.warning("The sum-message should disappear after burn-in, or the analysis may not be valid");
+					}
 				}
 				sum = 1e-200;
 			}

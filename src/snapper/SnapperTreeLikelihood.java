@@ -789,7 +789,7 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
 			
     		for (int i = 0; i < m_siteModel.getCategoryCount(); i++) {
     			double scaledTheta = theta[nodeIndex] / fCategoryRates[i];
-            	final double jointBranchRate = m_siteModel.getRateForCategory(i, node) * branchRate;
+            	final double jointBranchRate = m_siteModel.getRateForCategory(i, node);
             	time[i] = jointBranchRate * branchTime;// * scaledTheta / 2;
             	Q.setQ(u, v, scaledTheta);
             	// System.err.println(node.getNr() + " " + time[i]);
