@@ -183,7 +183,22 @@ public class Data extends Alignment {
 		
 		
 	} // initAndValidate
-	
+
+	@Override
+	public List<String> getTaxaNames() {
+		if (ProgramStatus.name.equals("BEAUti")) {
+			if (taxaNames == null) {
+				taxaNames = new ArrayList<>();
+			} else {
+				taxaNames.clear();
+			}
+			for (Taxon s : m_taxonsets.get()) {
+				taxaNames.add(s.getID());
+			}
+		}
+		return super.getTaxaNames();
+	}
+
 	private Sequence toBinarySequence(String id, String refferenceSeq,
 			String seqStr) {
 		Sequence binarySequence = new Sequence();

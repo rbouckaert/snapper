@@ -287,6 +287,7 @@ public class DataInputEditor extends InputEditor.Base {
                 taxonMapping.get(rows.get(i)).setTaxon2(taxon);
             }
 			modelToTaxonset();
+			taxonSetToModel();
 		});
 		
 		Button guessButton = new Button("Guess");
