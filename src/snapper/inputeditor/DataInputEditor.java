@@ -10,7 +10,9 @@ import java.util.regex.PatternSyntaxException;
 import beastfx.app.inputeditor.BeautiDoc;
 import beastfx.app.inputeditor.GuessPatternDialog;
 import beastfx.app.inputeditor.InputEditor;
+import beastfx.app.util.Alert;
 import beastfx.app.util.FXUtils;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
@@ -27,12 +29,14 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import snapper.Data;
 import beast.base.core.BEASTInterface;
 import beast.base.core.Input;
 import beast.base.evolution.alignment.Alignment;
 import beast.base.evolution.alignment.Sequence;
 import beast.base.evolution.alignment.Taxon;
 import beast.base.evolution.alignment.TaxonSet;
+import beast.base.evolution.datatype.Nucleotide;
 
 
 
@@ -82,9 +86,28 @@ public class DataInputEditor extends InputEditor.Base {
 	}
 
 	
+	private static boolean firstNucleotideOccurance = false;
+	private final static String nucleotideMessage = 
+			"A nucleotide alignment was loaded and SNPs will be called by setting the first "
+			+ "sequence as all zeros and other sequences as 1 when they differ from the first sequence.\n\n"
+			+ "This could lead to problems if you have sites with more than two values and the first sequence "
+			+ "contains a low frequency state.\n\n"
+			+ "Consider using phrynomics or other tools to preprocess your alignment instead of using the"
+			+ "raw nucleotide alignment.";
+	
 	@Override
 	public void init(Input<?> input, BEASTInterface plugin, int itemNr, ExpandOption bExpand, boolean bAddButtons) {
 		m_input = input;
+		
+		if (!firstNucleotideOccurance) {
+			Data data = (Data) m_input.get();
+			Alignment rawdata = data.m_rawData.get();
+			if (rawdata.getDataType() instanceof Nucleotide) {
+				Platform.runLater(() -> Alert.showMessageDialog(this, nucleotideMessage));
+				firstNucleotideOccurance = true;	
+			}
+		}
+		
 		m_beastObject = plugin;
 		this.itemNr = itemNr;
 		List<TaxonSet> taxonset = ((snapper.Data)input.get()).m_taxonsets.get(); 

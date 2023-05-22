@@ -33,6 +33,7 @@ import java.util.regex.Pattern;
 
 import beast.base.core.Description;
 import beast.base.core.Input;
+import beast.base.core.Log;
 import beast.base.core.Input.Validate;
 import beast.base.core.ProgramStatus;
 import beast.base.evolution.alignment.Alignment;
@@ -126,6 +127,13 @@ public class Data extends Alignment {
 			} else if (rawDataType instanceof Nucleotide) {
 				// call SNPs by setting first sequence to all zero
 				// any character in subsequent sequences that is not the same will be set to one
+				Log.warning("=====================================================================");
+				Log.warning("WARNING: Calling SNPs by setting the first sequence to be all zero  ");
+				Log.warning("WARNING: This may not be appropriate if your data has more than two ");
+				Log.warning("WARNING: states on a site and the first sequence has a low frequency");
+				Log.warning("WARNING: state.");
+				Log.warning("=====================================================================");
+
 				String refferenceSeq = sequences.get(0).dataInput.get().replaceAll("\\s", "");
 				
 				for(TaxonSet set : m_taxonsets.get()) {
@@ -171,7 +179,11 @@ public class Data extends Alignment {
 		super.initAndValidate();
 
 		threadCount = ProgramStatus.m_nThreads;
-
+        String instanceCount = System.getProperty("beast.instance.count");
+        if (instanceCount != null && instanceCount.length() > 0) {
+        	threadCount = Integer.parseInt(instanceCount);
+        }
+		
         if (threadCount<=1){
 			calcPatterns();
 			if (m_rawData.get() != null) {

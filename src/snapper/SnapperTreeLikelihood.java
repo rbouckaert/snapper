@@ -52,6 +52,7 @@ import beast.base.core.Description;
 import beast.base.core.Input;
 import beast.base.inference.State;
 import beast.base.core.Input.Validate;
+import beast.base.core.Log;
 import beast.base.core.ProgramStatus;
 import beast.base.inference.parameter.IntegerParameter;
 import beast.base.inference.parameter.RealParameter;
@@ -172,6 +173,10 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
 		}
         String instanceCount = System.getProperty("beast.instance.count");
         if (instanceCount != null && instanceCount.length() > 0) {
+        	if (threadCount > Integer.parseInt(instanceCount)) {
+        		Log.warning("WARNING: The nummber of instances is less than the number of threads.");
+        		Log.warning("WARNING: The SNAPPER tree likelihood will be calculated with #instances (=" + threadCount + ") threads.");
+        	}
         	threadCount = Integer.parseInt(instanceCount);
         }
 
