@@ -24,6 +24,7 @@
  */
 package snapper;
 
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -46,7 +47,6 @@ import beast.base.evolution.datatype.IntegerData;
 import beast.base.evolution.datatype.Nucleotide;
 import beast.base.evolution.datatype.StandardData;
 
-import beastfx.app.beast.BeastMCMC;
 import snap.SNPSequence;
 
 @Description("Represents sequence data for SnAP analysis. "+
@@ -94,6 +94,13 @@ public class Data extends Alignment {
 			List<Sequence> SNPsequences = sequenceInput.get();
 			
 			DataType rawDataType = m_rawData.get().getDataType();
+			if (rawDataType instanceof IntegerData) {
+				for (Sequence seq : sequences) {
+					if (seq.totalCountInput.get() == -1) {
+						seq.totalCountInput.set(getStateCount(seq));
+					}
+				}
+			}
 			if (rawDataType instanceof Binary || rawDataType instanceof IntegerData || rawDataType instanceof StandardData) {
 		
 				// sequences are defined through taxon sets, so construct
@@ -195,6 +202,20 @@ public class Data extends Alignment {
 		
 		
 	} // initAndValidate
+
+	private int getStateCount(Sequence seq) {
+		String s = seq.getData();
+		int max = 0;
+		for (int i = 0; i < s.length(); i++) {
+			try {
+				int state = Integer.parseInt(s.charAt(i)+"");
+				max = Math.max(max, state);
+			} catch (NumberFormatException e) {
+				// ignore
+			}
+		}
+		return max + 1;
+	}
 
 	@Override
 	public List<String> getTaxaNames() {

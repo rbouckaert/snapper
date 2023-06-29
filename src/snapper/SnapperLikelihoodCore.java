@@ -174,7 +174,6 @@ public class SnapperLikelihoodCore extends BeerLikelihoodCore {
 		//System.out.print(stateMap[nodeIndex].length);
 		
 
-		
 
 		int[] map = stateMap[nodeIndex][r];
 		if (map == null) {
@@ -189,6 +188,12 @@ public class SnapperLikelihoodCore extends BeerLikelihoodCore {
 			stateMap[nodeIndex][r] = newmap;
 		}
 		//System.out.println("HERE 2");
+		if (stateMap_1[nodeIndex][r].length <= n) {
+			System.out.println("HERE 2");
+			int[][] newmap = new int[n + 1][];
+			System.arraycopy(stateMap_1[nodeIndex][r], 0, newmap, 0, stateMap_1[nodeIndex][r].length);
+			stateMap_1[nodeIndex][r] = newmap;
+		}
 		int[] map_1 = stateMap_1[nodeIndex][r][n];
 		if (map_1 == null) {
 			//System.out.println("HERE 2");
@@ -202,7 +207,6 @@ public class SnapperLikelihoodCore extends BeerLikelihoodCore {
 			newmap_1[map_1.length] = patternIndex;
 			stateMap_1[nodeIndex][r][n] = newmap_1;
 		}
-
 
 		//System.out.println("HERE 4");
 		//System.out.println("r" +" "+ "n");

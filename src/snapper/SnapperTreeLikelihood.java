@@ -326,8 +326,6 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
         		likelihoodsInput.get().add(likelihood);
 				//System.out.println("HERE 1");
         		
-				
-				
 
         		if (i == 0 && dataInput.get() instanceof FilteredAlignment && ((FilteredAlignment)dataInput.get()).constantSiteWeightsInput.get() != null) {
         			
@@ -352,7 +350,8 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
         				"initFromTree", m_bInitFromTree.get(),
                         "pattern" , m_pPattern.get() + "",
                         "threads", 1,
-                        "useBetaRootPrior", useBetaRootPriorInput.get()                        
+                        "useBetaRootPrior", useBetaRootPriorInput.get(),
+                        "non-polymorphic", m_bUsenNonPolymorphic
         				);
         	    treelikelihood[i] = likelihood;        	
 				
@@ -426,7 +425,6 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
 				if(n > n_max[j]){
 					n_max[j] = n;
 				}
-            	
             }
     	}
 		
@@ -650,8 +648,8 @@ public class SnapperTreeLikelihood extends TreeLikelihood {
 					logP -= (double) (m_data2.getSiteCount() - m_numUnfilteredSites) * Math.log(1.0 - m_fP0 - m_fP1); //Correct likelihoods for those sites which were pre-filtered (removing constant sites)
 				}
 			}				
-			
 			if (useLogLikelihoodCorrection.get()) {
+			
 				logP += m_fLogLikelihoodCorrection;
 			}
 			
