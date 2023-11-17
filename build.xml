@@ -48,6 +48,7 @@
 
         <!-- Read package name and version from xml file -->
         <xmlproperty file="${SNAPPERdir}/version.xml" prefix="fromVersionFile" />
+        <property name="projName" value="${fromVersionFile.package(name)}" />
         <property name="SNAPPERversion" value="${fromVersionFile.package(version)}" />
 	</target>
 
@@ -125,7 +126,7 @@
 		</jar>
 
 
-		<jar jarfile="${dist}/snapper.addon.jar">
+		<jar jarfile="${dist}/snapper.package.jar">
 			<manifest>
 				<attribute name="Built-By" value="${user.name}" />
 				<attribute name="Main-Class" value="${main_class_snapper}" />
@@ -213,7 +214,7 @@
 	<property name="Windows_package_dir" value="${Windows_dir}/${snapper_name}" />
 
 
-	<target name="addon"
+	<target name="package"
 	        depends="build_jar_all_snapper_NoJUnitTest"
 	        description="release BEAST 2 add-on version of snapper">
 
@@ -229,7 +230,7 @@
 			<fileset file="version.xml"/>
 		</copy>
 		<copy todir="${Add_on_dir}/lib">
-			<fileset dir="${dist}" includes="snapper.addon.jar" />
+			<fileset dir="${dist}" includes="snapper.package.jar" />
 		</copy>
 		<copy todir="${Add_on_dir}">
 			<fileset dir="${dist}" includes="snapper.src.jar" />
@@ -245,7 +246,7 @@
 			<fileset dir="examples" includes="*.json" />
 		</copy>
 
-		<jar jarfile="${dist}/snapper.addon.v${SNAPPERversion}.zip">
+		<jar jarfile="${dist}/snapper.package.v${SNAPPERversion}.zip">
 			<fileset dir="${Add_on_dir}">
 				<include name="**/*" />
 			</fileset>
@@ -253,5 +254,28 @@
 		<echo message="Add-on v${SNAPPERversion} release is finished." />
 	</target>
 
+
+
+	<condition property="isWindows"><os family="windows" /></condition>
+	<condition property="isLinux"><and><os family="unix"/><not><os family="mac"/></not></and></condition>
+	<condition property="isMac"><os family="mac" /></condition>
+
+	<target name="installLinux" depends="package" if="isLinux">
+	        <mkdir dir="${user.home}/.beast/2.7/${projName}"/>
+			<unzip src="${dist}/snapper.package.v${SNAPPERversion}.zip" dest="${user.home}/.beast/2.7/${projName}"/>
+	</target>
+
+	<target name="installMac" depends="package" if="isMac">
+	        <mkdir dir="${user.home}/.beast/2.7/${projName}"/>
+			<unzip src="${dist}/snapper.package.v${SNAPPERversion}.zip" dest="${user.home}/Library/Application Support/BEAST/2.7/${projName}"/>
+	</target>
+
+	<target name="installWindows" depends="package" if="isWindows">
+	        <mkdir dir="${user.home}/BEAST/2.7/${projName}"/>
+			<unzip src="${dist}/snapper.package.v${SNAPPERversion}.zip" dest="${user.home}/BEAST/2.7/${projName}"/>
+	</target>
+
+	<target name="install" depends="installWindows,installMac,installLinux">
+	</target>
 
 </project>

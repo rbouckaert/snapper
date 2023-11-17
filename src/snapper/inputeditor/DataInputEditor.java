@@ -10,6 +10,7 @@ import java.util.regex.PatternSyntaxException;
 import beastfx.app.inputeditor.BeautiDoc;
 import beastfx.app.inputeditor.GuessPatternDialog;
 import beastfx.app.inputeditor.InputEditor;
+import beastfx.app.inputeditor.TaxonSetInputEditor.TaxonMap;
 import beastfx.app.util.Alert;
 import beastfx.app.util.FXUtils;
 import javafx.application.Platform;
@@ -77,7 +78,7 @@ public class DataInputEditor extends InputEditor.Base {
 	
 	TextField filterEntry;
 	String m_sFilter = ".*";
-	int m_sortByColumn = 0;
+	//int m_sortByColumn = 0;
 	boolean m_bIsAscending = true;
 	
 	@Override
@@ -148,6 +149,7 @@ public class DataInputEditor extends InputEditor.Base {
         	    new PropertyValueFactory<TaxonMap,String>("Taxon")
         	);
         m_table.getColumns().add(col1);
+        m_table.getSortOrder().add(col1);
 //        col1.getSortNode().setOnMouseClicked(e -> {
 //            // The index of the column whose header was clicked
 //			int vColIndex = 0;
@@ -482,7 +484,15 @@ public class DataInputEditor extends InputEditor.Base {
 //		        }
 //			}
 //		});
-		if (m_table != null) {
+
+		taxonMapping.sort(new Comparator<TaxonMap>() {
+			@Override
+			public int compare(TaxonMap o1, TaxonMap o2) {
+				return o1.taxon.compareTo(o2.taxon);
+			}
+		});
+
+        if (m_table != null) {
 			m_table.refresh();
 		}
     }
