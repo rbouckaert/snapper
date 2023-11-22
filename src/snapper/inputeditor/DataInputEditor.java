@@ -10,7 +10,6 @@ import java.util.regex.PatternSyntaxException;
 import beastfx.app.inputeditor.BeautiDoc;
 import beastfx.app.inputeditor.GuessPatternDialog;
 import beastfx.app.inputeditor.InputEditor;
-import beastfx.app.inputeditor.TaxonSetInputEditor.TaxonMap;
 import beastfx.app.util.Alert;
 import beastfx.app.util.FXUtils;
 import javafx.application.Platform;
@@ -354,6 +353,9 @@ public class DataInputEditor extends InputEditor.Base {
     	m_taxonset.clear();
 		List<Taxon> taxa = new ArrayList<Taxon>();
         for (Alignment alignment : getDoc().alignments) {
+        	if (alignment.sequenceInput.get().size() == 0 && alignment instanceof Data && ((Data)alignment).m_rawData.get() != null) {
+        		alignment = ((Data)alignment).m_rawData.get();
+        	}
             for (Sequence sequence : alignment.sequenceInput.get()) {
 				Taxon taxon = new Taxon();
 				// ensure sequence and taxon do not get same ID
@@ -382,6 +384,8 @@ public class DataInputEditor extends InputEditor.Base {
                     } catch (Exception ex) {
                         ex.printStackTrace();
                     }
+                } else {
+                	// drop the taxon from the list of candidates
                 }
             }
         }
