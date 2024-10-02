@@ -326,6 +326,7 @@
             <connect srcID="snapperU.s:$(n)"                  targetID="tracelog" inputName="log" if="inposterior(snapperU.s:$(n)) and snapperU.s:$(n)/estimate=true"/>
             <connect srcID="snapperV.s:$(n)"                  targetID="tracelog" inputName="log" if="inlikelihood(snapperV.s:$(n)) and snapperV.s:$(n)/estimate=true"/>
             <connect srcID="snapperCoalescentRate.t:$(n)"     targetID="tracelog" inputName="log" if="inlikelihood(snapperCoalescentRate.t:$(n)) and snapperCoalescentRate.t:$(n)/estimate=true"/>
+            <connect srcID="snapperCoalescentRate.t:$(n)"     targetID="TreeWithMetaDataLogger.t:$(n)" inputName="metadata" if="inlikelihood(snapperCoalescentRate.t:$(n)) and snapperCoalescentRate.t:$(n)/estimate=true"/>
             <connect srcID="clockRate.c:$(n)"                 targetID="tracelog" inputName="log" if="inlikelihood(clockRate.c:$(n)) and clockRate.c:$(n)/estimate=true"/>
             <connect srcID="YuleModel.t:$(n)"                 targetID="tracelog" inputName="log" if="inposterior(YuleModel.t:$(n)) and inposterior(Tree.t:$(n)) and Tree.t:$(n)/estimate=true"/>
             <connect srcID="birthRate.t:$(n)"                 targetID="tracelog" inputName="log" if="inposterior(YuleModel.t:$(n)) and birthRate.t:$(n)/estimate=true"/>
