@@ -238,7 +238,7 @@
 
             <plugin id="TreeHeight.t:$(n)" spec="beast.base.evolution.tree.TreeStatLogger" tree="@Tree.t:$(n)"/>
 
-	        <log id='ThetaLogger' spec='snap.ThetaLogger' coalescenceRate='@snapperCoalescentRate.t:$(n)'/>
+	        <log id='ThetaLogger.t:$(n)' spec='snap.ThetaLogger' coalescenceRate='@snapperCoalescentRate.t:$(n)'/>
 
             <logger id="treelog.t:$(n)" spec="beast.base.inference.Logger" logEvery="1000" fileName="$(filebase).trees" mode="tree">
 	            <log id="TreeWithMetaDataLogger.t:$(n)" spec="beast.base.evolution.TreeWithMetaDataLogger" tree="@Tree.t:$(n)">
@@ -330,7 +330,7 @@
             <connect srcID="clockRate.c:$(n)"                 targetID="tracelog" inputName="log" if="inlikelihood(clockRate.c:$(n)) and clockRate.c:$(n)/estimate=true"/>
             <connect srcID="YuleModel.t:$(n)"                 targetID="tracelog" inputName="log" if="inposterior(YuleModel.t:$(n)) and inposterior(Tree.t:$(n)) and Tree.t:$(n)/estimate=true"/>
             <connect srcID="birthRate.t:$(n)"                 targetID="tracelog" inputName="log" if="inposterior(YuleModel.t:$(n)) and birthRate.t:$(n)/estimate=true"/>
-            <connect srcID='ThetaLogger'                      targetID='tracelog' inputName='log' if="inlikelihood(snapperCoalescentRate.t:$(n)) and snapperCoalescentRate.t:$(n)/estimate=true"/>
+            <connect srcID='ThetaLogger.t:$(n)'               targetID='tracelog' inputName='log' if="inlikelihood(snapperCoalescentRate.t:$(n)) and snapperCoalescentRate.t:$(n)/estimate=true"/>
 
             <connect srcID="YuleBirthRatePrior.t:$(n)"        targetID="prior" inputName="distribution" if="inposterior(YuleModel.t:$(n)) and inposterior(Tree.t:$(n)) and birthRate.t:$(n)/estimate=true">Prior on Yule birth rate for partition s:$(n)</connect>
 
